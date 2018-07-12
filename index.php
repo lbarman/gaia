@@ -22,7 +22,9 @@ if(isset($_GET['ping'])) {
             $data = $db->escape($_GET['data']);
         }
 
-        $db -> query("INSERT INTO `pings` (`id`, `timestamp`, `local_timestamp`, `data`) VALUES (NULL, CURRENT_TIMESTAMP, " . $timestamp .", '". $data ."');");
+        $s = "INSERT INTO `pings` (`id`, `timestamp`, `local_timestamp`, `data`) VALUES (NULL, CURRENT_TIMESTAMP, '" . $timestamp ."', '". $data ."');";
+        $db->query($s);
+        die("OK");
     }
     else
     {
@@ -70,7 +72,7 @@ if(isset($_GET['ping'])) {
     </head>
     <body>
         <h1>Gaia</h1>
-        <div>
+        <div style="display:none">
             <h3>Pings</h3>
             <div id="canvas-holder1" style="width:75%;">
                 <canvas id="chart1"></canvas>
@@ -79,27 +81,39 @@ if(isset($_GET['ping'])) {
             </div>
         </div>
         <div>
-            <h3>Raw Data</h3>
-            <a href="#" id="toggleRawData">show/hide</a>
-            <pre id="rawData"><?php
-                $rows = $db -> select("SELECT * FROM `pings` ORDER BY timestamp DESC");
-                var_dump($rows);
+            <h3>Data</h3>
+            <?php
+                function formatTime($t){
+                    $seconds = strtotime($t);
+                    return date('H:i:s, d.m.Y', $seconds);
+                }
+
+                $rows = $db->select("SELECT id,timestamp,local_timestamp,data FROM `pings` ORDER BY timestamp DESC");
+                foreach($rows as $row) {
+                    echo '<div>';
+                    echo '<h5>[#'.$row['id'].'] '.
+                        formatTime($row['local_timestamp']).'</h5>';
+                    echo 'Created at '.formatTime($row['timestamp']);
+                    echo '<pre>'.base64_decode($row['data']).'</pre>';
+                    echo '</div>';
+                }
                 ?>
-            </pre>
         </div>
     <script type="text/javascript">
+        /*
         var hidden=true;
-        $('#rawData').hide();
+        $('.rawData').hide();
         $('#toggleRawData').click(function() {
             if(hidden){
-                $('#rawData').show(); 
+                $('.rawData').show(); 
                 hidden = false;
             } else {
-                $('#rawData').hide(); 
+                $('.rawData').hide(); 
                 hidden = true;
             }
             return false;
         });
+        */
     </script>
     <script>
         var customTooltips = function(tooltip) {
