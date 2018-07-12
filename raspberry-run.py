@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+#!/usr/bin/python2
 import sys
 import requests
 import time
@@ -62,7 +62,7 @@ def getDataToUpload(now):
     data += "# df -h\n"+getShellOutput(["df","-h"])+'\n\n'
     #data += "# top\n"+getShellOutput(["top", "-b" "-n1"])+'\n\n'
     
-    data = base64.b64encode(bytes(data, "utf-8"))
+    data = base64.b64encode(bytes(data))
     return data
 
 def contactGaiaWebSite(now):
@@ -81,18 +81,19 @@ def waitingLoop(now):
     time.sleep(WAITING_LOOP_SLEEP)
 
 def feed(now):
-
+    global lastDayFed
+    
     # feed operation
 
     lastDayFed = now.date()
-    with open(FILE_LAST_DAY_FED, 'r') as f:
+    with open(FILE_LAST_DAY_FED, 'w') as f:
         f.write(lastDayFed.strftime("%d.%m.%Y"))
 
     params = {
         "ping" : True,
         "token" : GAIA_SECRETTOKEN,
         "local_ts" : now.strftime('%Y-%m-%d %H:%M:%S'),
-        "data" : "Feeded"
+        "data" : base64.b64encode(bytes("Feeded")),
     }
 
     r = requests.get(GAIA_URL, params=params)
