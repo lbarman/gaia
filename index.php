@@ -1,37 +1,47 @@
 <?php
 require_once("db.php");
-$db = new Db();    
 
-if(isset($_GET['ping'])) {
-    $secretToken = 'nSWXz8p7BsdY74NGNQVqJr4e';
-    $secretToken2 = '';
+function formatTime($t){
+    $seconds = strtotime($t);
+    return date('H:i:s, d.m.Y', $seconds);
+}
 
-    if(isset($_GET['token'])){
-        $secretToken2 = $_GET['token'];
-    }
+function handleRaspberryConnection(){
+    if(isset($_GET['ping'])) {
+        $secretToken = 'nSWXz8p7BsdY74NGNQVqJr4e';
+        $secretToken2 = '';
 
-    if($secretToken === $secretToken2){
-
-        $timestamp = 'NULL';
-        $data = '';
-
-        if(isset($_GET['local_ts'])) {
-            $timestamp = $db->escape($_GET['local_ts']);
-        }
-        if(isset($_GET['data'])) {
-            $data = $db->escape($_GET['data']);
+        if(isset($_GET['token'])){
+            $secretToken2 = $_GET['token'];
         }
 
-        $s = "INSERT INTO `pings` (`id`, `timestamp`, `local_timestamp`, `data`) VALUES (NULL, CURRENT_TIMESTAMP, '" . $timestamp ."', '". $data ."');";
-        $db->query($s);
-        die("OK");
-    }
-    else
-    {
-        sleep(1);
-        die('Invalid secret');
+        if($secretToken === $secretToken2){
+
+            $timestamp = 'NULL';
+            $data = '';
+
+            if(isset($_GET['local_ts'])) {
+                $timestamp = $db->escape($_GET['local_ts']);
+            }
+            if(isset($_GET['data'])) {
+                $data = $db->escape($_GET['data']);
+            }
+
+            $s = "INSERT INTO `pings` (`id`, `timestamp`, `local_timestamp`, `data`) VALUES (NULL, CURRENT_TIMESTAMP, '" . $timestamp ."', '". $data ."');";
+            $db->query($s);
+            die("OK");
+        }
+        else
+        {
+            sleep(1);
+            die('Invalid secret');
+        }
     }
 }
+
+$db = new Db();              # connect to DB
+handleRaspberryConnection(); # check if connection is a ping from the Raspberry
+
 ?>
 
 <!DOCTYPE html>
@@ -72,21 +82,50 @@ if(isset($_GET['ping'])) {
     </head>
     <body>
         <h1>Gaia</h1>
-        <div style="display:none">
+        <div>
             <h3>Pings</h3>
             <div id="canvas-holder1" style="width:75%;">
                 <canvas id="chart1"></canvas>
                 <div class="chartjs-tooltip" id="tooltip-0"></div>
                 <div class="chartjs-tooltip" id="tooltip-1"></div>
             </div>
+
+        <div>
+            <?php
+
+                $rows = $db->select("SELECT id,timestamp,local_timestamp,data FROM `pings` ORDER BY timestamp DESC LIMIT 100");
+                $data = array();
+                foreach($rows as $row) {
+                    $data[] = $row['local_timestamp'];
+                }
+
+                $toInt = function($s) {
+                    return (int)$s;
+                };
+                
+                //print for js
+                echo '<script>var igor_data = [];'."\n";
+                $i = 0;
+                for($i = 0 ; $i < count($data); $i++){
+                    $dateStr = $data[$i];
+                    $dateStr = str_replace('-', ',', $dateStr);
+                    $dateStr = str_replace(' ', ',', $dateStr);
+                    $dateStr = str_replace(':', ',', $dateStr);
+
+                    # "07" -> "7" to avoid octal interpretation
+                    $dateElems = explode(',', $dateStr);
+                    $intElems = array_map($toInt, $dateElems);
+                    $dateStr = implode(',', $intElems);
+                    echo 'igor_data['.$i.'] = {x: new Date('.$dateStr.'), y: 1};'."\n";
+                }
+                echo '</script>';
+
+                ?>
+        </div>
         </div>
         <div>
             <h3>Data</h3>
             <?php
-                function formatTime($t){
-                    $seconds = strtotime($t);
-                    return date('H:i:s, d.m.Y', $seconds);
-                }
 
                 $rows = $db->select("SELECT id,timestamp,local_timestamp,data FROM `pings` ORDER BY timestamp DESC");
                 foreach($rows as $row) {
@@ -146,22 +185,13 @@ if(isset($_GET['ping'])) {
         };
         var color = Chart.helpers.color;
         var lineChartData = {
-            labels: ['January', 'February', 'March', 'April', 'May', 'June', 'July'],
             datasets: [{
                 label: 'Igor',
                 backgroundColor: color(window.chartColors.red).alpha(0.2).rgbString(),
                 borderColor: window.chartColors.red,
                 pointBackgroundColor: window.chartColors.red,
-                data: [
-                    randomScalingFactor(),
-                    randomScalingFactor(),
-                    randomScalingFactor(),
-                    randomScalingFactor(),
-                    randomScalingFactor(),
-                    randomScalingFactor(),
-                    randomScalingFactor()
-                ]
-            }, {
+                data: igor_data,
+            } /*, {
                 label: 'Plants',
                 backgroundColor: color(window.chartColors.green).alpha(0.2).rgbString(),
                 borderColor: window.chartColors.green,
@@ -175,7 +205,7 @@ if(isset($_GET['ping'])) {
                     randomScalingFactor(),
                     randomScalingFactor()
                 ]
-            }]
+            } */]
         };
 
         window.onload = function() {
@@ -194,7 +224,7 @@ if(isset($_GET['ping'])) {
                         intersect: false,
                         custom: customTooltips
                     }
-                }
+                },
             });
         };
     </script>
