@@ -1,12 +1,15 @@
 <?php
 require_once("db.php");
 
+$DURATION_TO_COVER_HOURS = 72;
+$BAR_DURATION_HOURS = 6;
+
 function formatTime($t){
     $seconds = strtotime($t);
     return date('H:i:s, d.m.Y', $seconds);
 }
 
-function handleRaspberryConnection(){
+function handleRaspberryConnection($db){
     if(isset($_GET['ping'])) {
         $secretToken = 'nSWXz8p7BsdY74NGNQVqJr4e';
         $secretToken2 = '';
@@ -29,6 +32,7 @@ function handleRaspberryConnection(){
 
             $s = "INSERT INTO `pings` (`id`, `timestamp`, `local_timestamp`, `data`) VALUES (NULL, CURRENT_TIMESTAMP, '" . $timestamp ."', '". $data ."');";
             $db->query($s);
+
             die("OK");
         }
         else
@@ -39,8 +43,8 @@ function handleRaspberryConnection(){
     }
 }
 
-$db = new Db();              # connect to DB
-handleRaspberryConnection(); # check if connection is a ping from the Raspberry
+$db = new Db();                 # connect to DB
+handleRaspberryConnection($db); # check if connection is a ping from the Raspberry
 
 ?>
 
@@ -84,39 +88,86 @@ handleRaspberryConnection(); # check if connection is a ping from the Raspberry
         <h1>Gaia</h1>
         <div>
             <h3>Pings</h3>
-            <div id="canvas-holder1" style="width:75%;">
+            <div id="canvas-holder1" style="width:100%;">
                 <canvas id="chart1"></canvas>
-                <div class="chartjs-tooltip" id="tooltip-0"></div>
-                <div class="chartjs-tooltip" id="tooltip-1"></div>
             </div>
 
         <div>
             <?php
 
-                $rows = $db->select("SELECT id,timestamp,local_timestamp,data FROM `pings` ORDER BY timestamp DESC LIMIT 100");
-                $data = array();
-                foreach($rows as $row) {
-                    $data[] = $row['local_timestamp'];
-                }
-
+                $rows = $db->select("SELECT id,timestamp,local_timestamp,data FROM `pings` ORDER BY timestamp DESC LIMIT 1000");
+                
                 $toInt = function($s) {
                     return (int)$s;
                 };
-                
-                //print for js
-                echo '<script>var igor_data = [];'."\n";
-                $i = 0;
-                for($i = 0 ; $i < count($data); $i++){
-                    $dateStr = $data[$i];
-                    $dateStr = str_replace('-', ',', $dateStr);
-                    $dateStr = str_replace(' ', ',', $dateStr);
-                    $dateStr = str_replace(':', ',', $dateStr);
 
-                    # "07" -> "7" to avoid octal interpretation
-                    $dateElems = explode(',', $dateStr);
-                    $intElems = array_map($toInt, $dateElems);
-                    $dateStr = implode(',', $intElems);
-                    echo 'igor_data['.$i.'] = {x: new Date('.$dateStr.'), y: 1};'."\n";
+                $t = time();
+                $t = 3600 * ceil($t / 3600); #round to the next hour
+
+                $xAxis = [];
+                $xLabels = [];
+
+                $numberOfXPoints = ceil($DURATION_TO_COVER_HOURS / $BAR_DURATION_HOURS);
+
+                for($h=$numberOfXPoints; $h > 0; $h--){
+                    $startTime = $t - 60 * 60 * $h * $BAR_DURATION_HOURS;
+                    $endTime = $t - 60 * 60 * ($h - 1) * $BAR_DURATION_HOURS;
+                    $xAxis[] = array($startTime, $endTime);
+                    $xLabels[] = date("d/m h\\h", $startTime);
+                }
+
+                //print xLabels for js
+                echo '<script>var xLabels = [];'."\n";
+                for($i = 0 ; $i < count($xLabels); $i++){
+
+                    echo 'xLabels['.$i.'] = \''.$xLabels[$i].'\';'."\n";
+                }
+                echo '</script>';
+
+                //for each xTick, check if we have something to print 
+                $igorPing = array();
+                $igorFed = array();
+                $igorPingTooltip = array();
+                $igorFedTooltip = array();
+                for($i = 0 ; $i < count($xAxis); $i++){
+                    $igorPing[$i] = 0;
+                    $igorFed[$i] = 0;
+
+                    foreach($rows as $row) {
+                        $str = $row['local_timestamp'];
+                        $ts = (int)strtotime($row['local_timestamp']);
+                        
+                        $data = base64_decode($row['data']);
+                        if($ts >= $xAxis[$i][0] && $ts < $xAxis[$i][1]){
+                            if($data == "Feeded"){
+                                $igorFed[$i] -= 10;
+                                $igorFedTooltip[$xLabels[$i]] = $row['local_timestamp'];
+                            } else {
+                                $igorPing[$i] += 1;
+                            }
+                        }
+                    }
+                }
+
+                //print igorFed for js
+                echo '<script>var igorFed = [];'."\n";
+                for($i = 0 ; $i < count($igorFed); $i++){
+
+                    echo 'igorFed['.$i.'] = \''.$igorFed[$i].'\';'."\n";
+                }
+
+                //print igorPing for js
+                echo 'var igorPing = [];'."\n";
+                for($i = 0 ; $i < count($igorPing); $i++){
+
+                    echo 'igorPing['.$i.'] = \''.$igorPing[$i].'\';'."\n";
+                }
+
+                //print igorFedTooltip for js
+                echo 'var igorFedTooltip = [];'."\n";
+                foreach($igorFedTooltip as $k => $v){
+
+                    echo 'igorFedTooltip[\''.$k.'\'] = \''.$v.'\';'."\n";
                 }
                 echo '</script>';
 
@@ -127,7 +178,7 @@ handleRaspberryConnection(); # check if connection is a ping from the Raspberry
             <h3>Data</h3>
             <?php
 
-                $rows = $db->select("SELECT id,timestamp,local_timestamp,data FROM `pings` ORDER BY timestamp DESC");
+                $rows = $db->select("SELECT id,timestamp,local_timestamp,data FROM `pings` ORDER BY timestamp DESC LIMIT 1000");
                 foreach($rows as $row) {
                     echo '<div>';
                     echo '<h5>[#'.$row['id'].'] '.
@@ -155,76 +206,35 @@ handleRaspberryConnection(); # check if connection is a ping from the Raspberry
         */
     </script>
     <script>
-        var customTooltips = function(tooltip) {
-            $(this._chart.canvas).css('cursor', 'pointer');
-
-            var positionY = this._chart.canvas.offsetTop;
-            var positionX = this._chart.canvas.offsetLeft;
-
-            $('.chartjs-tooltip').css({
-                opacity: 0,
-            });
-
-            if (!tooltip || !tooltip.opacity) {
-                return;
-            }
-
-            if (tooltip.dataPoints.length > 0) {
-                tooltip.dataPoints.forEach(function(dataPoint) {
-                    var content = [dataPoint.xLabel, dataPoint.yLabel].join(': ');
-                    var $tooltip = $('#tooltip-' + dataPoint.datasetIndex);
-
-                    $tooltip.html(content);
-                    $tooltip.css({
-                        opacity: 1,
-                        top: positionY + dataPoint.y + 'px',
-                        left: positionX + dataPoint.x + 'px',
-                    });
-                });
-            }
-        };
         var color = Chart.helpers.color;
         var lineChartData = {
+            labels: xLabels,
             datasets: [{
-                label: 'Igor',
+                label: 'Ping',
                 backgroundColor: color(window.chartColors.red).alpha(0.2).rgbString(),
                 borderColor: window.chartColors.red,
                 pointBackgroundColor: window.chartColors.red,
-                data: igor_data,
-            } /*, {
-                label: 'Plants',
+                data: igorPing,
+            }, {
+                label: 'Fed',
                 backgroundColor: color(window.chartColors.green).alpha(0.2).rgbString(),
                 borderColor: window.chartColors.green,
                 pointBackgroundColor: window.chartColors.green,
-                data: [
-                    randomScalingFactor(),
-                    randomScalingFactor(),
-                    randomScalingFactor(),
-                    randomScalingFactor(),
-                    randomScalingFactor(),
-                    randomScalingFactor(),
-                    randomScalingFactor()
-                ]
-            } */]
+                data: igorFed,
+            }]
         };
 
         window.onload = function() {
             var chartEl = document.getElementById('chart1');
             new Chart(chartEl, {
-                type: 'line',
-                data: lineChartData,
+                type: 'bar',
+                data: lineChartData, 
                 options: {
                     title: {
                         display: false,
                         text: ''
                     },
-                    tooltips: {
-                        enabled: false,
-                        mode: 'index',
-                        intersect: false,
-                        custom: customTooltips
-                    }
-                },
+                }, 
             });
         };
     </script>
