@@ -88,10 +88,13 @@ def servoRotate(angle):
     time.sleep(1)
 
 def servoFeed():
+    global pwm
+    pwm.start(servoAngleToDuty(SERVO_FEED_POS1))
     servoRotate(SERVO_FEED_POS1)
     servoRotate(SERVO_FEED_POS2)
     servoRotate(SERVO_FEED_POS1)
     time.sleep(1)
+    pwm.stop()
 
 def feed(now, action="Feeded"):
     global lastDayFed
@@ -141,7 +144,6 @@ GPIO.setup(GPIO_BUTTON, GPIO.IN, pull_up_down=GPIO.PUD_UP)
 GPIO.add_event_detect(GPIO_BUTTON, GPIO.FALLING, callback=buttonPressed, bouncetime=5000)
 
 pwm = GPIO.PWM(GPIO_SERVO, SERVO_CARRIER_WIDTH)
-pwm.start(servoAngleToDuty(SERVO_FEED_POS1))
 
 # run
 while True:
