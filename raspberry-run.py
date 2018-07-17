@@ -8,14 +8,8 @@ import urllib
 import base64
 from os import access, R_OK, W_OK
 from os.path import isfile
-
-FILE_FEEDING_TIME = 'daily_feeding_time.txt'
-FILE_LAST_DAY_FED = 'last_day_fed.txt'
-
-FEEDING_TIME = 17  # 5pm daily
-WAITING_LOOP_SLEEP = 60 * 10
-GAIA_URL = "https://gaia.lbarman.ch/index.php"
-GAIA_SECRETTOKEN = "nSWXz8p7BsdY74NGNQVqJr4e"
+from constants import *
+import RPi.GPIO as GPIO
 
 lastDayFed = None
 nextFeedingTime = None
@@ -80,10 +74,29 @@ def waitingLoop(now):
     print("WaitingLoop: waiting", WAITING_LOOP_SLEEP, "sec")
     time.sleep(WAITING_LOOP_SLEEP)
 
-def feed(now):
+def buttonPressed():
+    print "Button pressed"
+    feed(datetime.datetime.now(), "Feeded manually")
+
+def servoAngleToDuty(angle):
+    duty = float(angle)/180 * (SERVO_DUTY_END - SERVO_DUTY_START) + SERVO_DUTY_START;
+    return duty;
+
+def servoRotate(angle):
+    global pwm
+    pwm.ChangeDutyCycle(servoAngleToDuty(angle))
+    time.sleep(1)
+
+def servoFeed():
+    rotate(SERVO_FEED_POS1)
+    rotate(SERVO_FEED_POS2)
+    rotate(SERVO_FEED_POS1)
+    time.sleep(1)
+
+def feed(now, action="Feeded"):
     global lastDayFed
     
-    # feed operation
+    servoFeed()
 
     lastDayFed = now.date()
     with open(FILE_LAST_DAY_FED, 'w') as f:
@@ -93,7 +106,7 @@ def feed(now):
         "ping" : True,
         "token" : GAIA_SECRETTOKEN,
         "local_ts" : now.strftime('%Y-%m-%d %H:%M:%S'),
-        "data" : base64.b64encode(bytes("Feeded")),
+        "data" : base64.b64encode(bytes(action)),
     }
 
     r = requests.get(GAIA_URL, params=params)
@@ -119,6 +132,16 @@ with open(FILE_LAST_DAY_FED, 'r') as f:
         lastDayFed = datetime.datetime(*t[:6])
     except:
         pass
+
+#set up the GPIOs
+GPIO.setmode(GPIO.BCM)
+GPIO.setwarnings(False)
+GPIO.setup(GPIO_SERVO, GPIO.OUT)
+GPIO.setup(GPIO_BUTTON, GPIO.IN, pull_up_down=GPIO.PUD_UP)  
+GPIO.add_event_detect(GPIO_BUTTON, GPIO.FALLING, callback=buttonPressed, bouncetime=5000)
+
+pwm = GPIO.PWM(GPIO_SERVO, SERVO_CARRIER_WIDTH)
+pwm.start(servoAngleToDuty(SERVO_FEED_POS1))
 
 # run
 while True:
