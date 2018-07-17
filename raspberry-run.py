@@ -74,7 +74,7 @@ def waitingLoop(now):
     print("WaitingLoop: waiting", WAITING_LOOP_SLEEP, "sec")
     time.sleep(WAITING_LOOP_SLEEP)
 
-def buttonPressed():
+def buttonPressed(channel):
     print "Button pressed"
     feed(datetime.datetime.now(), "Feeded manually")
 
@@ -88,9 +88,9 @@ def servoRotate(angle):
     time.sleep(1)
 
 def servoFeed():
-    rotate(SERVO_FEED_POS1)
-    rotate(SERVO_FEED_POS2)
-    rotate(SERVO_FEED_POS1)
+    servoRotate(SERVO_FEED_POS1)
+    servoRotate(SERVO_FEED_POS2)
+    servoRotate(SERVO_FEED_POS1)
     time.sleep(1)
 
 def feed(now, action="Feeded"):
@@ -118,7 +118,7 @@ testRWFile(FILE_LAST_DAY_FED)
 with open(FILE_FEEDING_TIME, 'r') as f:
     try:
         lines = f.readlines()
-        h = int(lines[0])
+        h = int(lines[-1])
         FEEDING_TIME = h
     except:
         pass
@@ -149,6 +149,7 @@ while True:
 
     # do we need to feed Igor? 
     feedIn = (now.replace(hour=FEEDING_TIME, minute=0, second=0, microsecond=0) - now).total_seconds()
+    
     if lastDayFed.date() != now.date() and feedIn < 0:
         feed(now)
     else:
