@@ -149,6 +149,9 @@ pwm = GPIO.PWM(GPIO_SERVO, SERVO_CARRIER_WIDTH)
 while True:
     now = datetime.datetime.now()
 
+    print(lastDayFed)
+    print(lastDayFed.date())
+
     # do we need to feed Igor? 
     feedIn = (now.replace(hour=FEEDING_TIME, minute=0, second=0, microsecond=0) - now).total_seconds()
     
