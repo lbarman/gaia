@@ -3,7 +3,7 @@ import RPi.GPIO as GPIO
 import time
 from constants import *
 
-class GPIOControl
+class GPIOControl:
     
     pwm = None
     buttonCallback = None
@@ -16,22 +16,22 @@ class GPIOControl
         GPIO.add_event_detect(GPIO_BUTTON, GPIO.FALLING, callback=self.__buttonPressedCallback, bouncetime=GPIO_BUTTON_DEBOUNCE_TIME)
         self.pwm = GPIO.PWM(GPIO_SERVO, SERVO_CARRIER_WIDTH)
 
-    def __buttonPressedCallback(channel):
+    def __buttonPressedCallback(self, channel):
         if self.buttonCallback == None:
             print "Button pressed, but no callback registered"
         else:
             self.buttonCallback()
         return
 
-    def __servoAngleToDuty(angle):
+    def __servoAngleToDuty(self, angle):
         duty = float(angle)/180 * (SERVO_DUTY_END - SERVO_DUTY_START) + SERVO_DUTY_START;
         return duty;
 
-    def __servoRotate(angle):
+    def __servoRotate(self, angle):
         duty = self.__servoAngleToDuty(angle)
         self.pwm.ChangeDutyCycle(duty)
 
-    def servoFeed():
+    def servoFeed(self):
         startAngle = self.__servoAngleToDuty(SERVO_FEED_POS1)
         self.pwm.start(startAngle)
 
