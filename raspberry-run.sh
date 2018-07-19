@@ -1,6 +1,8 @@
 #!/usr/bin/env bash
 
-isRunning=$(ps -u | grep "[p]ython2 raspberry-run.py" | wc -l)
+ps -ux | grep "[p]ython2 raspberry-run.py"
+isRunning=$(ps -ux | grep "[p]ython2 raspberry-run.py" | wc -l)
+echo "$isRunning"
 
 if [ "$isRunning" -ne 1 ]; then
 	pkill python
