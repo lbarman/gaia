@@ -39,6 +39,15 @@ class GPIOControl:
         time.sleep(1)
 
         self.__servoRotate(SERVO_FEED_POS2)
+
+        i = 0
+        while i <20:
+            time.sleep(0.1)
+            self.__servoRotate(SERVO_FEED_POS2+10)
+            time.sleep(0.1)
+            self.__servoRotate(SERVO_FEED_POS2-10)
+            i += 1
+        self.__servoRotate(SERVO_FEED_POS2)
         time.sleep(1)
 
         self.__servoRotate(SERVO_FEED_POS1)

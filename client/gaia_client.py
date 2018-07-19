@@ -10,7 +10,6 @@ from constants import *
 from gpio_control import GPIOControl
 from local_db import LocalDatabase
 
-nextFeedingTime = None
 db = None
 gpio = None
 
@@ -26,14 +25,15 @@ def getShellOutput(cmd):
     return o
 
 def getDataToUpload(now):
+    global db
 
     data = ""
     data += "# feeding\n"
-    data += "daily feeding hour: "+str(FEEDING_TIME)+":00:00\n"
-    data += "last day fed: "+lastDayFed.strftime("%d.%m.%Y")+"\n"
+    data += "daily feeding hour: "+str(db.dailyFeedingTime)+":00:00\n"
+    data += "last day fed: "+db.lastDayFed.strftime("%d.%m.%Y")+"\n"
 
-    feedIn = (now.replace(hour=FEEDING_TIME, minute=0, second=0, microsecond=0) - now)
-    if lastDayFed.date() == now.date():
+    feedIn = (now.replace(hour=db.dailyFeedingTime, minute=0, second=0, microsecond=0) - now)
+    if db.lastDayFed.date() == now.date():
         data += "already fed for today\n\n"
     else:
         data += "NOT yet fed for today\n"
@@ -66,7 +66,7 @@ def buttonPressed():
     feed(datetime.datetime.now(), "Feeded manually")
 
 def feed(now, action="Feeded"):
-    global lastDayFed, gpio, db
+    global gpio, db
     
     gpio.servoFeed()
     db.updateLastDayFed()
@@ -95,13 +95,12 @@ print "[gaia-client.py] db and gpio initialized"
 while True:
     now = datetime.datetime.now()
 
-    print(lastDayFed)
-    print(lastDayFed.date())
+    print("last fed on", db.lastDayFed)
 
     # do we need to feed Igor? 
-    feedIn = (now.replace(hour=FEEDING_TIME, minute=0, second=0, microsecond=0) - now).total_seconds()
+    feedIn = (now.replace(hour=db.dailyFeedingTime, minute=0, second=0, microsecond=0) - now).total_seconds()
     
-    if lastDayFed.date() != now.date() and feedIn < 0:
+    if db.lastDayFed.date() != now.date() and feedIn < 0:
         feed(now)
     else:
         contactGaiaWebSite(now, getDataToUpload(now))

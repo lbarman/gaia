@@ -1,11 +1,10 @@
-.PHONY: install-cron install run autosync manual-feed
+.PHONY: install-cron install run autosync manual-feed is-running kill
 
 install:
 	chmod u+x run.sh
-	chmod u+x gaia-client.py
 
 install-cron:
-	echo "* * * * * root /root/gaia/client/run.sh" > /etc/cron.d/gaia 
+	echo "* * * * * root /root/gaia/client/run.sh > /root/gaia/client/logs/cron.txt" > /etc/cron.d/gaia 
 
 run:
 	./run.sh > logs/run.txt
@@ -18,3 +17,7 @@ autosync:
 
 manual-feed:
 	python2 -c "from gpio_control import *; g=GPIOControl(); g.servoFeed()"
+
+kill:
+	pkill python
+	pkill python2
