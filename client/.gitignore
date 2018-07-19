@@ -1,3 +1,2 @@
-constants.pyc
-cron-run.txt
-log.txt
+*.pyc
+logs/*

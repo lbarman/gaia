@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-SCRIPT_NAME="gaia-client.py"
+SCRIPT_NAME="gaia_client.py"
 LOG_FILE="logs/gaia-client.txt"
 
 # Always run stuff relative to this very folder, even when calling ./xxx/yyy/folder/gaia/client/run.sh
