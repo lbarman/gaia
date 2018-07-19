@@ -1,4 +1,5 @@
-#!/usr/bin/python2
+#!/usr/bin/env python
+
 import sys
 import requests
 import time
