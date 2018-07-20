@@ -24,6 +24,11 @@ def getShellOutput(cmd):
 
     return o
 
+def sameDay(date1, date2):
+    if date1.replace(hour=0,minute=0,second=0,microsecond=0) == date2.replace(hour=0,minute=0,second=0,microsecond=0):
+        return True
+    return False
+
 def getDataToUpload(now):
     global db
 
@@ -33,7 +38,7 @@ def getDataToUpload(now):
     data += "last day fed: "+db.lastDayFed.strftime("%d.%m.%Y")+"\n"
 
     feedIn = (now.replace(hour=db.dailyFeedingTime, minute=0, second=0, microsecond=0) - now)
-    if db.lastDayFed.date() == now.date():
+    if sameDay(db.lastDayFed,now):
         data += "already fed for today\n\n"
     else:
         data += "NOT yet fed for today\n"
@@ -71,6 +76,8 @@ def feed(now, action="Feeded"):
     gpio.servoFeed()
     db.updateLastDayFed()
 
+    print(action)
+
     # HTTP Request indicating we just fed Igor
     data = base64.b64encode(bytes(action))
     contactGaiaWebSite(now, data)
@@ -95,12 +102,12 @@ print "[gaia-client.py] db and gpio initialized"
 while True:
     now = datetime.datetime.now()
 
-    print("last fed on", db.lastDayFed)
+    print "last fed on", db.lastDayFed
 
     # do we need to feed Igor? 
     feedIn = (now.replace(hour=db.dailyFeedingTime, minute=0, second=0, microsecond=0) - now).total_seconds()
     
-    if db.lastDayFed.date() != now.date() and feedIn < 0:
+    if sameDay(db.lastDayFed,now) and feedIn < 0:
         feed(now)
     else:
         contactGaiaWebSite(now, getDataToUpload(now))

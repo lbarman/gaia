@@ -47,6 +47,6 @@ class LocalDatabase:
                 pass
 
     def updateLastDayFed(self):
-        self.lastDayFed = datetime.datetime.now().date()
+        self.lastDayFed = datetime.datetime.now().replace(hour=0,minute=0,second=0,microsecond=0)
         with open(FILE_LAST_DAY_FED, 'w') as f:
             f.write(self.lastDayFed.strftime("%d.%m.%Y"))

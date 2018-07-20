@@ -20,6 +20,7 @@ class GPIOControl:
         if self.buttonCallback == None:
             print "Button pressed, but no callback registered"
         else:
+            print "Button pressed, calling callback"
             self.buttonCallback()
         return
 
@@ -32,6 +33,7 @@ class GPIOControl:
         self.pwm.ChangeDutyCycle(duty)
 
     def servoFeed(self):
+        print "Starting feed routine..."
         startAngle = self.__servoAngleToDuty(SERVO_FEED_POS1)
         self.pwm.start(startAngle)
 
@@ -54,3 +56,4 @@ class GPIOControl:
         time.sleep(1)
 
         self.pwm.stop()
+        print "Done feeding."
