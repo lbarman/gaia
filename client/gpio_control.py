@@ -2,6 +2,7 @@
 import RPi.GPIO as GPIO
 import time
 from constants import *
+import atexit
 
 class GPIOControl:
     
@@ -11,10 +12,28 @@ class GPIOControl:
     def __init__(self):
         GPIO.setmode(GPIO.BCM)
         GPIO.setwarnings(False)
-        GPIO.setup(GPIO_SERVO, GPIO.OUT)
+
+        # map the button
         GPIO.setup(GPIO_BUTTON, GPIO.IN, pull_up_down=GPIO.PUD_UP)  
-        GPIO.add_event_detect(GPIO_BUTTON, GPIO.FALLING, callback=self.__buttonPressedCallback, bouncetime=GPIO_BUTTON_DEBOUNCE_TIME)
+        #GPIO.add_event_detect(GPIO_BUTTON, GPIO.FALLING, callback=self.__buttonPressedCallback, bouncetime=GPIO_BUTTON_DEBOUNCE_TIME)
+
+        # set up the relays
+        GPIO.setup(RELAY_GPIO_1, GPIO.OUT, initial=GPIO.HIGH)
+        GPIO.setup(RELAY_GPIO_2, GPIO.OUT, initial=GPIO.HIGH)
+        GPIO.setup(RELAY_GPIO_3, GPIO.OUT, initial=GPIO.HIGH)
+        GPIO.setup(RELAY_GPIO_4, GPIO.OUT, initial=GPIO.HIGH)
+
+        # redundant, but to be sure
+        GPIO.output(RELAY_GPIO_1, GPIO.HIGH)
+        GPIO.output(RELAY_GPIO_2, GPIO.HIGH)
+        GPIO.output(RELAY_GPIO_3, GPIO.HIGH)
+        GPIO.output(RELAY_GPIO_4, GPIO.HIGH)
+
+        # start controlling the servo
+        GPIO.setup(GPIO_SERVO, GPIO.OUT)
         self.pwm = GPIO.PWM(GPIO_SERVO, SERVO_CARRIER_WIDTH)
+        startAngle = self.__servoAngleToDuty(SERVO_FEED_POS1)
+        self.pwm.start(startAngle)
 
     def __buttonPressedCallback(self, channel):
         if self.buttonCallback == None:
@@ -34,8 +53,8 @@ class GPIOControl:
 
     def servoFeed(self):
         print "Starting feed routine..."
-        startAngle = self.__servoAngleToDuty(SERVO_FEED_POS1)
-        self.pwm.start(startAngle)
+        #startAngle = self.__servoAngleToDuty(SERVO_FEED_POS1)
+        #self.pwm.start(startAngle)
 
         self.__servoRotate(SERVO_FEED_POS1)
         time.sleep(1)
@@ -45,9 +64,9 @@ class GPIOControl:
         i = 0
         while i <20:
             time.sleep(0.1)
-            self.__servoRotate(SERVO_FEED_POS2+10)
+            self.__servoRotate(SERVO_FEED_POS2+SERVO_WIGGLE_ANGLE)
             time.sleep(0.1)
-            self.__servoRotate(SERVO_FEED_POS2-10)
+            self.__servoRotate(SERVO_FEED_POS2-SERVO_WIGGLE_ANGLE)
             i += 1
         self.__servoRotate(SERVO_FEED_POS2)
         time.sleep(1)
@@ -55,5 +74,42 @@ class GPIOControl:
         self.__servoRotate(SERVO_FEED_POS1)
         time.sleep(1)
 
-        self.pwm.stop()
+        #self.pwm.stop()
         print "Done feeding."
+
+    def __waterPlantInnerLoop(self, relayID, GPIOPin, durationSec):
+        if durationSec == -1:
+            print "Skip watering plant #" + str(relayID)+", value -1"
+        else:
+            t1 = time.time()
+            print "Turning on watering for plant #" + str(relayID)+", value", durationSec
+            GPIO.output(GPIOPin, GPIO.LOW)
+
+            stop = False
+            while not stop:
+                t2 = time.time()
+                if t2-t1 < durationSec:
+                    time.sleep(1)
+                else:
+                    stop = True
+            GPIO.output(GPIOPin, GPIO.HIGH)
+            print "Turning off watering for plant #" + str(relayID)+", after", round(t2-t1), "seconds"
+
+    def waterPlants(self):
+        print "Starting plant watering routine..."
+        self.__waterPlantInnerLoop(1, RELAY_GPIO_1, WATER_PLANT_RELAY1_DURATION)
+        self.__waterPlantInnerLoop(2, RELAY_GPIO_2, WATER_PLANT_RELAY2_DURATION)
+        self.__waterPlantInnerLoop(3, RELAY_GPIO_3, WATER_PLANT_RELAY3_DURATION)
+        self.__waterPlantInnerLoop(4, RELAY_GPIO_4, WATER_PLANT_RELAY4_DURATION)
+        print "Starting plant watering routine..."
+
+
+def exit_handler():
+    print "Application ending, cleaning up GPIOs"
+    GPIO.output(RELAY_GPIO_1, GPIO.HIGH)
+    GPIO.output(RELAY_GPIO_2, GPIO.HIGH)
+    GPIO.output(RELAY_GPIO_3, GPIO.HIGH)
+    GPIO.output(RELAY_GPIO_4, GPIO.HIGH)
+    GPIO.cleanup()
+
+atexit.register(exit_handler)

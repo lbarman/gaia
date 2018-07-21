@@ -8,9 +8,8 @@ import urllib
 import base64
 from constants import *
 from gpio_control import GPIOControl
-from local_db import LocalDatabase
+from cron import Cron
 
-db = None
 gpio = None
 
 def getShellOutput(cmd):
@@ -30,23 +29,21 @@ def sameDay(date1, date2):
     return False
 
 def getDataToUpload(now):
-    global db
+    global igorCron, plantsCron
 
     data = ""
-    data += "# feeding\n"
-    data += "daily feeding hour: "+str(db.dailyFeedingTime)+":00:00\n"
-    data += "last day fed: "+db.lastDayFed.strftime("%d.%m.%Y")+"\n"
-
-    feedIn = (now.replace(hour=db.dailyFeedingTime, minute=0, second=0, microsecond=0) - now)
-    if sameDay(db.lastDayFed,now):
-        data += "already fed for today\n\n"
-    else:
-        data += "NOT yet fed for today\n"
-        if feedIn.total_seconds() < 0:
-            data += "should feed asap, hang on...\n\n"
-        else:
-            hms = datetime.timedelta(seconds=int(feedIn.total_seconds()))
-            data += "feeding in "+str(hms)+"\n\n"
+    data += "# feed igor\n"
+    data += "cron: "+str(igorCron)+"\n"
+    data += "last day fed: "+str(igorCron.lastDayExecuted())+"\n"
+    n = igorCron.nextOccurence(now)
+    data += "next occurence: "+str(n)+" (in "+str(n-now)+")\n"
+    data += ""
+    data += "# water plants\n"
+    data += "cron: "+str(plantsCron)+"\n"
+    data += "last day watered: "+str(plantsCron.lastDayExecuted())+"\n"
+    n = plantsCron.nextOccurence(now)
+    data += "next occurence: "+str(n)+" (in "+str(n-now)+")\n"
+    data += ""
 
     data += "# uptime\n"+getShellOutput(["uptime"])+'\n\n'
     data += "# free\n"+getShellOutput(["free"])+'\n\n'
@@ -66,6 +63,18 @@ def contactGaiaWebSite(now, data):
 
     r = requests.get(GAIA_URL, params=params)
 
+    if r.status_code == requests.codes.ok:
+        print "Gaia not OK! answer", r
+    else:
+        print "Gaia answer:", r.content
+
+def restart():
+    command = "/usr/bin/sudo /sbin/shutdown -r now"
+    import subprocess
+    process = subprocess.Popen(command.split(), stdout=subprocess.PIPE)
+    output = process.communicate()[0]
+    print output
+
 def buttonPressed():
     print "Button pressed"
     feed(datetime.datetime.now(), "Feeded manually")
@@ -74,7 +83,6 @@ def feed(now, action="Feeded"):
     global gpio, db
     
     gpio.servoFeed()
-    db.updateLastDayFed()
 
     print(action)
 
@@ -82,15 +90,21 @@ def feed(now, action="Feeded"):
     data = base64.b64encode(bytes(action))
     contactGaiaWebSite(now, data)
 
+def water(now):
+    global gpio, db
+    
+    gpio.waterPlants()
+
+    print(action)
+
+    # HTTP Request indicating we just watered the plants
+    data = base64.b64encode(bytes("Plants watered"))
+    contactGaiaWebSite(now, data)
+
 print "[gaia-client.py] starting..."
 
-db = LocalDatabase()
 gpio = GPIOControl()
 gpio.buttonCallback = buttonPressed
-
-if db == None:
-    print "DB not initialized, quitting"
-    sys.exit(1)
 
 if gpio == None:
     print "GPIO not initialized, quitting"
@@ -98,17 +112,22 @@ if gpio == None:
 
 print "[gaia-client.py] db and gpio initialized"
 
+igorCron = Cron("igor", IGOR_CRON)
+plantsCron = Cron("plants", PLANTS_CRON)
+
 # main loop
 while True:
     now = datetime.datetime.now()
 
-    print "last fed on", db.lastDayFed
+    print "igor last fed on      : ", igorCron.lastDayExecuted()
+    print "feeding in            : ", (igorCron.nextOccurence(now) - now)
+    print "plants last watered on: ", plantsCron.lastDayExecuted()
+    print "watering in           : ", (plantsCron.nextOccurence(now) - now)
 
-    # do we need to feed Igor? 
-    feedIn = (now.replace(hour=db.dailyFeedingTime, minute=0, second=0, microsecond=0) - now).total_seconds()
-    
-    if sameDay(db.lastDayFed,now) and feedIn < 0:
+    if igorCron.shouldItRun(now):
         feed(now)
+    elif plantsCron.shouldItRun(now):
+        water(now)
     else:
         contactGaiaWebSite(now, getDataToUpload(now))
         print "[gaia-client.py] waiting", WAITING_LOOP_SLEEP, "sec"

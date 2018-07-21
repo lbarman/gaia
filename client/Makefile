@@ -1,4 +1,4 @@
-.PHONY: install-cron install run autosync manual-feed is-running kill
+.PHONY: install-cron install run autosync manual-feed is-running kill manual-water
 
 install:
 	chmod u+x run.sh
@@ -17,6 +17,9 @@ autosync:
 
 manual-feed:
 	python2 -c "from gpio_control import *; g=GPIOControl(); g.servoFeed()"
+
+manual-water:
+	python2 -c "from gpio_control import *; g=GPIOControl(); g.waterPlants()"
 
 kill:
 	pkill python
