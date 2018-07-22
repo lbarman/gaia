@@ -62,13 +62,22 @@ class Cron:
      return str(self.hour)+"h days:"+','.join([str(x) for x in self.days])
 
     def nextOccurence(self, now):
+        nextOccurence = self.__nextOccurenceIrrespectiveToLastRun(now)
+        lastRun = self.lastDayExecuted()
+
+        if nextOccurence == lastRun:
+            return self.__nextOccurenceIrrespectiveToLastRun(lastRun)
+
+        return nextOccurence
+
+    def __nextOccurenceIrrespectiveToLastRun(self, now):
         weekStart = now.replace(hour=0,minute=0,second=0,microsecond=0) 
         while weekStart.weekday() != 0:
             weekStart = weekStart - timedelta(days=1)
         # valid week start, now replace with the time (which cannot be *)
         nextOccurence = weekStart.replace(hour=self.hour)
 
-        while nextOccurence<now:
+        while nextOccurence<=now:
             nextOccurence = nextOccurence + timedelta(days=1)
             while nextOccurence.weekday() not in self.days:
                 nextOccurence = nextOccurence + timedelta(days=1)
@@ -86,7 +95,7 @@ class Cron:
 
         return lastRun
 
-    # we run 5min before the deadline
+    # we run 30min before the deadline
     # if true, run the action
     def shouldItRun(self, now):
         nextOccurence = self.nextOccurence(now)
@@ -103,9 +112,20 @@ class Cron:
         #print "diff min", diff_minutes
         #print "last Run and next occurence diff", diff, diff_minutes2
         
-        if diff_minutes < 5 and diff_minutes2 >= 5:
-            cursor.execute("UPDATE cron SET LASTRUN=(?) WHERE NAME=(?)", (nextOccurence, self.cronName,))
+        # if: next execution is soon, CHECK: last execution must be a long time ago
+        if diff_minutes < 30 and diff_minutes2 >= 30:
+            conn.execute("UPDATE cron SET LASTRUN=(?) WHERE NAME=(?)", (nextOccurence, self.cronName,))
             conn.commit()
             return True
 
         return False
+
+    def debug_printDB(self):
+        try:
+            cursor = conn.execute("SELECT * FROM cron")
+            data=cursor.fetchall()
+            for row in data:
+                print "CRON:", row
+        except Exception as err:
+            print("Error", err)
+            pass

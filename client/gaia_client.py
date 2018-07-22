@@ -5,9 +5,10 @@ import time
 import datetime
 import subprocess
 import urllib
+import sys
 import base64
 from constants import *
-from gpio_control import GPIOControl
+from gpio_control import GPIOControl, cleanup_gpios
 from cron import Cron
 
 gpio = None
@@ -23,11 +24,6 @@ def getShellOutput(cmd):
 
     return o
 
-def sameDay(date1, date2):
-    if date1.replace(hour=0,minute=0,second=0,microsecond=0) == date2.replace(hour=0,minute=0,second=0,microsecond=0):
-        return True
-    return False
-
 def getDataToUpload(now):
     global igorCron, plantsCron
 
@@ -37,13 +33,13 @@ def getDataToUpload(now):
     data += "last day fed: "+str(igorCron.lastDayExecuted())+"\n"
     n = igorCron.nextOccurence(now)
     data += "next occurence: "+str(n)+" (in "+str(n-now)+")\n"
-    data += ""
+    data += "\n"
     data += "# water plants\n"
     data += "cron: "+str(plantsCron)+"\n"
     data += "last day watered: "+str(plantsCron.lastDayExecuted())+"\n"
     n = plantsCron.nextOccurence(now)
     data += "next occurence: "+str(n)+" (in "+str(n-now)+")\n"
-    data += ""
+    data += "\n"
 
     data += "# uptime\n"+getShellOutput(["uptime"])+'\n\n'
     data += "# free\n"+getShellOutput(["free"])+'\n\n'
@@ -58,17 +54,35 @@ def contactGaiaWebSite(now, data):
         "ping" : True,
         "token" : GAIA_SECRETTOKEN,
         "local_ts" : now.strftime('%Y-%m-%d %H:%M:%S'),
-        "data" : getDataToUpload(now)
+        "data" : data
     }
 
     r = requests.get(GAIA_URL, params=params)
 
-    if r.status_code == requests.codes.ok:
+    if r.status_code != requests.codes.ok:
         print "Gaia not OK! answer", r
     else:
-        print "Gaia answer:", r.content
+        answer = r.content.strip()
 
-def restart():
+        if answer == "REBOOT":
+            print "Gaia requested reboot"
+            reboot()
+        if answer == "SHUTDOWN":
+            print "Gaia requested shutdown"
+            shutdown()
+        else:
+            print "Gaia said " + answer + "."
+
+def reboot():
+    cleanup_gpios()
+    command = "/usr/bin/sudo /sbin/shutdown -h now"
+    import subprocess
+    process = subprocess.Popen(command.split(), stdout=subprocess.PIPE)
+    output = process.communicate()[0]
+    print output
+
+def shutdown():
+    cleanup_gpios()
     command = "/usr/bin/sudo /sbin/shutdown -r now"
     import subprocess
     process = subprocess.Popen(command.split(), stdout=subprocess.PIPE)
@@ -84,8 +98,6 @@ def feed(now, action="Feeded"):
     
     gpio.servoFeed()
 
-    print(action)
-
     # HTTP Request indicating we just fed Igor
     data = base64.b64encode(bytes(action))
     contactGaiaWebSite(now, data)
@@ -93,12 +105,10 @@ def feed(now, action="Feeded"):
 def water(now):
     global gpio, db
     
-    gpio.waterPlants()
-
-    print(action)
+    report = gpio.waterPlants()
 
     # HTTP Request indicating we just watered the plants
-    data = base64.b64encode(bytes("Plants watered"))
+    data = base64.b64encode(bytes(report))
     contactGaiaWebSite(now, data)
 
 print "[gaia-client.py] starting..."
@@ -117,19 +127,24 @@ plantsCron = Cron("plants", PLANTS_CRON)
 
 # main loop
 while True:
-    now = datetime.datetime.now()
+    now = datetime.datetime.now() #.replace(hour=10,minute=31, second=0)
+    print "It is now", now
 
     print "igor last fed on      : ", igorCron.lastDayExecuted()
     print "feeding in            : ", (igorCron.nextOccurence(now) - now)
     print "plants last watered on: ", plantsCron.lastDayExecuted()
     print "watering in           : ", (plantsCron.nextOccurence(now) - now)
 
+
     if igorCron.shouldItRun(now):
+        print "feeding igor now"
         feed(now)
     elif plantsCron.shouldItRun(now):
+        print "watering plants now"
         water(now)
     else:
-        contactGaiaWebSite(now, getDataToUpload(now))
         print "[gaia-client.py] waiting", WAITING_LOOP_SLEEP, "sec"
+        contactGaiaWebSite(now, getDataToUpload(now))
         time.sleep(WAITING_LOOP_SLEEP)
+
     print "[gaia-client.py] looping"

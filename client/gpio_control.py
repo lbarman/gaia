@@ -32,8 +32,8 @@ class GPIOControl:
         # start controlling the servo
         GPIO.setup(GPIO_SERVO, GPIO.OUT)
         self.pwm = GPIO.PWM(GPIO_SERVO, SERVO_CARRIER_WIDTH)
-        startAngle = self.__servoAngleToDuty(SERVO_FEED_POS1)
-        self.pwm.start(startAngle)
+        #startAngle = self.__servoAngleToDuty(SERVO_FEED_POS1)
+        #self.pwm.start(startAngle)
 
     def __buttonPressedCallback(self, channel):
         if self.buttonCallback == None:
@@ -53,8 +53,8 @@ class GPIOControl:
 
     def servoFeed(self):
         print "Starting feed routine..."
-        #startAngle = self.__servoAngleToDuty(SERVO_FEED_POS1)
-        #self.pwm.start(startAngle)
+        startAngle = self.__servoAngleToDuty(SERVO_FEED_POS1)
+        self.pwm.start(startAngle)
 
         self.__servoRotate(SERVO_FEED_POS1)
         time.sleep(1)
@@ -68,21 +68,25 @@ class GPIOControl:
             time.sleep(0.1)
             self.__servoRotate(SERVO_FEED_POS2-SERVO_WIGGLE_ANGLE)
             i += 1
+        time.sleep(0.1)
         self.__servoRotate(SERVO_FEED_POS2)
         time.sleep(1)
 
         self.__servoRotate(SERVO_FEED_POS1)
         time.sleep(1)
 
-        #self.pwm.stop()
+        self.pwm.stop()
         print "Done feeding."
 
     def __waterPlantInnerLoop(self, relayID, GPIOPin, durationSec):
+        report = ""
         if durationSec == -1:
             print "Skip watering plant #" + str(relayID)+", value -1"
+            report += "Skip watering plant #" + str(relayID)+", value -1\n"
         else:
             t1 = time.time()
-            print "Turning on watering for plant #" + str(relayID)+", value", durationSec
+            print "Turning on watering for plant #" + str(relayID)+", value ", durationSec
+            report += "Turning on watering for plant #" + str(relayID)+", value "+str(durationSec)+"\n"
             GPIO.output(GPIOPin, GPIO.LOW)
 
             stop = False
@@ -94,17 +98,27 @@ class GPIOControl:
                     stop = True
             GPIO.output(GPIOPin, GPIO.HIGH)
             print "Turning off watering for plant #" + str(relayID)+", after", round(t2-t1), "seconds"
+            report += "Turning off watering for plant #" + str(relayID)+", after " + str(round(t2-t1)) + " seconds\n"
+        return report
 
     def waterPlants(self):
+
+        report = ""
         print "Starting plant watering routine..."
-        self.__waterPlantInnerLoop(1, RELAY_GPIO_1, WATER_PLANT_RELAY1_DURATION)
-        self.__waterPlantInnerLoop(2, RELAY_GPIO_2, WATER_PLANT_RELAY2_DURATION)
-        self.__waterPlantInnerLoop(3, RELAY_GPIO_3, WATER_PLANT_RELAY3_DURATION)
-        self.__waterPlantInnerLoop(4, RELAY_GPIO_4, WATER_PLANT_RELAY4_DURATION)
-        print "Starting plant watering routine..."
+        report += "Starting plant watering routine...\n"
+
+        report += self.__waterPlantInnerLoop(1, RELAY_GPIO_1, WATER_PLANT_RELAY1_DURATION)
+        report += self.__waterPlantInnerLoop(2, RELAY_GPIO_2, WATER_PLANT_RELAY2_DURATION)
+        report += self.__waterPlantInnerLoop(3, RELAY_GPIO_3, WATER_PLANT_RELAY3_DURATION)
+        report += self.__waterPlantInnerLoop(4, RELAY_GPIO_4, WATER_PLANT_RELAY4_DURATION)
+
+        print "Plant watering routine done."
+        report += "Plant watering routine done.\n"
+
+        return report
 
 
-def exit_handler():
+def cleanup_gpios():
     print "Application ending, cleaning up GPIOs"
     GPIO.output(RELAY_GPIO_1, GPIO.HIGH)
     GPIO.output(RELAY_GPIO_2, GPIO.HIGH)
@@ -112,4 +126,4 @@ def exit_handler():
     GPIO.output(RELAY_GPIO_4, GPIO.HIGH)
     GPIO.cleanup()
 
-atexit.register(exit_handler)
+atexit.register(cleanup_gpios)

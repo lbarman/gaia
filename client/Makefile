@@ -21,6 +21,12 @@ manual-feed:
 manual-water:
 	python2 -c "from gpio_control import *; g=GPIOControl(); g.waterPlants()"
 
+print-cron-db:
+	python2 -c "from cron import *; x=Cron(\"tmp\", \"0 *\"); x.debug_printDB()"
+
+cron-erase-db:
+	rm -rf sqlite.db
+
 kill:
 	pkill python
 	pkill python2
