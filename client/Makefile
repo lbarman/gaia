@@ -21,6 +21,9 @@ manual-feed:
 manual-water:
 	python2 -c "from gpio_control import *; g=GPIOControl(); g.waterPlants()"
 
+water-fill-pipes:
+	python2 -c "from gpio_control import *; g=GPIOControl(); g.fillWaterPipes()"
+
 print-cron-db:
 	python2 -c "from cron import *; x=Cron(\"tmp\", \"0 *\"); x.debug_printDB()"
 

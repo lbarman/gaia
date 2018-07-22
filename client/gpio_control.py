@@ -117,6 +117,14 @@ class GPIOControl:
 
         return report
 
+    def fillWaterPipes(self):
+        print "Filling pipes..."
+        self.__waterPlantInnerLoop(1, RELAY_GPIO_1, WATER_PLANT_FILL_PIPES_DURATION)
+        self.__waterPlantInnerLoop(2, RELAY_GPIO_2, WATER_PLANT_FILL_PIPES_DURATION)
+        self.__waterPlantInnerLoop(3, RELAY_GPIO_3, WATER_PLANT_FILL_PIPES_DURATION)
+        self.__waterPlantInnerLoop(4, RELAY_GPIO_4, WATER_PLANT_FILL_PIPES_DURATION)
+        print "Done."
+
 
 def cleanup_gpios():
     print "Application ending, cleaning up GPIOs"
