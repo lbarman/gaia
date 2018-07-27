@@ -59,19 +59,12 @@ def contactGaiaWebSite(now, data):
 
     r = requests.get(GAIA_URL, params=params)
 
+    answer = "none, something went wrong"
     if r.status_code != requests.codes.ok:
         print "Gaia not OK! answer", r
     else:
         answer = r.content.strip()
-
-        if answer == "REBOOT":
-            print "Gaia requested reboot"
-            reboot()
-        if answer == "SHUTDOWN":
-            print "Gaia requested shutdown"
-            shutdown()
-        else:
-            print "Gaia said " + answer + "."
+    return answer
 
 def reboot():
     cleanup_gpios()
@@ -135,7 +128,6 @@ while True:
     print "plants last watered on: ", plantsCron.lastDayExecuted()
     print "watering in           : ", (plantsCron.nextOccurence(now) - now)
 
-
     if igorCron.shouldItRun(now):
         print "feeding igor now"
         feed(now)
@@ -144,7 +136,15 @@ while True:
         water(now)
     else:
         print "[gaia-client.py] waiting", WAITING_LOOP_SLEEP, "sec"
-        contactGaiaWebSite(now, getDataToUpload(now))
+        answer = contactGaiaWebSite(now, getDataToUpload(now))
+
+        if answer == "REBOOT":
+            contactGaiaWebSite(now, "Gaia requested reboot.")
+            reboot()
+        if answer == "SHUTDOWN":
+            contactGaiaWebSite(now, "Gaia requested shutdown.")
+            shutdown()
+
         time.sleep(WAITING_LOOP_SLEEP)
 
     print "[gaia-client.py] looping"
