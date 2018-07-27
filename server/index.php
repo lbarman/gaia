@@ -1,12 +1,17 @@
 <?php
 require_once("db.php");
 
-$DURATION_TO_COVER_HOURS = 72;
-$BAR_DURATION_HOURS = 6;
+$NUMBER_OF_ITEMS_TO_FETCH = 10000;
 
 function formatTime($t){
     $seconds = strtotime($t);
     return date('H:i:s, d.m.Y', $seconds);
+}
+
+function startsWith($haystack, $needle)
+{
+     $length = strlen($needle);
+     return (substr($haystack, 0, $length) === $needle);
 }
 
 function handleRaspberryConnection($db){
@@ -56,7 +61,6 @@ handleRaspberryConnection($db); # check if connection is a ping from the Raspber
         <link rel="stylesheet" type="text/css" href="sakura.css">
         <script src="https://code.jquery.com/jquery-3.3.1.min.js" integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8=" crossorigin="anonymous"></script>
         <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.7.2/Chart.min.js"></script>
-        <script src="chart.js"></script>
         <style>
         canvas{
             -moz-user-select: none;
@@ -82,12 +86,16 @@ handleRaspberryConnection($db); # check if connection is a ping from the Raspber
             width: 10px;
             height: 10px;
         }
+
+        .uninteresting_report {
+            display: none;
+        }
     </style>
     </head>
     <body>
         <h1>Gaia</h1>
         <div>
-            <h3>Pings</h3>
+            <h3>Graph</h3>
             <div id="canvas-holder1" style="width:100%;">
                 <canvas id="chart1"></canvas>
             </div>
@@ -95,98 +103,92 @@ handleRaspberryConnection($db); # check if connection is a ping from the Raspber
         <div>
             <?php
 
-                $rows = $db->select("SELECT id,timestamp,local_timestamp,data FROM `pings` ORDER BY timestamp DESC LIMIT 1000");
+                $rows = $db->select("SELECT id,timestamp,local_timestamp,data FROM `pings` ORDER BY timestamp DESC LIMIT ".$NUMBER_OF_ITEMS_TO_FETCH);
                 
                 $toInt = function($s) {
                     return (int)$s;
                 };
 
-                $t = time();
-                $t = 3600 * ceil($t / 3600); #round to the next hour
-
-                $xAxis = [];
-                $xLabels = [];
-
-                $numberOfXPoints = ceil($DURATION_TO_COVER_HOURS / $BAR_DURATION_HOURS);
-
-                for($h=$numberOfXPoints; $h > 0; $h--){
-                    $startTime = $t - 60 * 60 * $h * $BAR_DURATION_HOURS;
-                    $endTime = $t - 60 * 60 * ($h - 1) * $BAR_DURATION_HOURS;
-                    $xAxis[] = array($startTime, $endTime);
-                    $xLabels[] = date("d/m h\\h", $startTime);
-                }
-
-                //print xLabels for js
-                echo '<script>var xLabels = [];'."\n";
-                for($i = 0 ; $i < count($xLabels); $i++){
-
-                    echo 'xLabels['.$i.'] = \''.$xLabels[$i].'\';'."\n";
-                }
-                echo '</script>';
-
                 //for each xTick, check if we have something to print 
                 $igorPing = array();
                 $igorFed = array();
-                $igorPingTooltip = array();
-                $igorFedTooltip = array();
-                for($i = 0 ; $i < count($xAxis); $i++){
-                    $igorPing[$i] = 0;
-                    $igorFed[$i] = 0;
+                $plantsWatered = array();
 
-                    foreach($rows as $row) {
-                        $str = $row['local_timestamp'];
-                        $ts = (int)strtotime($row['local_timestamp']);
+                foreach($rows as $row) {
+                    $str = $row['local_timestamp'];
+                    $ts = (int)strtotime($row['local_timestamp']);
                         
-                        $data = base64_decode($row['data']);
-                        if($ts >= $xAxis[$i][0] && $ts < $xAxis[$i][1]){
-                            if($data == "Feeded"){
-                                $igorFed[$i] -= 10;
-                                $igorFedTooltip[$xLabels[$i]] = $row['local_timestamp'];
-                            } else {
-                                $igorPing[$i] += 1;
-                            }
-                        }
+                    $data = base64_decode($row['data']);
+                    if($data == "Feeded"){
+                        $igorFed[$ts] = 1;
+                    } else if(startsWith($data, "Starting plant watering")){
+                        $plantsWatered[$ts] = 1;
+                    } else {
+                        $igorPing[$ts] = 1;
                     }
                 }
 
-                //print igorFed for js
-                echo '<script>var igorFed = [];'."\n";
-                for($i = 0 ; $i < count($igorFed); $i++){
+                #$maxValue = max(array(max($igorPing), max($igorPing), max($igorPing)));
+                #$igorFed = array_map(function($el) { return $el * $maxValue; }, $igorFed);
+                #$plantsWatered = array_map(function($el) { return $el * $maxValue; }, $plantsWatered);
 
-                    echo 'igorFed['.$i.'] = \''.$igorFed[$i].'\';'."\n";
+                //print igorFed for js
+                echo '<script>var a1 = {};';
+                foreach($igorFed as $k => $v){
+
+                    echo 'a1["'.$k.'"] = \''.$v.'\';';
                 }
 
                 //print igorPing for js
-                echo 'var igorPing = [];'."\n";
-                for($i = 0 ; $i < count($igorPing); $i++){
+                echo 'var a2 = {};'."\n";
+                foreach($igorPing as $k => $v){
 
-                    echo 'igorPing['.$i.'] = \''.$igorPing[$i].'\';'."\n";
+                    echo 'a2["'.$k.'"] = \''.$v.'\';';
                 }
 
-                //print igorFedTooltip for js
-                echo 'var igorFedTooltip = [];'."\n";
-                foreach($igorFedTooltip as $k => $v){
+                //print plantsWatered for js
+                echo 'var a3 = {};';
+                foreach($plantsWatered as $k => $v){
 
-                    echo 'igorFedTooltip[\''.$k.'\'] = \''.$v.'\';'."\n";
+                    echo 'a3["'.$k.'"] = \''.$v.'\';';
                 }
+                echo "\n".'var igorFed = a1;'."\n";
+                echo 'var igorPing = a2;'."\n";
+                echo 'var plantsWatered = a3;'."\n";
                 echo '</script>';
-
                 ?>
+                <pre id="graphData">
+
+                </pre>
         </div>
         </div>
         <div>
             <h3>Data</h3>
             <?php
 
-                $rows = $db->select("SELECT id,timestamp,local_timestamp,data FROM `pings` ORDER BY timestamp DESC LIMIT 1000");
+                $hiddenReports = 0;
+                $first = true;
+
                 foreach($rows as $row) {
-                    echo '<div>';
+
+                    $data = base64_decode($row['data']);
+                    $class = '';
+                    if (!$first && startsWith($data, '# feed igor')){
+                        $class = 'uninteresting_report';
+                        $hiddenReports++;
+                    }
+
+                    echo '<div class="'.$class.'">';
                     echo '<h5>[#'.$row['id'].'] '.
                         formatTime($row['local_timestamp']).'</h5>';
                     echo 'Created at '.formatTime($row['timestamp']);
+
                     echo '<pre>'.base64_decode($row['data']).'</pre>';
                     echo '</div>';
+
+                    $first = false;
                 }
+                echo '<p>'.$hiddenReports.' hidden reports (<a href="" onclick="$(\'.uninteresting_report\').css(\'display\', \'block\');">show</a>)</p>';
                 ?>
         </div>
     <script type="text/javascript">
@@ -206,21 +208,125 @@ handleRaspberryConnection($db); # check if connection is a ping from the Raspber
         */
     </script>
     <script>
+
+        var PRECISION = 24 * 3600
+
+        function roundTo(x) {
+            return Math.floor(x / PRECISION) * PRECISION
+        }
+
+        function toDataset(rawData, labels) {
+            var hashMap = {}
+            for (var property in rawData) {
+                if (rawData.hasOwnProperty(property)) {
+
+                    t = roundTo(Number(property))
+                    if(hashMap[t] == undefined){
+                       hashMap[t] = 0 
+                    }
+                    hashMap[t] += Number(rawData[property])
+                }
+            }
+            if(labels == undefined){
+                // we compute our own labels
+                labels = []
+                var dataset = []
+                for (var property in hashMap) {
+                    if (hashMap.hasOwnProperty(property)) {
+                        t = new Date(1000 * Number(property))
+                        labels.push(t)
+                        dataset.push({t: t, y: hashMap[property]});
+                    }
+                }
+                return [labels, dataset]
+            } else {
+                // we use the given labels
+                var dataset = []
+                for (i = 0; i < labels.length; i++) {
+
+                    t = labels[i]
+                    timestamp = t.getTime() / 1000
+
+                    if (hashMap.hasOwnProperty(timestamp)) {
+                        dataset.push({t: t, y: 1});
+                    } else {
+                        dataset.push({t: t, y: 0});
+                    }
+                }
+                return [labels, dataset]
+            }
+        }
+
+        var pingsLabelsAndVals = toDataset(igorPing, undefined);
+        var igorLabelsAndVals = toDataset(igorFed, pingsLabelsAndVals[0]);
+        var plantsLabelsAndVals = toDataset(plantsWatered, pingsLabelsAndVals[0]);
+
+        // nice labels
+        var labels = [];
+        for (i = 0; i < pingsLabelsAndVals[0].length; i++) {
+            d = pingsLabelsAndVals[0][i];
+            labels.push(d.getDate()+"/"+(d.getMonth()+1) + " " + d.getHours());
+        }
+
+        // make the important info stand out
+        maxValue = 0
+        for (i = 0; i < pingsLabelsAndVals[1].length; i++) {
+            maxValue = Math.max(maxValue, pingsLabelsAndVals[1][i].y)
+        }
+        maxValue = -maxValue
+        for (i = 0; i < igorLabelsAndVals[1].length; i++) {
+            igorLabelsAndVals[1][i].y = maxValue * igorLabelsAndVals[1][i].y
+        }
+        for (i = 0; i < plantsLabelsAndVals[1].length; i++) {
+            plantsLabelsAndVals[1][i].y = maxValue * plantsLabelsAndVals[1][i].y
+        }
+
+        // print interesting info
+        igorUnprocessedData = toDataset(igorFed, undefined);
+        str = "# igor fed:" + "\n"
+        for (var property in igorFed) {
+            if (igorFed.hasOwnProperty(property)) {
+                t = new Date(1000 * Number(property))
+                str += t.toUTCString().replace(" GMT", "") + "\n"
+            }
+        }
+        str += "\n"
+        str += "# plants watered:" + "\n"
+        for (var property in plantsWatered) {
+            if (plantsWatered.hasOwnProperty(property)) {
+                t = new Date(1000 * Number(property))
+                str += t.toUTCString().replace(" GMT", "") + "\n"
+            }
+        }
+        
+        $('#graphData').html(str)
+
+        // plot
+        var red = 'rgb(255, 99, 132)'
+        var green = 'rgb(75, 192, 192)'
+        var blue = 'rgb(54, 162, 235)'
+
         var color = Chart.helpers.color;
         var lineChartData = {
-            labels: xLabels,
+            labels: labels,
             datasets: [{
                 label: 'Ping',
-                backgroundColor: color(window.chartColors.red).alpha(0.2).rgbString(),
-                borderColor: window.chartColors.red,
-                pointBackgroundColor: window.chartColors.red,
-                data: igorPing,
+                backgroundColor: color(blue).alpha(0.2).rgbString(),
+                borderColor: blue,
+                pointBackgroundColor: blue,
+                data: pingsLabelsAndVals[1],
             }, {
-                label: 'Fed',
-                backgroundColor: color(window.chartColors.green).alpha(0.2).rgbString(),
-                borderColor: window.chartColors.green,
-                pointBackgroundColor: window.chartColors.green,
-                data: igorFed,
+                label: 'Igor Fed',
+                backgroundColor: color(red).alpha(0.2).rgbString(),
+                borderColor: red,
+                pointBackgroundColor: red,
+                data: igorLabelsAndVals[1],
+            }, {
+                label: 'Plants Watered',
+                backgroundColor: color(green).alpha(0.2).rgbString(),
+                borderColor: green,
+                pointBackgroundColor: green,
+                data: plantsLabelsAndVals[1],
             }]
         };
 
