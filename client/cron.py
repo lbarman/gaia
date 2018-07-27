@@ -1,40 +1,49 @@
-import sys
 from datetime import datetime, timedelta
 from constants import *
 import sqlite3
 from dateutil import parser
 
-conn = sqlite3.connect(SQLITE_FILE, detect_types=sqlite3.PARSE_DECLTYPES)
-
-conn.execute('''CREATE TABLE IF NOT EXISTS cron
-         (NAME           VARCHAR(50)   NOT NULL,
-         LASTRUN        DATETIME);''')
-
-time0 = datetime.now().replace(hour=0,minute=0,second=0,microsecond=0,day=1,month=1,year=1970)
-
+# this is instantiated by the Cron task
+conn = None
 
 # cronstring with format "h x,y,z" means "at X o'clock every x/y/z day of the week"
 class Cron:
+    time0 = datetime.now().replace(hour=0,minute=0,second=0,microsecond=0,day=1,month=1,year=1970)
     cronName = "unknown"
     cronString = ""
     hour = ""
     days = []
+    daysStrings = ["mon", "tue", "wed", "thu", "fri", "sat", "sun"]
 
-    def __init__(self, cronName, cronString):
+    def __init__(self, cronName, cronString, sqliteMemoryMode=False):
+        global conn
+
+        # first, establish the connection to the SQLITE database if not already done
+        # this also allows for testing if memory=True
+        if conn == None:
+            if sqliteMemoryMode:
+                print "[warning] Instantiating the cron DB only in memory"
+                conn = sqlite3.connect(":memory:", detect_types=sqlite3.PARSE_DECLTYPES)
+            else:
+                conn = sqlite3.connect(SQLITE_FILE, detect_types=sqlite3.PARSE_DECLTYPES)
+
+        conn.execute('''CREATE TABLE IF NOT EXISTS cron
+                 (NAME           VARCHAR(50)   NOT NULL,
+                 LASTRUN        DATETIME);''')
+
+        # then, create this Cron. Parse the data and standardize it
         self.cronName = cronName
         self.cronString = cronString
         
         parts = self.cronString.split(" ")
         if len(parts) != 2:
-            print "Invalid cron string:", self.cronString
-            sys.exit(1)
+            raise ValueError("Invalid cron string:" + self.cronString)
 
         hour = parts[0].strip()
         days = parts[1].strip()
 
         if not hour.isdigit():
-            print "Hour not valid:", hour
-            sys.exit(1)
+            raise ValueError("Hour not valid:" + hour)
 
         self.hour = int(hour)
 
@@ -44,8 +53,13 @@ class Cron:
         days2 = days.split(",")
 
         self.days = [int(day) for day in days2]
+        self.days = sorted(self.days)
 
-        # make sure there is something in the DB
+        for day in self.days:
+            if day < 0 or day > 6:
+                raise ValueError("Day not valid:" + str(day))
+
+        # make sure there is something in the DB w.r.t to this cron
         try:
             cursor = conn.execute("SELECT * FROM cron WHERE NAME = (?)", (self.cronName,))
             count = 0
@@ -53,13 +67,13 @@ class Cron:
                 count += 1
 
             if count == 0:
-                conn.execute("INSERT INTO cron (NAME, LASTRUN) VALUES ((?), (?))", (self.cronName, time0,))
+                conn.execute("INSERT INTO cron (NAME, LASTRUN) VALUES ((?), (?))", (self.cronName, self.time0,))
 
         except ValueError as err:
-            print("ERR", err)
+            print("Cron error:", err)
 
     def __str__(self):
-     return str(self.hour)+"h days:"+','.join([str(x) for x in self.days])
+        return str(self.hour)+"h on "+','.join([self.daysStrings[x] for x in self.days])
 
     def nextOccurence(self, now):
         nextOccurence = self.__nextOccurenceIrrespectiveToLastRun(now)
@@ -85,7 +99,8 @@ class Cron:
         return nextOccurence
 
     def lastDayExecuted(self):
-        lastRun = time0
+        global conn
+        lastRun = self.time0
         try:
             cursor = conn.execute("SELECT LASTRUN FROM cron WHERE NAME = (?)", (self.cronName,))
             data=cursor.fetchall()
@@ -98,6 +113,7 @@ class Cron:
     # we run 30min before the deadline
     # if true, run the action
     def shouldItRun(self, now):
+        global conn
         nextOccurence = self.nextOccurence(now)
         lastRun = self.lastDayExecuted()
 
@@ -120,12 +136,22 @@ class Cron:
 
         return False
 
+    def debug_truncateDB(self):
+        global conn
+        conn.execute("DROP TABLE cron;")
+        conn.execute('''CREATE TABLE IF NOT EXISTS cron
+                 (NAME           VARCHAR(50)   NOT NULL,
+                 LASTRUN        DATETIME);''')
+        conn.commit()
+
     def debug_printDB(self):
+        global conn
         try:
             cursor = conn.execute("SELECT * FROM cron")
             data=cursor.fetchall()
             for row in data:
-                print "CRON:", row
+                if row != None:
+                    print "CRON-DB-Row:", row
         except Exception as err:
-            print("Error", err)
+            print "Cron error:", err
             pass

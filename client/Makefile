@@ -1,4 +1,4 @@
-.PHONY: install-cron install run autosync manual-feed is-running kill manual-water
+.PHONY: install install-cron run test is-running kill autosync manual-feed manual-water water-fill-pipes cron-print cron-erase
 
 install:
 	chmod u+x run.sh
@@ -9,8 +9,15 @@ install-cron:
 run:
 	./run.sh > logs/run.txt
 
+test:
+	python2 cron_test.py
+
 is-running:
 	ps -ux | grep "[p]ython2 gaia_client.py"
+
+kill:
+	pkill python
+	pkill python2
 
 autosync:
 	contscp . root@192.168.0.10:/root/gaia/client 22
@@ -24,12 +31,8 @@ manual-water:
 water-fill-pipes:
 	python2 -c "from gpio_control import *; g=GPIOControl(); g.fillWaterPipes()"
 
-print-cron-db:
+cron-print:
 	python2 -c "from cron import *; x=Cron(\"tmp\", \"0 *\"); x.debug_printDB()"
 
-cron-erase-db:
+cron-erase:
 	rm -rf sqlite.db
-
-kill:
-	pkill python
-	pkill python2
