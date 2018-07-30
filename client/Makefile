@@ -1,10 +1,16 @@
-.PHONY: install install-cron run test is-running kill autosync manual-feed manual-water water-fill-pipes cron-print cron-erase
+.PHONY: install install-cron uninstall-cron get-external-ip run test is-running kill autosync manual-feed manual-water water-fill-pipes cron-print cron-erase
 
 install:
 	chmod u+x run.sh
 
 install-cron:
 	echo "* * * * * root /root/gaia/client/run.sh > /root/gaia/client/logs/cron.txt" > /etc/cron.d/gaia 
+
+uninstall-cron:
+	rm -f /etc/cron.d/gaia 
+
+get-external-ip:
+	curl icanhazip.com
 
 run:
 	./run.sh > logs/run.txt
