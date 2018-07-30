@@ -79,8 +79,14 @@ if(isset($_POST) && isset($_POST['passphrase']) && isset($_POST['newCommand'])){
         die("Invalid passphrase");
     } else {
         $cmd = strtoupper(trim($_POST['newCommand']));
-        $s = "INSERT INTO `commands` (`id`, `timestamp`, `command`) VALUES (NULL, CURRENT_TIMESTAMP, '" . $cmd ."');";
-        $db->query($s);
+
+        if($cmd == "EMPTY_DB") {
+            $s = "DELETE FROM `pings` WHERE 1=1;";
+            $db->query($s);
+        } else {
+            $s = "INSERT INTO `commands` (`id`, `timestamp`, `command`) VALUES (NULL, CURRENT_TIMESTAMP, '" . $cmd ."');";
+            $db->query($s);
+        }
     }
 }
 
