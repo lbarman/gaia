@@ -68,7 +68,7 @@ def contactGaiaWebSite(now, data):
 
 def reboot():
     cleanup_gpios()
-    command = "/usr/bin/sudo /sbin/shutdown -h now"
+    command = "/usr/bin/sudo /sbin/shutdown -r now"
     import subprocess
     process = subprocess.Popen(command.split(), stdout=subprocess.PIPE)
     output = process.communicate()[0]
@@ -76,7 +76,7 @@ def reboot():
 
 def shutdown():
     cleanup_gpios()
-    command = "/usr/bin/sudo /sbin/shutdown -r now"
+    command = "/usr/bin/sudo /sbin/shutdown -h now"
     import subprocess
     process = subprocess.Popen(command.split(), stdout=subprocess.PIPE)
     output = process.communicate()[0]
@@ -138,12 +138,22 @@ while True:
         print "[gaia-client.py] waiting", WAITING_LOOP_SLEEP, "sec"
         answer = contactGaiaWebSite(now, getDataToUpload(now))
 
-        if answer == "REBOOT":
-            contactGaiaWebSite(now, "Gaia requested reboot.")
+        if answer == "REBOOT" or answer == "RESTART":
+            data = base64.b64encode(bytes("Gaia requested reboot."))
+            contactGaiaWebSite(now, data)
             reboot()
         if answer == "SHUTDOWN":
-            contactGaiaWebSite(now, "Gaia requested shutdown.")
+            data = base64.b64encode(bytes("Gaia requested shutdown."))
+            contactGaiaWebSite(now, data)
             shutdown()
+        if answer == "FEED":
+            data = base64.b64encode(bytes("Gaia requested manual feeding."))
+            contactGaiaWebSite(now, data)
+            feed(now)
+        if answer == "WATER":
+            data = base64.b64encode(bytes("Gaia requested manual plant watering."))
+            contactGaiaWebSite(now, data)
+            water(now)
 
         time.sleep(WAITING_LOOP_SLEEP)
 

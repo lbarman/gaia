@@ -425,7 +425,7 @@ handleRaspberryConnection($db, $nextCommand); # check if connection is a ping fr
         };
 
         function loadFeed(){
-            $('#live_feed').html('<iframe src="http://lbarman.ch:11734"></iframe>');
+            $('#live_feed').html('<img src="http://lbarman.ch:11735/" alt="http://lbarman.ch:11735/" class="shrinkToFit" width="632" height="474">');
             return false;
         }
     </script>

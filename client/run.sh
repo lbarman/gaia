@@ -31,6 +31,7 @@ echo "$isRunning"
 if [ "$isRunning" -ne 2 ]; then
     rm -f "$LOG_FILE_SSH_1"
     rm -f "$LOG_FILE_SSH_2"
+    pkill ssh
     echo "Starting ssh tunnels..."
     nohup ssh -N -R 11734:localhost:22 raspi@lbarman.ch -p 11733 2>&1 >"$LOG_FILE_SSH_1"  &
     nohup ssh -N -R 11735:localhost:8081 raspi@lbarman.ch -p 11733 2>&1 >"$LOG_FILE_SSH_2"  &
