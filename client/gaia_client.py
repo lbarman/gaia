@@ -38,7 +38,10 @@ def getDataToUpload(now):
     data += "cron: "+str(plantsCron)+"\n"
     data += "last day watered: "+str(plantsCron.lastDayExecuted())+"\n"
     n = plantsCron.nextOccurence(now)
-    data += "next occurence: "+str(n)+" (in "+str(n-now)+")\n"
+    data += "\n"
+
+    data += "# cron db\n"
+    data += str(igorCron.debug_printDB())+")\n"
     data += "\n"
 
     data += "# uptime\n"+getShellOutput(["uptime"])+'\n\n'

@@ -155,12 +155,16 @@ class Cron:
 
     def debug_printDB(self):
         global conn
+        s = ""
         try:
             cursor = conn.execute("SELECT * FROM cron")
             data=cursor.fetchall()
             for row in data:
                 if row != None:
                     print "CRON-DB-Row:", row
+                    s += str(row) + '\n'
         except Exception as err:
             print "Cron error:", err
+            s += str(err) + '\n'
             pass
+        return s
