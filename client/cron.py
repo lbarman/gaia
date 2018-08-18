@@ -3,6 +3,9 @@ from constants import *
 import sqlite3
 from dateutil import parser
 
+# a Cron task runs exactly once in [target-CRON_WINDOW_BEFORE_DEADLINE; target] if called during that time
+CRON_WINDOW_BEFORE_DEADLINE = 30
+
 # this is instantiated by the Cron task
 conn = None
 
@@ -112,8 +115,14 @@ class Cron:
 
     # we run 30min before the deadline
     # if true, run the action
+    # Statemachine:
+    #    IF: next target is closer than CRON_WINDOW_BEFORE_DEADLINE
+    #       IF: last_run is not within [next target - CRON_WINDOW_BEFORE_DEADLINE; now]
+    #           run, set last_run to target
+    #       ELSE: do nothing
+    #    ELSE: do nothing
     def shouldItRun(self, now):
-        global conn
+        global conn, CRON_WINDOW_BEFORE_DEADLINE
         nextOccurence = self.nextOccurence(now)
         lastRun = self.lastDayExecuted()
 
@@ -129,7 +138,7 @@ class Cron:
         #print "last Run and next occurence diff", diff, diff_minutes2
         
         # if: next execution is soon, CHECK: last execution must be a long time ago
-        if diff_minutes < 30 and diff_minutes2 >= 30:
+        if diff_minutes < CRON_WINDOW_BEFORE_DEADLINE and diff_minutes2 >= CRON_WINDOW_BEFORE_DEADLINE:
             conn.execute("UPDATE cron SET LASTRUN=(?) WHERE NAME=(?)", (nextOccurence, self.cronName,))
             conn.commit()
             return True
