@@ -96,8 +96,8 @@ class Cron:
 
         while nextOccurence<=now:
             nextOccurence = nextOccurence + timedelta(days=1)
-            while nextOccurence.weekday() not in self.days:
-                nextOccurence = nextOccurence + timedelta(days=1)
+        while nextOccurence.weekday() not in self.days:
+            nextOccurence = nextOccurence + timedelta(days=1)
 
         return nextOccurence
 
@@ -123,6 +123,7 @@ class Cron:
     #    ELSE: do nothing
     def shouldItRun(self, now):
         global conn, CRON_WINDOW_BEFORE_DEADLINE
+
         nextOccurence = self.nextOccurence(now)
         lastRun = self.lastDayExecuted()
 
@@ -133,7 +134,7 @@ class Cron:
         # difference in minutes between last run and when it should run
         diff = nextOccurence - lastRun
         diff_minutes2 = (diff.total_seconds() / 60)
-
+        
         #print "diff min", diff_minutes
         #print "last Run and next occurence diff", diff, diff_minutes2
         

@@ -127,6 +127,58 @@ class TestCron(unittest.TestCase):
 
         c.debug_truncateDB()
 
+    def test_cron_midnight(self):
+        print "Testing cron over midnight"
+        self.dbReset()
+
+        # all days
+        c = Cron("test", "13 1,4", sqliteMemoryMode=True)
+        self.assertEqual(c.lastDayExecuted(), c.time0)
+
+        # should run in two hours, not now
+        now = datetime.now().replace(year=2018,month=8,day=12,hour=22,minute=29, second=0, microsecond=0)
+        self.assertEqual(c.shouldItRun(now), False)
+        expected = datetime.now().replace(year=2018,month=8,day=14,hour=13,minute=00, second=0, microsecond=0)
+        self.assertEqual(c.nextOccurence(now), expected)
+
+        # 1 minute before midnight, nothing changed
+        now = datetime.now().replace(year=2018,month=8,day=12,hour=23,minute=59, second=0, microsecond=0)
+        self.assertEqual(c.shouldItRun(now), False)
+        expected = datetime.now().replace(year=2018,month=8,day=14,hour=13,minute=00, second=0, microsecond=0)
+        self.assertEqual(c.nextOccurence(now), expected)
+
+        # 1 minute after midnight, nothing changed
+        now = datetime.now().replace(year=2018,month=8,day=13,hour=00,minute=01, second=0, microsecond=0)
+        self.assertEqual(c.shouldItRun(now), False)
+        expected = datetime.now().replace(year=2018,month=8,day=14,hour=13,minute=00, second=0, microsecond=0)
+        self.assertEqual(c.nextOccurence(now), expected)
+
+        # 1 minute before the next midnight, nothing changed
+        now = datetime.now().replace(year=2018,month=8,day=13,hour=23,minute=59, second=0, microsecond=0)
+        self.assertEqual(c.shouldItRun(now), False)
+        expected = datetime.now().replace(year=2018,month=8,day=14,hour=13,minute=00, second=0, microsecond=0)
+        self.assertEqual(c.nextOccurence(now), expected)
+
+        # 1 minute after the next midnight, nothing changed
+        now = datetime.now().replace(year=2018,month=8,day=14,hour=0,minute=01, second=0, microsecond=0)
+        self.assertEqual(c.shouldItRun(now), False)
+        expected = datetime.now().replace(year=2018,month=8,day=14,hour=13,minute=00, second=0, microsecond=0)
+        self.assertEqual(c.nextOccurence(now), expected)
+
+        # 29 minutes before, should run exactly once
+        now = datetime.now().replace(year=2018,month=8,day=14,hour=12,minute=31, second=0, microsecond=0)
+        expected = datetime.now().replace(year=2018,month=8,day=14,hour=13,minute=00, second=0, microsecond=0)
+        self.assertEqual(c.nextOccurence(now), expected)
+        self.assertEqual(c.shouldItRun(now), True)
+        self.assertEqual(c.shouldItRun(now), False) #exactly once
+        self.assertEqual(c.lastDayExecuted(), expected)
+
+        # then, it should run in 1 day (Friday)
+        expected = datetime.now().replace(year=2018,month=8,day=17,hour=13,minute=00, second=0, microsecond=0)
+        self.assertEqual(c.nextOccurence(now), expected)
+
+        c.debug_truncateDB()
+
     def test_cron_run_customschedule(self):
         print "Testing cron schedule when run monday, wednesday, and sunday"
         self.dbReset()
