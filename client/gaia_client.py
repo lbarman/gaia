@@ -87,6 +87,7 @@ igorCron = Cron("igor", IGOR_CRON)
 plantsCron = Cron("plants", PLANTS_CRON)
 
 # main loop
+sleepCount = 0
 while True:
     now = datetime.datetime.now() 
     print "It is now", now
@@ -102,8 +103,10 @@ while True:
     elif plantsCron.shouldItRun(now):
         print "watering plants now"
         water(now)
-    else:
-        print "[gaia-client.py] waiting", WAITING_LOOP_SLEEP, "sec"
+    else if sleepCount >= GAIA_REPORT_EVERY_X_SLEEP:
+        sleepCount = 0
+
+        print "contacting Gaia now"
         answer = contactGaiaWebSite(now, getDataToUpload(now))
 
         if answer == "REBOOT" or answer == "RESTART":
@@ -119,6 +122,6 @@ while True:
             contactGaiaWebSite(now, "Gaia requested manual plant watering.")
             water(now)
 
-        time.sleep(WAITING_LOOP_SLEEP)
-
-    print "[gaia-client.py] looping"
+    #print "[gaia-client.py] waiting", WAITING_LOOP_SLEEP, "sec"
+    time.sleep(WAITING_LOOP_SLEEP)
+    sleepCount += 1
