@@ -88,6 +88,8 @@ if(isset($_POST) && isset($_POST['passphrase']) && isset($_POST['newCommand'])){
             $db->query($s);
         }
     }
+    header('Location: https://gaia.lbarman.ch');
+    exit();
 }
 
 // fetch potential command
