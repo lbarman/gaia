@@ -3,6 +3,9 @@
 install:
 	chmod u+x run.sh
 
+install-gpio-boot:
+	echo "gpio -g mode 2 out" > /etc/rc.local
+
 install-cron:
 	echo "* * * * * root /root/gaia/client/run.sh > /root/gaia/client/logs/cron.txt" > /etc/cron.d/gaia 
 

@@ -13,6 +13,10 @@ class GPIOControl:
         GPIO.setmode(GPIO.BCM)
         GPIO.setwarnings(False)
 
+        # turn on the "logic" led
+        GPIO.setup(GPIO_IGOR_LOGIC_LED, GPIO.OUT, initial=GPIO.HIGH)
+        GPIO.output(GPIO_IGOR_LOGIC_LED, GPIO.HIGH)
+
         # map the button
         GPIO.setup(GPIO_BUTTON, GPIO.IN, pull_up_down=GPIO.PUD_UP)  
         #GPIO.add_event_detect(GPIO_BUTTON, GPIO.FALLING, callback=self.__buttonPressedCallback, bouncetime=GPIO_BUTTON_DEBOUNCE_TIME)
@@ -132,6 +136,7 @@ def cleanup_gpios():
     GPIO.output(RELAY_GPIO_2, GPIO.HIGH)
     GPIO.output(RELAY_GPIO_3, GPIO.HIGH)
     GPIO.output(RELAY_GPIO_4, GPIO.HIGH)
+    GPIO.output(GPIO_IGOR_LOGIC_LED, GPIO.LOW)
     GPIO.cleanup()
 
 atexit.register(cleanup_gpios)
