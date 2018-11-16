@@ -70,10 +70,10 @@ Details:
 ```
 1. +3.3VDC
 2. +5VDC             <---- connect wire 2 white +5VDC
-35. GPIO BCM pin 19  <---- connect wire 3 grey       "Pump 1 control"
-36. GPIO BCM pin 16  <---- connect wire 4 purple     "Pump 2 control"
-37. GPIO BCM pin 26  <---- connect wire 5 blue       "Pump 3 control"
-38. GPIO BCM pin 20  <---- connect wire 6 green      "Pump 4 control"
+35. GPIO BCM pin 19  <---- connect wire 6 green      "Pump 1 control"
+36. GPIO BCM pin 16  <---- connect wire 3 grey       "Pump 2 control"
+37. GPIO BCM pin 26  <---- connect wire 4 purple     "Pump 3 control"
+38. GPIO BCM pin 20  <---- connect wire 5 blue       "Pump 4 control"
 39. GND              <---- connect wire 1 black GND
 40. GPIO BCM pin 21  <---- connect wire 7 yellow/red "LED control"
 ```

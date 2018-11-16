@@ -9,13 +9,18 @@ class GPIOControl:
     pwm = None
     buttonCallback = None
 
+    igorLedState = False
+    waterLedState = False
+
     def __init__(self):
         GPIO.setmode(GPIO.BCM)
         GPIO.setwarnings(False)
 
-        # turn on the "logic" led
-        GPIO.setup(GPIO_IGOR_LOGIC_LED, GPIO.OUT, initial=GPIO.HIGH)
-        GPIO.output(GPIO_IGOR_LOGIC_LED, GPIO.HIGH)
+        # turn off the "logic" leds
+        GPIO.setup(GPIO_IGOR_LOGIC_LED, GPIO.OUT, initial=GPIO.LOW)
+        GPIO.setup(GPIO_WATER_LOGIC_LED, GPIO.OUT, initial=GPIO.LOW)
+        GPIO.output(GPIO_IGOR_LOGIC_LED, GPIO.LOW)
+        GPIO.output(GPIO_WATER_LOGIC_LED, GPIO.LOW)
 
         # map the button
         GPIO.setup(GPIO_BUTTON, GPIO.IN, pull_up_down=GPIO.PUD_UP)  
@@ -129,6 +134,22 @@ class GPIOControl:
         self.__waterPlantInnerLoop(4, RELAY_GPIO_4, WATER_PLANT_FILL_PIPES_DURATION)
         print "Done."
 
+    def toggleIgorFeedLed(self):
+        if self.igorLedState:
+            self.igorLedState = False
+            GPIO.output(GPIO_IGOR_LOGIC_LED, GPIO.LOW)
+        else:
+            self.igorLedState = True
+            GPIO.output(GPIO_IGOR_LOGIC_LED, GPIO.HIGH)
+
+    def toggleWaterLed(self):
+        if self.waterLedState:
+            self.waterLedState = False
+            GPIO.output(GPIO_WATER_LOGIC_LED, GPIO.LOW)
+        else:
+            self.waterLedState = True
+            GPIO.output(GPIO_WATER_LOGIC_LED, GPIO.HIGH)
+
 
 def cleanup_gpios():
     print "Application ending, cleaning up GPIOs"
@@ -137,6 +158,7 @@ def cleanup_gpios():
     GPIO.output(RELAY_GPIO_3, GPIO.HIGH)
     GPIO.output(RELAY_GPIO_4, GPIO.HIGH)
     GPIO.output(GPIO_IGOR_LOGIC_LED, GPIO.LOW)
+    GPIO.output(GPIO_WATER_LOGIC_LED, GPIO.LOW)
     GPIO.cleanup()
 
 atexit.register(cleanup_gpios)

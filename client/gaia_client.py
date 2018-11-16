@@ -89,6 +89,10 @@ plantsCron = Cron("plants", PLANTS_CRON)
 # main loop
 sleepCount = 0
 while True:
+    # toggle Logic LEDS
+    gpio.toggleIgorFeedLed()
+    gpio.toggleWaterLed()
+
     now = datetime.datetime.now() 
     print "It is now", now
 
@@ -103,7 +107,7 @@ while True:
     elif plantsCron.shouldItRun(now):
         print "watering plants now"
         water(now)
-    else if sleepCount >= GAIA_REPORT_EVERY_X_SLEEP:
+    elif sleepCount >= GAIA_REPORT_EVERY_X_SLEEP:
         sleepCount = 0
 
         print "contacting Gaia now"
