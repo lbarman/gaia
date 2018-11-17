@@ -1,6 +1,10 @@
 syntax = "proto3";
 package gaia;
 
+service GaiaService {
+  rpc Ping(Status) returns (Response) {}
+}
+
 message Config {
   bool feeding_module_activated = 1;
   bool watering_module_activated = 2;
@@ -24,4 +28,14 @@ message Status {
   string local_timestamp = 2;
   Config current_config = 3;
   SystemStatus system_status = 4;
+}
+
+message Response {
+  enum Action {
+    DO_NOTHING = 0;
+    REBOOT = 1;
+    SHUTDOWN = 2;
+  }
+  Action action = 1;
+  Config config = 2;
 }
