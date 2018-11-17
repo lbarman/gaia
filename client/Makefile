@@ -1,6 +1,11 @@
-.PHONY: install install-cron uninstall-cron get-external-ip run test is-running kill autosync manual-feed manual-water water-fill-pipes cron-print cron-erase
+.PHONY: install run install-cron uninstall-cron get-external-ip run test is-running kill autosync manual-feed manual-water water-fill-pipes cron-print cron-erase
 
 install:
+	pip install google --user
+	pip install google-cloud --user
+	pip install google-cloud-vision --user
+
+run:
 	chmod u+x run.sh
 
 install-gpio-boot:
