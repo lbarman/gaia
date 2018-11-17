@@ -1,4 +1,4 @@
-syntax = "proto3";
+syntax = "proto2";
 package gaia;
 
 service GaiaService {
@@ -6,28 +6,28 @@ service GaiaService {
 }
 
 message Config {
-  bool feeding_module_activated = 1;
-  bool watering_module_activated = 2;
-  string feeding_module_cronstring = 3;
-  string watering_module_cronstring = 4;
-  int32 watering_pump_1_duration = 5;
-  int32 watering_pump_2_duration = 6;
-  int32 watering_pump_3_duration = 7;
-  int32 watering_pump_4_duration = 8;
+  required bool feeding_module_activated = 1;
+  required bool watering_module_activated = 2;
+  required string feeding_module_cronstring = 3;
+  required string watering_module_cronstring = 4;
+  required int32 watering_pump_1_duration = 5;
+  required int32 watering_pump_2_duration = 6;
+  required int32 watering_pump_3_duration = 7;
+  required int32 watering_pump_4_duration = 8;
 }
 
 message SystemStatus {
-  string uptime = 1;
-  string memory = 2;
-  string disk_usage = 3;
-  string processes = 4;
+  required string uptime = 1;
+  required string memory = 2;
+  required string disk_usage = 3;
+  required string processes = 4;
 }
 
 message Status {
-  string authentication_token = 1;
-  string local_timestamp = 2;
-  Config current_config = 3;
-  SystemStatus system_status = 4;
+  required string authentication_token = 1;
+  required string local_timestamp = 2;
+  required Config current_config = 3;
+  required SystemStatus system_status = 4;
 }
 
 message Response {
@@ -36,6 +36,6 @@ message Response {
     REBOOT = 1;
     SHUTDOWN = 2;
   }
-  Action action = 1;
-  Config config = 2;
+  required Action action = 1;
+  optional Config config = 2;
 }

@@ -17,9 +17,9 @@ _sym_db = _symbol_database.Default()
 DESCRIPTOR = _descriptor.FileDescriptor(
   name='protobufs.proto',
   package='gaia',
-  syntax='proto3',
+  syntax='proto2',
   serialized_options=None,
-  serialized_pb=_b('\n\x0fprotobufs.proto\x12\x04gaia\"\x9c\x02\n\x06\x43onfig\x12 \n\x18\x66\x65\x65\x64ing_module_activated\x18\x01 \x01(\x08\x12!\n\x19watering_module_activated\x18\x02 \x01(\x08\x12!\n\x19\x66\x65\x65\x64ing_module_cronstring\x18\x03 \x01(\t\x12\"\n\x1awatering_module_cronstring\x18\x04 \x01(\t\x12 \n\x18watering_pump_1_duration\x18\x05 \x01(\x05\x12 \n\x18watering_pump_2_duration\x18\x06 \x01(\x05\x12 \n\x18watering_pump_3_duration\x18\x07 \x01(\x05\x12 \n\x18watering_pump_4_duration\x18\x08 \x01(\x05\"U\n\x0cSystemStatus\x12\x0e\n\x06uptime\x18\x01 \x01(\t\x12\x0e\n\x06memory\x18\x02 \x01(\t\x12\x12\n\ndisk_usage\x18\x03 \x01(\t\x12\x11\n\tprocesses\x18\x04 \x01(\t\"\x90\x01\n\x06Status\x12\x1c\n\x14\x61uthentication_token\x18\x01 \x01(\t\x12\x17\n\x0flocal_timestamp\x18\x02 \x01(\t\x12$\n\x0e\x63urrent_config\x18\x03 \x01(\x0b\x32\x0c.gaia.Config\x12)\n\rsystem_status\x18\x04 \x01(\x0b\x32\x12.gaia.SystemStatus\"\x83\x01\n\x08Response\x12%\n\x06\x61\x63tion\x18\x01 \x01(\x0e\x32\x15.gaia.Response.Action\x12\x1c\n\x06\x63onfig\x18\x02 \x01(\x0b\x32\x0c.gaia.Config\"2\n\x06\x41\x63tion\x12\x0e\n\nDO_NOTHING\x10\x00\x12\n\n\x06REBOOT\x10\x01\x12\x0c\n\x08SHUTDOWN\x10\x02\x32\x35\n\x0bGaiaService\x12&\n\x04Ping\x12\x0c.gaia.Status\x1a\x0e.gaia.Response\"\x00\x62\x06proto3')
+  serialized_pb=_b('\n\x0fprotobufs.proto\x12\x04gaia\"\x9c\x02\n\x06\x43onfig\x12 \n\x18\x66\x65\x65\x64ing_module_activated\x18\x01 \x02(\x08\x12!\n\x19watering_module_activated\x18\x02 \x02(\x08\x12!\n\x19\x66\x65\x65\x64ing_module_cronstring\x18\x03 \x02(\t\x12\"\n\x1awatering_module_cronstring\x18\x04 \x02(\t\x12 \n\x18watering_pump_1_duration\x18\x05 \x02(\x05\x12 \n\x18watering_pump_2_duration\x18\x06 \x02(\x05\x12 \n\x18watering_pump_3_duration\x18\x07 \x02(\x05\x12 \n\x18watering_pump_4_duration\x18\x08 \x02(\x05\"U\n\x0cSystemStatus\x12\x0e\n\x06uptime\x18\x01 \x02(\t\x12\x0e\n\x06memory\x18\x02 \x02(\t\x12\x12\n\ndisk_usage\x18\x03 \x02(\t\x12\x11\n\tprocesses\x18\x04 \x02(\t\"\x90\x01\n\x06Status\x12\x1c\n\x14\x61uthentication_token\x18\x01 \x02(\t\x12\x17\n\x0flocal_timestamp\x18\x02 \x02(\t\x12$\n\x0e\x63urrent_config\x18\x03 \x02(\x0b\x32\x0c.gaia.Config\x12)\n\rsystem_status\x18\x04 \x02(\x0b\x32\x12.gaia.SystemStatus\"\x83\x01\n\x08Response\x12%\n\x06\x61\x63tion\x18\x01 \x02(\x0e\x32\x15.gaia.Response.Action\x12\x1c\n\x06\x63onfig\x18\x02 \x01(\x0b\x32\x0c.gaia.Config\"2\n\x06\x41\x63tion\x12\x0e\n\nDO_NOTHING\x10\x00\x12\n\n\x06REBOOT\x10\x01\x12\x0c\n\x08SHUTDOWN\x10\x02\x32\x35\n\x0bGaiaService\x12&\n\x04Ping\x12\x0c.gaia.Status\x1a\x0e.gaia.Response\"\x00')
 )
 
 
@@ -60,56 +60,56 @@ _CONFIG = _descriptor.Descriptor(
   fields=[
     _descriptor.FieldDescriptor(
       name='feeding_module_activated', full_name='gaia.Config.feeding_module_activated', index=0,
-      number=1, type=8, cpp_type=7, label=1,
+      number=1, type=8, cpp_type=7, label=2,
       has_default_value=False, default_value=False,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
       name='watering_module_activated', full_name='gaia.Config.watering_module_activated', index=1,
-      number=2, type=8, cpp_type=7, label=1,
+      number=2, type=8, cpp_type=7, label=2,
       has_default_value=False, default_value=False,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
       name='feeding_module_cronstring', full_name='gaia.Config.feeding_module_cronstring', index=2,
-      number=3, type=9, cpp_type=9, label=1,
+      number=3, type=9, cpp_type=9, label=2,
       has_default_value=False, default_value=_b("").decode('utf-8'),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
       name='watering_module_cronstring', full_name='gaia.Config.watering_module_cronstring', index=3,
-      number=4, type=9, cpp_type=9, label=1,
+      number=4, type=9, cpp_type=9, label=2,
       has_default_value=False, default_value=_b("").decode('utf-8'),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
       name='watering_pump_1_duration', full_name='gaia.Config.watering_pump_1_duration', index=4,
-      number=5, type=5, cpp_type=1, label=1,
+      number=5, type=5, cpp_type=1, label=2,
       has_default_value=False, default_value=0,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
       name='watering_pump_2_duration', full_name='gaia.Config.watering_pump_2_duration', index=5,
-      number=6, type=5, cpp_type=1, label=1,
+      number=6, type=5, cpp_type=1, label=2,
       has_default_value=False, default_value=0,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
       name='watering_pump_3_duration', full_name='gaia.Config.watering_pump_3_duration', index=6,
-      number=7, type=5, cpp_type=1, label=1,
+      number=7, type=5, cpp_type=1, label=2,
       has_default_value=False, default_value=0,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
       name='watering_pump_4_duration', full_name='gaia.Config.watering_pump_4_duration', index=7,
-      number=8, type=5, cpp_type=1, label=1,
+      number=8, type=5, cpp_type=1, label=2,
       has_default_value=False, default_value=0,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
@@ -122,7 +122,7 @@ _CONFIG = _descriptor.Descriptor(
   ],
   serialized_options=None,
   is_extendable=False,
-  syntax='proto3',
+  syntax='proto2',
   extension_ranges=[],
   oneofs=[
   ],
@@ -140,28 +140,28 @@ _SYSTEMSTATUS = _descriptor.Descriptor(
   fields=[
     _descriptor.FieldDescriptor(
       name='uptime', full_name='gaia.SystemStatus.uptime', index=0,
-      number=1, type=9, cpp_type=9, label=1,
+      number=1, type=9, cpp_type=9, label=2,
       has_default_value=False, default_value=_b("").decode('utf-8'),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
       name='memory', full_name='gaia.SystemStatus.memory', index=1,
-      number=2, type=9, cpp_type=9, label=1,
+      number=2, type=9, cpp_type=9, label=2,
       has_default_value=False, default_value=_b("").decode('utf-8'),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
       name='disk_usage', full_name='gaia.SystemStatus.disk_usage', index=2,
-      number=3, type=9, cpp_type=9, label=1,
+      number=3, type=9, cpp_type=9, label=2,
       has_default_value=False, default_value=_b("").decode('utf-8'),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
       name='processes', full_name='gaia.SystemStatus.processes', index=3,
-      number=4, type=9, cpp_type=9, label=1,
+      number=4, type=9, cpp_type=9, label=2,
       has_default_value=False, default_value=_b("").decode('utf-8'),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
@@ -174,7 +174,7 @@ _SYSTEMSTATUS = _descriptor.Descriptor(
   ],
   serialized_options=None,
   is_extendable=False,
-  syntax='proto3',
+  syntax='proto2',
   extension_ranges=[],
   oneofs=[
   ],
@@ -192,28 +192,28 @@ _STATUS = _descriptor.Descriptor(
   fields=[
     _descriptor.FieldDescriptor(
       name='authentication_token', full_name='gaia.Status.authentication_token', index=0,
-      number=1, type=9, cpp_type=9, label=1,
+      number=1, type=9, cpp_type=9, label=2,
       has_default_value=False, default_value=_b("").decode('utf-8'),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
       name='local_timestamp', full_name='gaia.Status.local_timestamp', index=1,
-      number=2, type=9, cpp_type=9, label=1,
+      number=2, type=9, cpp_type=9, label=2,
       has_default_value=False, default_value=_b("").decode('utf-8'),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
       name='current_config', full_name='gaia.Status.current_config', index=2,
-      number=3, type=11, cpp_type=10, label=1,
+      number=3, type=11, cpp_type=10, label=2,
       has_default_value=False, default_value=None,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
       name='system_status', full_name='gaia.Status.system_status', index=3,
-      number=4, type=11, cpp_type=10, label=1,
+      number=4, type=11, cpp_type=10, label=2,
       has_default_value=False, default_value=None,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
@@ -226,7 +226,7 @@ _STATUS = _descriptor.Descriptor(
   ],
   serialized_options=None,
   is_extendable=False,
-  syntax='proto3',
+  syntax='proto2',
   extension_ranges=[],
   oneofs=[
   ],
@@ -244,7 +244,7 @@ _RESPONSE = _descriptor.Descriptor(
   fields=[
     _descriptor.FieldDescriptor(
       name='action', full_name='gaia.Response.action', index=0,
-      number=1, type=14, cpp_type=8, label=1,
+      number=1, type=14, cpp_type=8, label=2,
       has_default_value=False, default_value=0,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
@@ -265,7 +265,7 @@ _RESPONSE = _descriptor.Descriptor(
   ],
   serialized_options=None,
   is_extendable=False,
-  syntax='proto3',
+  syntax='proto2',
   extension_ranges=[],
   oneofs=[
   ],

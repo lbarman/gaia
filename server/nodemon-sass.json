@@ -1,6 +1,0 @@
-{
-    "watch": ["src/public/css"],
-    "ext": "scss",
-    "exec": "make rebuild-sass"
-  }
-  
