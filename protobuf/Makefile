@@ -4,12 +4,6 @@ PROTO_FILE=protobufs.proto
 PYTHON_TARGET=protobufs_pb2.py
 TEST_TARGET=protobuf_message_binary
 
-node_modules/.installed:
-	npm install
-	touch node_modules/.installed
-
-install: node_modules/.installed
-
 $(PYTHON_TARGET): $(PROTO_FILE)
 	# requires `pip install grpcio-tools --user`
 	python3 -m grpc_tools.protoc -I=. --python_out=. --grpc_python_out=. protobufs.proto
@@ -19,8 +13,6 @@ all: clean $(PYTHON_TARGET)
 clean:
 	rm -f $(PYTHON_TARGET)
 	rm -f $(TEST_TARGET)
-
-cleanall:
 	rm -rf __pycache__
 
 test:
