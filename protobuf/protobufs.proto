@@ -1,0 +1,27 @@
+syntax = "proto3";
+package gaia;
+
+message Config {
+  bool feeding_module_activated = 1;
+  bool watering_module_activated = 2;
+  string feeding_module_cronstring = 3;
+  string watering_module_cronstring = 4;
+  int32 watering_pump_1_duration = 5;
+  int32 watering_pump_2_duration = 6;
+  int32 watering_pump_3_duration = 7;
+  int32 watering_pump_4_duration = 8;
+}
+
+message SystemStatus {
+  string uptime = 1;
+  string memory = 2;
+  string disk_usage = 3;
+  string processes = 4;
+}
+
+message Status {
+  string authentication_token = 1;
+  string local_timestamp = 2;
+  Config current_config = 3;
+  SystemStatus system_status = 4;
+}
