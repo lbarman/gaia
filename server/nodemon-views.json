@@ -1,0 +1,7 @@
+{
+    "watch": ["src/view"],
+    "ext": "html",
+    "ignore": ["src/view/**/*.ts", "src/view/**/*.map"],
+    "exec": "make rebuild-views"
+  }
+  
