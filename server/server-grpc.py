@@ -9,6 +9,7 @@ import protobufs_pb2
 import protobufs_pb2_grpc
 
 from constants import *
+from database import *
 
 # our gRPC
 class GaiaServiceServicer(protobufs_pb2_grpc.GaiaServiceServicer):
@@ -28,19 +29,6 @@ class GaiaServiceServicer(protobufs_pb2_grpc.GaiaServiceServicer):
         print("Answering with", answer, protobufs_pb2.Response.REBOOT)
         return answer
 
-
-def serve():
-    server = grpc.server(futures.ThreadPoolExecutor(max_workers=2))
-    protobufs_pb2_grpc.add_GaiaServiceServicer_to_server(GaiaServiceServicer(), server)
-    server.add_insecure_port('[::]:50051')
-    server.start()
-    try:
-        while True:
-            print("OK, sleeping...")
-            time.sleep(60 * 60 * 24)
-    except KeyboardInterrupt:
-        server.stop(0)
-
 def startGRPCServer():
     server = grpc.server(futures.ThreadPoolExecutor(max_workers=GRPC_MAX_WORKERS))
     protobufs_pb2_grpc.add_GaiaServiceServicer_to_server(GaiaServiceServicer(), server)
@@ -52,7 +40,7 @@ if __name__ == '__main__':
     gprcServer = startGRPCServer()
     try:
         while True:
-            startWebServer() # blocking
+            sleep(99999999999999999)
     except KeyboardInterrupt:
         print("Quitting")
         gprcServer.stop(0)

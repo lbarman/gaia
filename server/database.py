@@ -8,8 +8,11 @@ class Database:
     db = None
     cursor = None
 
-    def __init__(self):
-        self.db = sqlite3.connect(SQLITE_DATABASE_PATH, detect_types=sqlite3.PARSE_DECLTYPES|sqlite3.PARSE_COLNAMES)
+    def __init__(self, inMemory=False, databasePath=SQLITE_DATABASE_PATH):
+        if inMemory:
+            databasePath = ":memory:"
+
+        self.db = sqlite3.connect(databasePath)
         self.cursor = self.db.cursor()
         self.cursor.execute('PRAGMA foreign_keys=ON;')
 
@@ -58,6 +61,10 @@ class Database:
         ''')
         self.db.commit()
 
+    def deleteAllCommands(self):
+        self.cursor.execute('''DELETE FROM commands''')
+        self.db.commit()
+
     def saveCommand(self, text, config=None):
         self.cursor.execute('''DELETE FROM commands''')
         self.cursor.execute('''INSERT INTO commands(text) VALUES (?)''', (text,))
@@ -88,20 +95,54 @@ class Database:
         self.db.commit()
 
     def getCommand(self):
-        self.cursor.execute('''SELECT id, server_timestamp, text FROM commands ORDER BY id DESC''')
+        self.cursor.execute('''SELECT 
+            commands.id,
+            commands.server_timestamp,
+            commands.text,
+            configs.feeding_module_activated,
+            configs.watering_module_activated,
+            configs.feeding_module_cronstring,
+            configs.watering_module_cronstring,
+            configs.watering_pump_1_duration,
+            configs.watering_pump_2_duration,
+            configs.watering_pump_3_duration,
+            configs.watering_pump_4_duration
+            FROM commands 
+            LEFT JOIN configs ON commands.id == configs.command_id
+            ORDER BY commands.id DESC''')
+
         answer = {}
         row = self.cursor.fetchone()
+
+        if row == None:
+            return None
+
         answer['id'] = row[0]
         answer['server_timestamp'] = datetime.strptime(row[1], "%Y-%m-%d %H:%M:%S")
         answer['text'] = row[2]
+        config = None
+
+        if row[3] != None and row[4] != None:
+            config = {}
+            config['feeding_module_activated'] = row[3]
+            config['watering_module_activated'] = row[4]
+            config['feeding_module_cronstring'] = row[5]
+            config['watering_module_cronstring'] = row[6]
+            config['watering_pump_1_duration'] = row[7]
+            config['watering_pump_2_duration'] = row[8]
+            config['watering_pump_3_duration'] = row[9]
+            config['watering_pump_4_duration'] = row[10]
+
+        answer['config'] = config
+
         return answer
 
-    def saveStatus(self, protobufStatus):
+    def saveStatus(self, protobufStatus, numberOfDaysToKeepStatus=NUMBER_OF_DAYS_TO_KEEP_STATUS):
         
         # delete things older than 1 week ago
-        oneWeekAgo = datetime.today() - timedelta(days=NUMBER_OF_DAYS_TO_KEEP_STATUS)
+        oneWeekAgo = datetime.today() - timedelta(days=numberOfDaysToKeepStatus)
         oneWeekAgoStr = oneWeekAgo.strftime("%Y-%m-%d %H:%M:%S")
-        self.cursor.execute('''DELETE FROM status WHERE (?)''', (oneWeekAgoStr,))
+        self.cursor.execute('''DELETE FROM status WHERE server_timestamp < (?)''', (oneWeekAgoStr,))
 
         # insert new
         self.cursor.execute('''INSERT INTO status(local_timestamp) VALUES (?)''',
@@ -181,7 +222,7 @@ class Database:
             typedRow['uptime'] = row[10]
             typedRow['memory'] = row[11]
             typedRow['disk_usage'] = row[12]
-            typedRow['processes'] = row[12]
+            typedRow['processes'] = row[13]
             answer.append(typedRow)
 
         return answer

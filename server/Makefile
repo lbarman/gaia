@@ -10,3 +10,6 @@ protobufs_pb2_grpc.py: import-protobuf
 
 serve: protobufs_pb2.py protobufs_pb2_grpc.py
 	python3 server-grpc.py
+
+test: protobufs_pb2.py protobufs_pb2_grpc.py
+	python3 database_test.py
