@@ -1,31 +1,17 @@
-# Copyright 2015 gRPC authors.
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#     http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
-"""The Python implementation of the gRPC route guide server."""
-
 from concurrent import futures
 import time
 import math
 
 import grpc
+import sqlite3
 
 import protobufs_pb2
 import protobufs_pb2_grpc
-from flask import Flask
 
+from constants import *
+
+# our gRPC
 class GaiaServiceServicer(protobufs_pb2_grpc.GaiaServiceServicer):
-    """Provides methods that implement functionality of route guide server."""
-
     def Ping(self, request, context):
         print("Got query", request, context)
         answer = protobufs_pb2.Response()
@@ -55,21 +41,18 @@ def serve():
     except KeyboardInterrupt:
         server.stop(0)
 
-
-app = Flask(__name__)
-
-@app.route('/')
-def hello():
-    return "Hello World!"
+def startGRPCServer():
+    server = grpc.server(futures.ThreadPoolExecutor(max_workers=GRPC_MAX_WORKERS))
+    protobufs_pb2_grpc.add_GaiaServiceServicer_to_server(GaiaServiceServicer(), server)
+    server.add_insecure_port('[::]:' + str(GRPC_SERVER_PORT))
+    server.start()
+    return server
 
 if __name__ == '__main__':
-    server = grpc.server(futures.ThreadPoolExecutor(max_workers=2))
-    protobufs_pb2_grpc.add_GaiaServiceServicer_to_server(GaiaServiceServicer(), server)
-    server.add_insecure_port('[::]:50051')
-    server.start()
+    gprcServer = startGRPCServer()
     try:
         while True:
-            print("OK, now starting flask...")
-            app.run()
+            startWebServer() # blocking
     except KeyboardInterrupt:
-        server.stop(0)
+        print("Quitting")
+        gprcServer.stop(0)
