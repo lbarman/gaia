@@ -7,11 +7,12 @@ import sqlite3
 
 import protobufs_pb2
 import protobufs_pb2_grpc
-
+from server_grpc_test import DummyServiceServicer
 from constants import *
 from database import *
 
-# our gRPC
+_ONE_DAY_IN_SECONDS = 60 * 60 * 24
+
 class GaiaServiceServicer(protobufs_pb2_grpc.GaiaServiceServicer):
     def Ping(self, request, context):
         print("Got query", request, context)
@@ -29,9 +30,14 @@ class GaiaServiceServicer(protobufs_pb2_grpc.GaiaServiceServicer):
         print("Answering with", answer, protobufs_pb2.Response.REBOOT)
         return answer
 
-def startGRPCServer():
+def startGRPCServer(dummyServer=False):
     server = grpc.server(futures.ThreadPoolExecutor(max_workers=GRPC_MAX_WORKERS))
-    protobufs_pb2_grpc.add_GaiaServiceServicer_to_server(GaiaServiceServicer(), server)
+
+    servicer = GaiaServiceServicer()
+    if dummyServer:
+        servicer = DummyServiceServicer()
+
+    protobufs_pb2_grpc.add_GaiaServiceServicer_to_server(servicer, server)
     server.add_insecure_port('[::]:' + str(GRPC_SERVER_PORT))
     server.start()
     return server
@@ -40,7 +46,7 @@ if __name__ == '__main__':
     gprcServer = startGRPCServer()
     try:
         while True:
-            sleep(99999999999999999)
+            sleep(_ONE_DAY_IN_SECONDS)
     except KeyboardInterrupt:
         print("Quitting")
         gprcServer.stop(0)
