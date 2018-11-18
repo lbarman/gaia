@@ -14,6 +14,10 @@ from database import *
 _ONE_DAY_IN_SECONDS = 60 * 60 * 24
 
 class GaiaServiceServicer(protobufs_pb2_grpc.GaiaServiceServicer):
+
+    def __init__(self):
+        self.db = 
+
     def Ping(self, request, context):
         print("Got query", request, context)
         answer = protobufs_pb2.Response()
