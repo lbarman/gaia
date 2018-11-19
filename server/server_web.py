@@ -1,36 +1,31 @@
-from concurrent import futures
-import time
-import math
+from flask import Flask, Response, send_from_directory
+from constants import WEB_SERVER_PORT, TEMPLATE_FILE
 
-import grpc
-
-from flask import Flask
-
-from constants import *
+webserver = Flask(__name__, static_url_path='')
 
 
-webserver = Flask("GaiaWebServer")
+@webserver.route('/public/<path:filename>')
+def assets(filename):
+    return send_from_directory('public', filename)
+
 
 @webserver.route('/')
-def hello():
-    return "Hello World!"
+def main():
 
-def startGRPCServer():
-    server = grpc.server(futures.ThreadPoolExecutor(max_workers=GRPC_MAX_WORKERS))
-    protobufs_pb2_grpc.add_GaiaServiceServicer_to_server(GaiaServiceServicer(), server)
-    server.add_insecure_port('[::]:' + str(GRPC_SERVER_PORT))
-    server.start()
-    return server
+    template_source = ''
+    with open(TEMPLATE_FILE, 'r') as file:
+        template_source = file.read()
 
-def startWebServer():
+    return Response(template_source, 200)
+
+
+def start_web_server():
     global webserver
     webserver.run(host='127.0.0.1', port=WEB_SERVER_PORT)
 
+
 if __name__ == '__main__':
-    gprcServer = startGRPCServer()
     try:
-        while True:
-            startWebServer() # blocking
+        start_web_server()  # blocking
     except KeyboardInterrupt:
         print("Quitting")
-        gprcServer.stop(0)

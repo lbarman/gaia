@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <title>Gaia</title>
+        <link rel="stylesheet" type="text/css" href="public/css/sakura.css">
+        <link rel="stylesheet" type="text/css" href="public/css/gaia.css">
+        <script src="public/js/jquery-3.3.1.min.js"></script>
+        <script src="public/js/Chart-2.7.2.min.js"></script>
+        <link rel="icon" type="image/png" sizes="32x32" href="public/img/favicon-32x32.png">
+        <link rel="icon" type="image/png" sizes="96x96" href="public/img/favicon-96x96.png">
+        <link rel="icon" type="image/png" sizes="16x16" href="public/img/favicon-16x16.png">
+        <style>
+
+    </style>
+    </head>
+    <body>
+        <img id="logo" src="public/img/gaia.jpg" alt="logo" width="100" height="97" />
+        <h1>Gaia</h1>
+        <div>
+            <p>Connectivity: Ping={{TEST_PORT_SSH}} Video={{TEST_PORT_VIDEO}}</p>
+            <p><a href="#" onclick="loadFeed()">Load live feed</a></p>
+            <div id="live_feed"></div>
+
+            <h3>Graph</h3>
+            <div id="canvas-holder1" style="width:100%;">
+                <canvas id="chart1"></canvas>
+            </div>
+
+        </div>
+        <div>
+            <h3>Commands</h3>
+            <pre>{{NEXT_COMMAND}}</pre>
+            <form method="post">
+                <p>Add new command:</p>
+                <input id="newCommand"  name="newCommand" placeholder="COMMAND" type="text" />
+                <input id="passphrase"  name="passphrase" placeholder="Passphrase" type="password" />
+                <input type="submit"/>
+            </form>
+        </div>
+        <div>
+            <h3>Data</h3>
+            {{DATA}}
+        </div>
+
+    <script>
+
+        function loadFeed(){
+            const videoStream = '<img src="http://lbarman.ch:11735/" alt="http://lbarman.ch:11735/" class="shrinkToFit" width="632" height="474">'
+            $('#live_feed').html(videoStream);
+            return false;
+        }
+    </script>
+    </body>
+</html>
