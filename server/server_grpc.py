@@ -53,6 +53,8 @@ class GaiaServiceServicer(protobufs_pb2_grpc.GaiaServiceServicer):
                 response.config.watering_pump_3_duration = command['config']['watering_pump_3_duration']
                 response.config.watering_pump_4_duration = command['config']['watering_pump_4_duration']
 
+        db.delete_all_commands()
+
         if self.verbose:
             print("Answering with", response)
 

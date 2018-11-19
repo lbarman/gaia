@@ -42,4 +42,151 @@ h1 {
 }
 body {
     background-color: white;
+    max-width: 50em;
+}
+
+.portStatus {
+    font-weight: bold;
+}
+
+.portClosed {
+    color: rgb(255, 99, 132)
+}
+
+.portOpen {
+    color: rgb(75, 192, 192)
+}
+
+#glasscontainer {
+    height: 110px;
+    overflow: hidden;
+}
+.glass {
+    margin: 0px auto;
+    height: 100px;
+    width: 50px;
+    display:inline-block;
+    position: relative;
+    border: 10px solid lightgray;
+    border-top-style: none;
+    border-radius: 10px;
+}
+
+.water {
+    width: 100%;
+    height: 10%;
+    background-color: skyblue;
+    position: absolute;
+    bottom: 0;
+}
+
+.glass span {
+    position: relative;
+    top: 20px;
+    left: 1px;
+    display: block;
+    text-align: center;
+    width: 48px;
+    font-weight: bold;
+    z-index: 100;
+    float: left;
+}
+
+.module {
+    display: inline-block;
+    height: 120px;
+    vertical-align:top;
+}
+
+.module .label {
+    margin-top: 5px;
+    font-weight: bold;
+}
+
+#feeder-module .label {
+    color: #eb8787;
+}
+
+#water-module .label {
+    color: skyblue;
+}
+
+.foodbox {
+    height: 110px;
+    width: 60px;
+    display: inline-block;
+    border-radius: 10px;
+    border: 10px solid lightgray;
+    border-top: none;
+    border-bottom: none;
+}
+
+
+.foodpill {
+    width: 20px;
+    height: 20px;
+    display: inline-block;
+    background-color: #eb8787;
+    border-radius: 10px;
+    position: relative;
+    top: 0px;
+    left: 0px;
+}
+
+.disabled .foodpill,
+.disabled .water {
+    background-color: #e6e6e6 !important;
+}
+
+.disabled .label {
+    color: #aeaeae !important;
+}
+
+#weekdays-module {
+    margin-left: 30px;
+}
+
+#weekdays-module table {
+    border-collapse: separate;
+    display: inline;
+    vertical-align: top;
+}
+
+#weekdays-module table,
+#weekdays-module tr,
+#weekdays-module td {
+    margin: 0px;
+    padding: 0px;
+}
+
+#weekdays-module td {
+    border-radius: 10px;
+    padding: 10px;
+    background: #f1f1f1;
+}
+
+#weekdays-feeder .weekday_on {
+    background-color: #eb8787;
+}
+
+#weekdays-water .weekday_on {
+    background-color: skyblue;
+}
+
+#weekdays-module .hour {
+    display: inline-block;
+    border-radius: 10px;
+    padding: 10px;
+    background: #f1f1f1;
+    vertical-align: top;
+}
+
+#weekdays-module span {
+    display: inline-block;
+    vertical-align: top;
+    margin-top: 10px;
+}
+
+.disabled.weekday_on {
+    background: #f1f1f1 !important;
 }

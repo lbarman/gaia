@@ -13,7 +13,10 @@ protobufs_pb2_grpc.py: import-protobuf
 serve-grpc: protobufs_pb2.py protobufs_pb2_grpc.py
 	python3 server-grpc.py
 
-serve-web:
+db.sqlite:
+	python3 -c "from database import *; Database().recreate_database()"
+
+serve-web: db.sqlite
 	gunicorn -w 4 -b 127.0.0.1:$(shell cat constants.py | grep WEB_SERVER_PORT | cut -d "=" -f 2 | xargs) server_web:webserver
 
 test: protobufs_pb2.py protobufs_pb2_grpc.py
