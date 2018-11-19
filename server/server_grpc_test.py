@@ -31,6 +31,7 @@ def dummy_status_message():
 
 
 class DummyServiceServicer(protobufs_pb2_grpc.GaiaServiceServicer):
+
     def Ping(self, request, context):
         answer = protobufs_pb2.Response()
         answer.action = protobufs_pb2.Response.DO_NOTHING
@@ -48,9 +49,9 @@ class DummyServiceServicer(protobufs_pb2_grpc.GaiaServiceServicer):
 
 class GRPCServerTest(unittest.TestCase):
 
-    def test_basic(self):
+    def test_dummy(self):
 
-        server = start_grpc_server(dummy_server=True)
+        server = start_grpc_server(boot_type=GRPCServerBootingType.Dummy, verbose=True)
         sleep(1)
 
         # create the gRPC stub
@@ -59,17 +60,36 @@ class GRPCServerTest(unittest.TestCase):
 
         # send message
         status = dummy_status_message()
-        answer = stub.Ping(status)
+        response = stub.Ping(status)
 
-        self.assertEqual(answer.action, protobufs_pb2.Response.DO_NOTHING)
-        self.assertEqual(answer.config.feeding_module_activated, True)
-        self.assertEqual(answer.config.watering_module_activated, True)
-        self.assertEqual(answer.config.feeding_module_cronstring, "12 *")
-        self.assertEqual(answer.config.watering_module_cronstring, "13 1,3,5")
-        self.assertEqual(answer.config.watering_pump_1_duration, 10)
-        self.assertEqual(answer.config.watering_pump_2_duration, 20)
-        self.assertEqual(answer.config.watering_pump_3_duration, 30)
-        self.assertEqual(answer.config.watering_pump_4_duration, 40)
+        self.assertEqual(response.action, protobufs_pb2.Response.DO_NOTHING)
+        self.assertEqual(response.config.feeding_module_activated, True)
+        self.assertEqual(response.config.watering_module_activated, True)
+        self.assertEqual(response.config.feeding_module_cronstring, "12 *")
+        self.assertEqual(response.config.watering_module_cronstring, "13 1,3,5")
+        self.assertEqual(response.config.watering_pump_1_duration, 10)
+        self.assertEqual(response.config.watering_pump_2_duration, 20)
+        self.assertEqual(response.config.watering_pump_3_duration, 30)
+        self.assertEqual(response.config.watering_pump_4_duration, 40)
+
+        server.stop(0)
+
+    def test_real_inmemory(self):
+
+        server = start_grpc_server(boot_type=GRPCServerBootingType.RealButInMemoryOnly, verbose=True)
+        sleep(1)
+
+        # create the gRPC stub
+        channel = grpc.insecure_channel('127.0.0.1:'+str(GRPC_SERVER_PORT))
+        stub = protobufs_pb2_grpc.GaiaServiceStub(channel)
+
+        # send message
+        status = dummy_status_message()
+        response = stub.Ping(status)
+
+        # this should be the default
+        self.assertEqual(response.action, protobufs_pb2.Response.DO_NOTHING)
+        self.assertEqual(response.HasField('config'), False)
 
         server.stop(0)
 

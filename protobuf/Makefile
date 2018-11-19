@@ -18,3 +18,9 @@ clean:
 
 test:
 	python3 test.py $(TEST_TARGET)
+
+freeze:
+	$(MAKE) -C ../server freeze
+
+install:
+	$(MAKE) -C ../server install
