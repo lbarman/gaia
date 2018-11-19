@@ -12,6 +12,7 @@ all: clean $(PYTHON_TARGET)
 
 clean:
 	rm -f $(PYTHON_TARGET)
+	rm -f protobufs_pb2_grpc.py
 	rm -f $(TEST_TARGET)
 	rm -rf __pycache__
 
