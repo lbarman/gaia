@@ -11,6 +11,8 @@ def assets(filename):
     return send_from_directory('public', filename)
 
 
+@webserver.route('/command')
+
 @webserver.route('/')
 def main():
 
@@ -43,8 +45,8 @@ def main():
     tokens['FEEDING_HOUR'] = '12'
     tokens['WATERING_HOUR'] = '14'
 
-    tokens['FEEDING_DISABLED'] = '' # 'disabled'
-    tokens['WATERING_DISABLED'] = '' #'disabled'
+    tokens['FEEDING_DISABLED'] = ''  # 'disabled'
+    tokens['WATERING_DISABLED'] = ''  # 'disabled'
 
     # build the template
     html = template_source

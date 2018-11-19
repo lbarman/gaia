@@ -12,7 +12,7 @@ def is_port_open(port):
 def build_port_open_html_string(is_open):
 
     css_class = 'portClosed'
-    text = "???"
+    text = "?"
 
     if is_open:
         css_class = 'portOpen'

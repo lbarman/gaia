@@ -29,7 +29,7 @@
                 <canvas id="chart1"></canvas>
             </div>
         </div>
-        <div>
+        <div id="current_config">
             <h3>Current Config</h3>
             <div id="feeder-module" class="module {{FEEDING_DISABLED}}">
                 <div class="foodbox">
@@ -83,14 +83,45 @@
                 </div>
             </div>
         </div>
-        <div>
-            <h3>Commands</h3>
-            <pre>{{NEXT_COMMAND}}</pre>
-            <form method="post">
-                <p>Add new command:</p>
-                <input id="newCommand"  name="newCommand" placeholder="COMMAND" type="text" />
+        <div id="update_response">
+            <h3>Update Config</h3>
+            Pending config update: <pre>{{NEXT_COMMAND}}</pre>
+            <form id="formNewCommand" method="post" action="/command">
+                <p>Add new command: <select id="newCommand"  name="newCommand" >
+                  <option value="0">DO_NOTHING</option>
+                  <option value="1">SHUTDOWN</option>
+                  <option value="2">REBOOT</option>
+                </select></p>
+                <p>And update config: <select id="updateConfig"  name="updateConfig" >
+                  <option value="0">No</option>
+                  <option value="1">Yes</option>
+                </select></p>
+
+                <div id="divUpdateConfig" style="display:none">
+                    <p>Feeding enabled: <select id="feedingEnabled"  name="feedingEnabled" >
+                  <option value="0">No</option>
+                  <option value="1">Yes</option>
+                    </select></p>
+                    <p>Watering enabled: <select id="wateringEnabled"  name="wateringEnabled" >
+                  <option value="0">No</option>
+                  <option value="1">Yes</option>
+                    </select></p>
+                    <p>Feeding CronString:
+                <input id="feedingCron"  name="feedingCron" placeholder="12h *" type="text" /></p>
+                    <p>Watering CronString:
+                <input id="wateringCron"  name="wateringCron" placeholder="13h 0,2,3" type="text" /></p>
+                    <p>Pump 1 duration:
+                <input id="pump1Duration"  name="pump1Duration" placeholder="10" type="text" /></p>
+                    <p>Pump 2 duration:
+                <input id="pump2Duration"  name="pump2Duration" placeholder="10" type="text" /></p>
+                    <p>Pump 3 duration:
+                <input id="pump3Duration"  name="pump3Duration" placeholder="10" type="text" /></p>
+                    <p>Pump 4 duration:
+                <input id="pump4Duration"  name="pump4Duration" placeholder="10" type="text" /></p>
+                </div>
+
                 <input id="passphrase"  name="passphrase" placeholder="Passphrase" type="password" />
-                <input type="submit"/>
+                <input type="submit" value="Submit" />
             </form>
         </div>
         <div>
@@ -99,12 +130,38 @@
         </div>
 
     <script>
-
         function loadFeed(){
             const videoStream = '<img src="http://lbarman.ch:{{PORT_VIDEO}}/" alt="Video stream" class="shrinkToFit" width="632" height="474">'
             $('#live_feed').html(videoStream);
             return false;
         }
+
+        $('#updateConfig').on('change', function(){
+            if(this.value == '1') {
+                $('#divUpdateConfig').css('display', 'block')
+            } else {
+                $('#divUpdateConfig').css('display', 'none')
+            }
+        })
+
+        $("#formNewCommand").submit(function(e) {
+            var form = $(this);
+            var url = form.attr('action');
+            $.ajax({
+                   type: "POST",
+                   url: url,
+                   data: form.serialize(),
+                   success: function(data)
+                   {
+                       console.log(data);
+                   },
+                   error: function (request, error) {
+                        console.log(arguments);
+                   alert(" Can't do because: " + error);
+                   },
+            });
+            e.preventDefault();
+        });
     </script>
     </body>
 </html>
