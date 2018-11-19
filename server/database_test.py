@@ -3,88 +3,99 @@ import unittest
 from database import *
 import protobufs_pb2
 
-def dummyConfig():
+
+def dummy_config():
     config = protobufs_pb2.Config()
-    config.feeding_module_activated = True;
-    config.watering_module_activated = True;
-    config.feeding_module_cronstring = "12 *";
-    config.watering_module_cronstring = "13 1,3,5";
-    config.watering_pump_1_duration = 10;
-    config.watering_pump_2_duration = 20;
-    config.watering_pump_3_duration = 30;
-    config.watering_pump_4_duration = 40;
+    config.feeding_module_activated = True
+    config.watering_module_activated = True
+    config.feeding_module_cronstring = "12 *"
+    config.watering_module_cronstring = "13 1,3,5"
+    config.watering_pump_1_duration = 10
+    config.watering_pump_2_duration = 20
+    config.watering_pump_3_duration = 30
+    config.watering_pump_4_duration = 40
     return config
 
-def dummyStatusUpdate():
+
+def dummy_status_update():
     status = protobufs_pb2.Status()
-    status.authentication_token = "authentication_token_str";
+    status.authentication_token = "authentication_token_str"
     status.local_timestamp = datetime(2009, 12, 1, 19, 31, 1, 40113).strftime("%Y-%m-%d %H:%M:%S")
 
     config = status.current_config
-    config.feeding_module_activated = True;
-    config.watering_module_activated = True;
-    config.feeding_module_cronstring = "12 *";
-    config.watering_module_cronstring = "13 1,3,5";
-    config.watering_pump_1_duration = 10;
-    config.watering_pump_2_duration = 20;
-    config.watering_pump_3_duration = 30;
-    config.watering_pump_4_duration = 40;
+    config.feeding_module_activated = True
+    config.watering_module_activated = True
+    config.feeding_module_cronstring = "12 *"
+    config.watering_module_cronstring = "13 1,3,5"
+    config.watering_pump_1_duration = 10
+    config.watering_pump_2_duration = 20
+    config.watering_pump_3_duration = 30
+    config.watering_pump_4_duration = 40
 
     systemstatus = status.system_status 
-    systemstatus.uptime = "uptime_str";
-    systemstatus.memory = "memory_str";
-    systemstatus.disk_usage = "disk_usage_str";
-    systemstatus.processes = "processes_str";
+    systemstatus.uptime = "uptime_str"
+    systemstatus.memory = "memory_str"
+    systemstatus.disk_usage = "disk_usage_str"
+    systemstatus.processes = "processes_str"
     return status
+
+
+def count_records(table, cursor):
+    query = cursor.execute('SELECT count(*) FROM ' + table).fetchone()
+
+    if query is None or len(query) == 0:
+        return 0
+
+    return query[0]
+
 
 class DatabaseTest(unittest.TestCase):
 
     def test_db_creation(self):
-        db = Database(inMemory=True)
+        db = Database(in_memory=True)
         self.assertNotEqual(db.db, None)
         self.assertNotEqual(db.cursor, None)
 
-        db.recreateDatabase()
+        db.recreate_database()
 
         self.assertNotEqual(db.db, None)
         self.assertNotEqual(db.cursor, None)
 
-        tables = db.cursor.execute("SELECT name FROM sqlite_master WHERE type='table'").fetchall()
+        tables = db.cursor.execute('SELECT name FROM sqlite_master WHERE type=\'table\'').fetchall()
         tables = [x[0] for x in tables]
 
         for expectedTable in ["status", "configs", "system_status", "commands"]:
             if expectedTable not in tables:
-                self.fail("Table", expectedTable, "wasn't created")
+                self.fail("Table " + expectedTable + " wasn't created")
 
     def test_command_creation(self):
-        db = Database(inMemory=True)
-        db.recreateDatabase()
+        db = Database(in_memory=True)
+        db.recreate_database()
 
         # initially, there should be no command
-        self.assertEqual(db.getCommand(), None)
+        self.assertEqual(db.get_command(), None)
 
-        db.saveCommand("SOME_COMMAND")
+        db.save_command("SOME_COMMAND")
 
         # save a command without config
-        cmd = db.getCommand()
+        cmd = db.get_command()
         self.assertNotEqual(cmd, None)
         self.assertEqual(cmd["text"], "SOME_COMMAND")
         self.assertEqual(cmd["config"], None)
 
         # save a new command, should only keep the most recent
-        db.saveCommand("SOME_COMMAND2")
-        cmd = db.getCommand()
+        db.save_command("SOME_COMMAND2")
+        cmd = db.get_command()
         self.assertNotEqual(cmd, None)
         self.assertEqual(cmd["text"], "SOME_COMMAND2")
         self.assertEqual(cmd["config"], None)
 
-        count = db.cursor.execute("SELECT count(*) FROM commands").fetchone()[0]
-        self.assertEqual(count, 1)
+        self.assertEqual(1, count_records('commands', db.cursor))
 
         # save a command with config
-        config1 = dummyConfig()
-        db.saveCommand("SOME_COMMAND3", config1)
-        cmd = db.getCommand()
+        config1 = dummy_config()
+        db.save_command("SOME_COMMAND3", config1)
+        cmd = db.get_command()
         self.assertNotEqual(cmd, None)
         self.assertEqual(cmd["text"], "SOME_COMMAND3")
 
@@ -101,38 +112,34 @@ class DatabaseTest(unittest.TestCase):
         # saving a new command should overwrite the previous, and hence delete the config
 
         # save a command with config
-        db.saveCommand("SOME_COMMAND4", None)
-        cmd = db.getCommand()
+        db.save_command("SOME_COMMAND4", None)
+        cmd = db.get_command()
         self.assertNotEqual(cmd, None)
         self.assertEqual(cmd["text"], "SOME_COMMAND4")
 
-        count = db.cursor.execute("SELECT count(*) FROM commands").fetchone()[0]
-        self.assertEqual(count, 1)
-
-        count = db.cursor.execute("SELECT count(*) FROM configs").fetchone()[0]
-        self.assertEqual(count, 0)
+        self.assertEqual(1, count_records('commands', db.cursor))
+        self.assertEqual(0, count_records('configs', db.cursor))
 
         # delete should empty the table
-        db.deleteAllCommands()
+        db.delete_all_commands()
 
-        count = db.cursor.execute("SELECT count(*) FROM commands").fetchone()[0]
-        self.assertEqual(count, 0)
+        self.assertEqual(0, count_records('commands', db.cursor))
 
     def test_status_creation(self):
-        db = Database(inMemory=True)
-        db.recreateDatabase()
+        db = Database(in_memory=True)
+        db.recreate_database()
 
         # initially, there should be no command
-        self.assertEqual(db.getAllStatus(), [])
+        self.assertEqual(db.get_all_status(), [])
 
         # save and retrieve one
-        status1 = dummyStatusUpdate()
+        status1 = dummy_status_update()
 
-        db.saveStatus(status1)
-        allStatus = db.getAllStatus()
-        self.assertNotEqual(allStatus, None)
-        self.assertEqual(len(allStatus), 1)
-        status2 = allStatus[0]
+        db.save_status(status1)
+        all_status = db.get_all_status()
+        self.assertNotEqual(all_status, None)
+        self.assertEqual(len(all_status), 1)
+        status2 = all_status[0]
 
         self.assertEqual(status2['local_timestamp'].strftime("%Y-%m-%d %H:%M:%S"), status1.local_timestamp)
         self.assertEqual(status2['feeding_module_activated'], status1.current_config.feeding_module_activated)
@@ -148,20 +155,21 @@ class DatabaseTest(unittest.TestCase):
         self.assertEqual(status2['disk_usage'], status1.system_status.disk_usage)
         self.assertEqual(status2['processes'], status1.system_status.processes)
 
-        self.assertEqual(1, db.cursor.execute("SELECT count(*) FROM configs").fetchone()[0])
-        self.assertEqual(1, db.cursor.execute("SELECT count(*) FROM system_status").fetchone()[0])
-        self.assertEqual(1, db.cursor.execute("SELECT count(*) FROM status").fetchone()[0])
+        self.assertEqual(1, count_records('configs', db.cursor))
+        self.assertEqual(1, count_records('system_status', db.cursor))
+        self.assertEqual(1, count_records('status', db.cursor))
 
-        db.saveStatus(status1)
-        self.assertEqual(2, db.cursor.execute("SELECT count(*) FROM configs").fetchone()[0])
-        self.assertEqual(2, db.cursor.execute("SELECT count(*) FROM system_status").fetchone()[0])
-        self.assertEqual(2, db.cursor.execute("SELECT count(*) FROM status").fetchone()[0])
+        db.save_status(status1)
+        self.assertEqual(2, count_records('configs', db.cursor))
+        self.assertEqual(2, count_records('system_status', db.cursor))
+        self.assertEqual(2, count_records('status', db.cursor))
 
         # should remove all things older than X days, here with X=0 => table should be truncated
-        db.saveStatus(status1, numberOfDaysToKeepStatus=0)
-        self.assertEqual(1, db.cursor.execute("SELECT count(*) FROM configs").fetchone()[0])
-        self.assertEqual(1, db.cursor.execute("SELECT count(*) FROM system_status").fetchone()[0])
-        self.assertEqual(1, db.cursor.execute("SELECT count(*) FROM status").fetchone()[0])
+        db.save_status(status1, number_of_days_to_keep_status=0)
+        self.assertEqual(1, count_records('configs', db.cursor))
+        self.assertEqual(1, count_records('system_status', db.cursor))
+        self.assertEqual(1, count_records('status', db.cursor))
+
 
 if __name__ == '__main__':
     unittest.main()
