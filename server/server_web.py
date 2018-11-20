@@ -1,7 +1,11 @@
-from flask import Flask, Response, send_from_directory
+from flask import Flask, Response, send_from_directory, request
+
+import protobufs_pb2
 from constants import *
 from helpers import *
 from database import Database
+from time import sleep
+import re
 
 webserver = Flask(__name__, static_url_path='')
 
@@ -11,7 +15,81 @@ def assets(filename):
     return send_from_directory('public', filename)
 
 
-@webserver.route('/command')
+@webserver.route('/command', methods=['POST'])
+def update_command():
+    try:
+        # very weak protection against bruteforce
+        sleep(WEB_SERVER_NEW_COMMAND_SLEEP_TIME)
+
+        if request.method != 'POST':
+            return Response(status=405)
+        if request.form is None:
+            return Response(status=400)
+        if request.form.get('passphrase') != COMMAND_PASSPHRASE:
+            return Response(status=401)
+
+        cmd_id = request.form.get('newCommand')
+        cmd_text = 'UNKNOWN_COMMAND'
+        if cmd_id == '0':
+            cmd_text = 'DO_NOTHING'
+        elif cmd_id == '1':
+            cmd_text = 'SHUTDOWN'
+        elif cmd_id == '2':
+            cmd_text = 'REBOOT'
+        new_config = None
+
+        if request.form.get('updateConfig') == '1':
+            new_config = protobufs_pb2.Config()
+
+            # manually parse those
+            new_config.feeding_module_activated = False
+            if request.form.get('feedingEnabled') == '1':
+                new_config.feeding_module_activated = True
+
+            new_config.watering_module_activated = False
+            if request.form.get('wateringEnabled') == '1':
+                new_config.watering_module_activated = True
+
+            # regex-validate those
+            feeding_cron = request.form.get('feedingCron')
+            watering_cron = request.form.get('wateringCron')
+
+            pattern = re.compile(CRON_REGEX_TESTER)
+            if not pattern.match(feeding_cron):
+                raise ValueError('Feeding cron is invalid:', feeding_cron)
+            if not pattern.match(watering_cron):
+                raise ValueError('Watering cron is invalid:', feeding_cron)
+
+            new_config.feeding_module_cronstring = feeding_cron
+            new_config.watering_module_cronstring = watering_cron
+
+            # manual sanity check on those values
+            d1 = int(request.form.get('pump1Duration'))
+            d2 = int(request.form.get('pump2Duration'))
+            d3 = int(request.form.get('pump3Duration'))
+            d4 = int(request.form.get('pump4Duration'))
+
+            if d1 < 0 or d2 < 0 or d3 < 0 or d4 < 0:
+                raise ValueError('A watering duration is below zero:', d1, d2, d3, d4)
+
+            m = WATERING_DURATION_MAX_VALUE
+            if d1 > m or d2 > m or d3 > m or d4 > m:
+                raise ValueError('A watering duration exceeds the max value:', d1, d2, d3, d4)
+
+            # protobuf raise exception if we're not actually inputting numbers
+            new_config.watering_pump_1_duration = d1
+            new_config.watering_pump_2_duration = d2
+            new_config.watering_pump_3_duration = d3
+            new_config.watering_pump_4_duration = d4
+
+        db = Database()
+        db.save_command(cmd_text, new_config)
+        return Response(status=201)
+
+    except Exception as e:
+        print("Exception: ", e)
+        return Response(status=400)
+
 
 @webserver.route('/')
 def main():

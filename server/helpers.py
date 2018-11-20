@@ -1,6 +1,7 @@
 import socket
 from constants import WATER_DURATION_EQUAL_100_PERCENT
 
+
 def is_port_open(port):
     sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     result = sock.connect_ex(('127.0.0.1', port))
@@ -19,6 +20,7 @@ def build_port_open_html_string(is_open):
         text = "OK"
 
     return '<span class="portStatus ' + css_class + '">' + text + '</span>'
+
 
 def build_water_levels_dict(l1, l2, l3, l4, dict):
 
