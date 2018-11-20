@@ -1,4 +1,6 @@
-language: python
+language: python3
+
+key: server/requirements.txt
 
 before_script: make install-server
 
