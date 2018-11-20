@@ -1,8 +1,8 @@
 language: python3
 
-key: server/requirements.txt
+key:
 
-before_script: make install-server
+before_script:
 
 script:
   pip install --user --upgrade pip virtualenv
