@@ -4,4 +4,10 @@ key: server/requirements.txt
 
 before_script: make install-server
 
-script: make test
+script:
+  pip install --user --upgrade pip virtualenv
+  virtualenv -p python3 .venv
+  source .venv/bin/activate
+  $(MAKE) -C server install
+  $(MAKE) -C server test
+  deactivate
