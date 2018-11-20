@@ -142,7 +142,7 @@ class Database:
         # delete things older than 1 week ago
         one_week_ago = datetime.today() - timedelta(days=number_of_days_to_keep_status)
         one_week_ago_str = one_week_ago.strftime("%Y-%m-%d %H:%M:%S")
-        self.cursor.execute('DELETE FROM status WHERE server_timestamp < (?)', (one_week_ago_str,))
+        self.cursor.execute('DELETE FROM status WHERE server_timestamp <= (?)', (one_week_ago_str,))
 
         # insert new
         self.cursor.execute('INSERT INTO status(local_timestamp) VALUES (?)',
