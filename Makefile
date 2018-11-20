@@ -1,6 +1,6 @@
-.PHONY: protobuf install test
+.PHONY: protobuf install-server test
 
-install:
+install-server:
 	$(MAKE) -C server install
 
 protobuf:
