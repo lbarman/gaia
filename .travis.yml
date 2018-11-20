@@ -1,0 +1,5 @@
+language: python
+
+before_script: make install-server
+
+script: make test

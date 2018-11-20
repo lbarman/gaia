@@ -11,24 +11,24 @@
         <link rel="icon" type="image/png" sizes="32x32" href="public/img/favicon-32x32.png">
         <link rel="icon" type="image/png" sizes="96x96" href="public/img/favicon-96x96.png">
         <link rel="icon" type="image/png" sizes="16x16" href="public/img/favicon-16x16.png">
-        <style>
-
-    </style>
     </head>
     <body>
         <img id="logo" src="public/img/gaia.jpg" alt="logo" width="100" height="97" />
         <h1>Gaia</h1>
-        <div>
+
+        <div id="connectivity">
             <p>Connectivity: Ping={{TEST_PORT_SSH}} Video={{TEST_PORT_VIDEO}}</p>
             <p><a href="#" onclick="loadFeed()">Load live feed</a></p>
             <div id="live_feed"></div>
         </div>
-        <div style="display:none">
+
+        <div id="graph" style="display:none">
             <h3>Graph</h3>
             <div id="canvas-holder1" style="width:100%;">
                 <canvas id="chart1"></canvas>
             </div>
         </div>
+
         <div id="current_config">
             <h3>Current Config</h3>
             <div id="feeder-module" class="module {{FEEDING_DISABLED}}">
@@ -83,6 +83,7 @@
                 </div>
             </div>
         </div>
+
         <div id="update_response">
             <h3>Update Config</h3>
             Pending config update: <pre>{{NEXT_COMMAND}}</pre>
@@ -124,7 +125,8 @@
                 <input type="submit" value="Submit" />
             </form>
         </div>
-        <div>
+
+        <div id="data">
             <h3>Data</h3>
             {{DATA}}
         </div>
