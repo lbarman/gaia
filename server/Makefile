@@ -1,4 +1,4 @@
-.PHONY: import-protobuf serve test freeze install requirements.txt
+.PHONY: import-protobuf serve test freeze install
 
 PYTHON_MODULES=requirements.txt
 
