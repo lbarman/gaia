@@ -10,9 +10,7 @@ script:
   - source .venv/bin/activate
   - make -C server install
   - make -C server test
-  - coverage run --source=server -a server/database_test.py
-  - coverage run --source=server -a server/server_grpc_test.py
-  - coverage run --source=server -a server/server_web_test.py
+  - make -C server coverage
   - deactivate
 
 after_success:
