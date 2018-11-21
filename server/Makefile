@@ -30,11 +30,3 @@ freeze:
 
 install: $(PYTHON_MODULES)
 	pip install -r $(PYTHON_MODULES)
-
-coverage:
-	rm -f .coverage
-	coverage run -a --source=. database_test.py
-	coverage run -a --source=. server_grpc_test.py
-	$(MAKE) -C . db.sqlite # the web server does *not* recreate the DB (since it is automatically spawned by gunicorn), so manually do it here
-	coverage run -a --source=. server_web_test.py
-	coveralls
