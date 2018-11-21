@@ -1,7 +1,13 @@
 [run]
 omit =
+    protobufs_pb2.py
     */protobufs_pb2.py
+    protobufs_pb2_grpc.py
     */protobufs_pb2_grpc.py
+    /home/jwhite/.virtualenvs
+    /home/jwhite/.virtualenvs/*
+    .venv
+    */.venv/
 
 [report]
 exclude_lines =
