@@ -10,8 +10,5 @@ script:
   - source .venv/bin/activate
   - make -C server install
   - make -C server test
-  - make -C server coverage
+  - make -C coverage
   - deactivate
-
-after_success:
-  - coveralls
