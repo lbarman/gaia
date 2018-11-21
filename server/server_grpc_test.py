@@ -7,11 +7,12 @@ import protobufs_pb2_grpc
 from constants import *
 import os.path
 from database_test import dummy_config
+from datetime import datetime
 
 def dummy_status_message():
     status = protobufs_pb2.Status()
     status.authentication_token = "authentication_token_str"
-    status.local_timestamp = "local_timestamp_str"
+    status.local_timestamp = datetime(2009, 12, 1, 19, 31, 1, 40113).strftime("%Y-%m-%d %H:%M:%S")
 
     config = status.current_config
     config.feeding_module_activated = True

@@ -7,9 +7,7 @@ from multiprocessing import Process
 import logging
 
 def run_flask():
-    webserver.logger.disabled = True
     webserver.run(host='127.0.0.1', port=WEB_SERVER_PORT)
-
 
 class MyTest(unittest.TestCase):
 

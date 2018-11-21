@@ -22,6 +22,8 @@ serve-web: db.sqlite
 test: protobufs_pb2.py protobufs_pb2_grpc.py
 	python3 database_test.py
 	python3 server_grpc_test.py
+	$(MAKE) -C . db.sqlite # the web server does *not* recreate the DB (since it is automatically spawned by gunicorn), so manually do it here
+	python3 server_web_test.py
 
 freeze:
 	pip freeze > $(PYTHON_MODULES)
@@ -33,5 +35,6 @@ coverage:
 	rm -f .coverage
 	coverage run -a database_test.py
 	coverage run -a server_grpc_test.py
+	$(MAKE) -C . db.sqlite # the web server does *not* recreate the DB (since it is automatically spawned by gunicorn), so manually do it here
 	coverage run -a server_web_test.py
 	coveralls
