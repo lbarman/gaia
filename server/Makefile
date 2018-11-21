@@ -23,8 +23,6 @@ test: protobufs_pb2.py protobufs_pb2_grpc.py
 	python3 database_test.py
 	python3 server_grpc_test.py
 
-$(PYTHON_MODULES): freeze
-
 freeze:
 	pip freeze > $(PYTHON_MODULES)
 
