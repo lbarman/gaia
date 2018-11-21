@@ -10,8 +10,12 @@ omit =
     */.venv/
 
 include = 
+    helpers.py
+    database.py
     database_test.py
+    server_grpc.py
     server_grpc_test.py
+    server_web.py
     server_web_test.py
 
 [report]
