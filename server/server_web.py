@@ -134,7 +134,7 @@ def main():
     return Response(html, 200)
 
 
-# BTW: gunicorn is directly calling webserver.run itself
+# BTW: gunicorn is directly calling webserver.run itself. make sure the DB exists, it is not created by the web server
 if __name__ == '__main__':
     try:
         webserver.run(host='127.0.0.1', port=WEB_SERVER_PORT)
