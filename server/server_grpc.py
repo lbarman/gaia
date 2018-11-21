@@ -38,9 +38,9 @@ class GaiaServiceServicer(protobufs_pb2_grpc.GaiaServiceServicer):
         # check if we have to transmit a command
         command = db.get_command()
         if command is not None:
-            if command['action'] == 'SHUTDOWN':
+            if command['text'] == 'SHUTDOWN':
                     response.action = protobufs_pb2.Response.SHUTDOWN
-            elif command['action'] == 'REBOOT':
+            elif command['text'] == 'REBOOT':
                     response.action = protobufs_pb2.Response.REBOOT
 
             if command['config'] is not None:

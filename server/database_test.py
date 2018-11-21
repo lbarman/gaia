@@ -8,8 +8,8 @@ def dummy_config():
     config = protobufs_pb2.Config()
     config.feeding_module_activated = True
     config.watering_module_activated = True
-    config.feeding_module_cronstring = "12 *"
-    config.watering_module_cronstring = "13 1,3,5"
+    config.feeding_module_cronstring = "12h *"
+    config.watering_module_cronstring = "13h 1,3,5"
     config.watering_pump_1_duration = 10
     config.watering_pump_2_duration = 20
     config.watering_pump_3_duration = 30
@@ -25,8 +25,8 @@ def dummy_status_update():
     config = status.current_config
     config.feeding_module_activated = True
     config.watering_module_activated = True
-    config.feeding_module_cronstring = "12 *"
-    config.watering_module_cronstring = "13 1,3,5"
+    config.feeding_module_cronstring = "12h *"
+    config.watering_module_cronstring = "13h 1,3,5"
     config.watering_pump_1_duration = 10
     config.watering_pump_2_duration = 20
     config.watering_pump_3_duration = 30
