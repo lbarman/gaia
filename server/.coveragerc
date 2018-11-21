@@ -9,6 +9,11 @@ omit =
     .venv
     */.venv/
 
+include = 
+    database_test.py
+    server_grpc_test.py
+    server_web_test.py
+
 [report]
 exclude_lines =
     pragma: no cover
