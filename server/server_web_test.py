@@ -4,10 +4,10 @@ from constants import *
 from server_web import webserver
 from time import sleep
 from multiprocessing import Process
-
+import logging
 
 def run_flask():
-    webserver.debug = False
+    webserver.logger.disabled = True
     webserver.run(host='127.0.0.1', port=WEB_SERVER_PORT)
 
 
@@ -33,12 +33,12 @@ class MyTest(unittest.TestCase):
         self.http.clear()
 
     def test_asset_js(self):
-        r = self.http.request('GET', self.server_url+"/public/css/gaia.jpg", timeout=1.0)
+        r = self.http.request('GET', self.server_url+"/public/img/gaia.jpg", timeout=1.0)
         self.assertEqual(r.status, 200)
         self.http.clear()
 
     def test_asset_img(self):
-        r = self.http.request('GET', self.server_url+"/public/css/jquery-3.3.1.min.js", timeout=1.0)
+        r = self.http.request('GET', self.server_url+"/public/js/jquery-3.3.1.min.js", timeout=1.0)
         self.assertEqual(r.status, 200)
         self.http.clear()
 

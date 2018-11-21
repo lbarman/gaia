@@ -1,4 +1,4 @@
-.PHONY: import-protobuf serve test freeze install
+.PHONY: import-protobuf serve test freeze install coverage
 
 PYTHON_MODULES=requirements.txt
 
@@ -28,3 +28,10 @@ freeze:
 
 install: $(PYTHON_MODULES)
 	pip install -r $(PYTHON_MODULES)
+
+coverage:
+	rm -f .coverage
+	coverage run -a database_test.py
+	coverage run -a server_grpc_test.py
+	coverage run -a server_web_test.py
+	coveralls

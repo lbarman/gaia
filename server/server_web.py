@@ -6,13 +6,15 @@ from helpers import *
 from database import Database
 from time import sleep
 import re
+import os 
 
 webserver = Flask(__name__, static_url_path='')
 
 
 @webserver.route('/public/<path:filename>')
 def assets(filename):
-    return send_from_directory('public', filename)
+    dir_path = os.path.dirname(os.path.realpath(__file__))
+    return send_from_directory(dir_path+'/public', filename)
 
 
 @webserver.route('/command', methods=['POST'])
