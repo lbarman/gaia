@@ -98,7 +98,8 @@ def update_command():
 def main():
 
     template_source = ''
-    with open(TEMPLATE_FILE, 'r') as file:
+    dir_path = os.path.dirname(os.path.realpath(__file__))
+    with open(dir_path + '/' + TEMPLATE_FILE, 'r') as file:
         template_source = file.read()
 
     # query the database
