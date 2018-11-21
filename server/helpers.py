@@ -3,11 +3,15 @@ from constants import WATER_DURATION_EQUAL_100_PERCENT
 
 
 def is_port_open(port):
-    sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    result = sock.connect_ex(('127.0.0.1', port))
-    if result == 0:
+    s = socket.socket()
+    try:
+        s.connect(('127.0.0.1', port))
         return True
-    return False
+    except socket.error:
+        return False
+    finally:
+        s.close()
+
 
 
 def build_port_open_html_string(is_open):

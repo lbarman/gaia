@@ -21,8 +21,6 @@ def update_command():
         # very weak protection against bruteforce
         sleep(WEB_SERVER_NEW_COMMAND_SLEEP_TIME)
 
-        if request.method != 'POST':
-            return Response(status=405)
         if request.form is None:
             return Response(status=400)
         if request.form.get('passphrase') != COMMAND_PASSPHRASE:
@@ -36,6 +34,9 @@ def update_command():
             cmd_text = 'SHUTDOWN'
         elif cmd_id == '2':
             cmd_text = 'REBOOT'
+        else:
+            return Response(status=406)
+
         new_config = None
 
         if request.form.get('updateConfig') == '1':
