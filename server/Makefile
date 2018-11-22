@@ -26,6 +26,9 @@ test: gaia_server/protobufs_pb2.py gaia_server/protobufs_pb2_grpc.py
 	$(MAKE) -C . db.sqlite # the web server does *not* recreate the DB (since it is automatically spawned by gunicorn), so manually do it here
 	python3 tests/server_web_test.py
 
+clean:
+	rm -rf db.sqlite
+
 freeze:
 	pip freeze > $(PYTHON_MODULES)
 
