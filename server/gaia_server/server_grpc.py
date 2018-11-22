@@ -1,13 +1,12 @@
 from concurrent import futures
-import grpc
-import protobufs_pb2
-import protobufs_pb2_grpc
-from database import Database
 from time import sleep
-from constants import GRPC_MAX_WORKERS, GRPC_SERVER_PORT
-from enum import Enum
-import sys
-import os.path
+
+import grpc
+
+import gaia_server.constants as constants
+import gaia_server.database as database
+import gaia_server.protobufs_pb2_grpc as protobufs_pb2
+import gaia_server.protobufs_pb2_grpc as protobufs_pb2_grpc
 
 _ONE_DAY_IN_SECONDS = 60 * 60 * 24
 
@@ -22,9 +21,9 @@ class GaiaServiceServicer(protobufs_pb2_grpc.GaiaServiceServicer):
 
         db = None
         if self.useRealDatabase:
-            db = Database(in_memory=False)  # sql schema was already instanciated
+            db = database.Database(in_memory=False)  # sql schema was already instanciated
         else:
-            db = Database(in_memory=True)
+            db = database.Database(in_memory=True)
             db.recreate_database()
 
         if self.verbose:
@@ -62,7 +61,7 @@ class GaiaServiceServicer(protobufs_pb2_grpc.GaiaServiceServicer):
         return response
 
 def start_grpc_server(override_servicer=None, verbose=False):
-    server = grpc.server(futures.ThreadPoolExecutor(max_workers=GRPC_MAX_WORKERS))
+    server = grpc.server(futures.ThreadPoolExecutor(max_workers=constants.GRPC_MAX_WORKERS))
 
     servicer = None
 
@@ -72,15 +71,15 @@ def start_grpc_server(override_servicer=None, verbose=False):
         servicer = override_servicer
 
     protobufs_pb2_grpc.add_GaiaServiceServicer_to_server(servicer, server)
-    server.add_insecure_port('[::]:' + str(GRPC_SERVER_PORT))
-    print("Starting gRPC server on port", GRPC_SERVER_PORT)
+    server.add_insecure_port('[::]:' + str(constants.GRPC_SERVER_PORT))
+    print("Starting gRPC server on port", constants.GRPC_SERVER_PORT)
     server.start()
     return server
 
 
 if __name__ == '__main__':
     # try recreating the DB
-    db = Database()
+    db = database.Database()
     db.recreate_database()
 
     gprcServer = start_grpc_server()

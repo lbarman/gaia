@@ -1,12 +1,13 @@
+import time
+
+import os
+import re
 from flask import Flask, Response, send_from_directory, request
 
-import protobufs_pb2
-from constants import *
-from helpers import *
-from database import Database
-from time import sleep
-import re
-import os
+import gaia_server.constants as constants
+import gaia_server.database as database
+import gaia_server.helpers as helpers
+import gaia_server.protobufs_pb2 as protobufs_pb2
 
 webserver = Flask(__name__, static_url_path='')
 
@@ -21,11 +22,11 @@ def assets(filename):
 def update_command():
     try:
         # very weak protection against bruteforce
-        sleep(WEB_SERVER_NEW_COMMAND_SLEEP_TIME)
+        time.sleep(constants.WEB_SERVER_NEW_COMMAND_SLEEP_TIME)
 
         if request.form is None:
             return Response(status=400)
-        if request.form.get('passphrase') != COMMAND_PASSPHRASE:
+        if request.form.get('passphrase') != constants.COMMAND_PASSPHRASE:
             return Response(status=401)
 
         cmd_id = request.form.get('newCommand')
@@ -57,7 +58,7 @@ def update_command():
             feeding_cron = request.form.get('feedingCron')
             watering_cron = request.form.get('wateringCron')
 
-            pattern = re.compile(CRON_REGEX_TESTER)
+            pattern = re.compile(constants.CRON_REGEX_TESTER)
             if not pattern.match(feeding_cron):
                 raise ValueError('Feeding cron is invalid:', feeding_cron)
             if not pattern.match(watering_cron):
@@ -75,7 +76,7 @@ def update_command():
             if d1 < 0 or d2 < 0 or d3 < 0 or d4 < 0:
                 raise ValueError('A watering duration is below zero:', d1, d2, d3, d4)
 
-            m = WATERING_DURATION_MAX_VALUE
+            m = constants.WATERING_DURATION_MAX_VALUE
             if d1 > m or d2 > m or d3 > m or d4 > m:
                 raise ValueError('A watering duration exceeds the max value:', d1, d2, d3, d4)
 
@@ -85,7 +86,7 @@ def update_command():
             new_config.watering_pump_3_duration = d3
             new_config.watering_pump_4_duration = d4
 
-        db = Database()
+        db = database.Database()
         db.save_command(cmd_text, new_config)
         return Response(status=201)
 
@@ -98,11 +99,11 @@ def update_command():
 def main():
 
     template_source = ''
-    with open(TEMPLATE_FILE, 'r') as file:
+    with open(constants.TEMPLATE_FILE, 'r') as file:
         template_source = file.read()
 
     # query the database
-    db = Database()
+    db = database.Database()
     next_command = db.get_command()
     all_status = db.get_all_status()
 
@@ -116,12 +117,12 @@ def main():
 
     # prepare the array to replace in the template
     tokens = dict()
-    tokens['TEST_PORT_SSH'] = build_port_open_html_string(is_port_open(PORT_SSH))
-    tokens['TEST_PORT_VIDEO'] = build_port_open_html_string(is_port_open(PORT_VIDEO))
+    tokens['TEST_PORT_SSH'] = helpers.build_port_open_html_string(helpers.is_port_open(constants.PORT_SSH))
+    tokens['TEST_PORT_VIDEO'] = helpers.build_port_open_html_string(helpers.is_port_open(constants.PORT_VIDEO))
     tokens['DATA'] = 'On'
     tokens['NEXT_COMMAND'] = next_cmd_string
-    tokens['PORT_VIDEO'] = str(PORT_VIDEO)
-    build_water_levels_dict(None, None, 100, None, tokens)
+    tokens['PORT_VIDEO'] = str(constants.PORT_VIDEO)
+    helpers.build_water_levels_dict(None, None, 100, None, tokens)
 
     tokens['FEEDING_HOUR'] = '12'
     tokens['WATERING_HOUR'] = '14'
@@ -140,6 +141,6 @@ def main():
 # BTW: gunicorn is directly calling webserver.run itself. make sure the DB exists, it is not created by the web server
 if __name__ == '__main__':
     try:
-        webserver.run(host='127.0.0.1', port=WEB_SERVER_PORT)
+        webserver.run(host='127.0.0.1', port=constants.WEB_SERVER_PORT)
     except KeyboardInterrupt:
         print("Quitting")

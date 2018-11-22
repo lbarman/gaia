@@ -1,14 +1,14 @@
-from constants import *
-
 import sqlite3
 from datetime import datetime, timedelta
+
+import gaia_server.constants as constants
 
 
 class Database:
     db = None
     cursor = None
 
-    def __init__(self, in_memory=False, database_path=SQLITE_DATABASE_PATH):
+    def __init__(self, in_memory=False, database_path=constants.SQLITE_DATABASE_PATH):
         if in_memory:
             database_path = ":memory:"
 
@@ -137,7 +137,7 @@ class Database:
 
         return answer
 
-    def save_status(self, status_pb2, number_of_days_to_keep_status=NUMBER_OF_DAYS_TO_KEEP_STATUS):
+    def save_status(self, status_pb2, number_of_days_to_keep_status=constants.NUMBER_OF_DAYS_TO_KEEP_STATUS):
 
         # delete things older than 1 week ago
         one_week_ago = datetime.today() - timedelta(days=number_of_days_to_keep_status)

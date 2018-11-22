@@ -1,5 +1,6 @@
 import socket
-from constants import WATER_DURATION_EQUAL_100_PERCENT
+
+import gaia_server.constants as constants
 
 
 def is_port_open(port):
@@ -40,16 +41,16 @@ def build_water_levels_dict(l1, l2, l3, l4, dict):
 
     if l1 is not None:
         dict['WATER1_NUMBER'] = str(l1)
-        dict['WATER1_LEVEL'] = str(round(l1 / WATER_DURATION_EQUAL_100_PERCENT * 100))
+        dict['WATER1_LEVEL'] = str(round(l1 / constants.WATER_DURATION_EQUAL_100_PERCENT * 100))
 
     if l2 is not None:
         dict['WATER2_NUMBER'] = str(l2)
-        dict['WATER2_LEVEL'] = str(round(l2 / WATER_DURATION_EQUAL_100_PERCENT * 100))
+        dict['WATER2_LEVEL'] = str(round(l2 / constants.WATER_DURATION_EQUAL_100_PERCENT * 100))
 
     if l3 is not None:
         dict['WATER3_NUMBER'] = str(l3)
-        dict['WATER3_LEVEL'] = str(round(l3 / WATER_DURATION_EQUAL_100_PERCENT * 100))
+        dict['WATER3_LEVEL'] = str(round(l3 / constants.WATER_DURATION_EQUAL_100_PERCENT * 100))
 
     if l4 is not None:
         dict['WATER4_NUMBER'] = str(l4)
-        dict['WATER4_LEVEL'] = str(round(l4 / WATER_DURATION_EQUAL_100_PERCENT * 100))
+        dict['WATER4_LEVEL'] = str(round(l4 / constants.WATER_DURATION_EQUAL_100_PERCENT * 100))
