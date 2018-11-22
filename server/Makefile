@@ -21,9 +21,7 @@ serve-web: db.sqlite
 	gunicorn -w 4 -b 127.0.0.1:$(shell cat gaia_server/constants.py | grep WEB_SERVER_PORT | cut -d "=" -f 2 | xargs) --pythonpath gaia_server server_web:webserver
 
 test: gaia_server/protobufs_pb2.py gaia_server/protobufs_pb2_grpc.py
-	python3 tests/database_test.py
-	python3 tests/server_grpc_test.py
-	python3 tests/server_web_test.py
+	pytest
 
 coverage:
 	rm -f .coverage
