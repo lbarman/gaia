@@ -27,14 +27,16 @@ class GaiaServiceServicer(protobufs_pb2_grpc.GaiaServiceServicer):
         if self.verbose:
             print("Got query", status, context)
 
-        if status.authentication_token != constants.AUTHENTICATION_TOKEN:
-            raise AssertionError('Invalid token provided', status.authentication_token)
-
-        db.save_status(status)
-
         # prepare empty response
         response = protobufs_pb2.Response()
         response.action = protobufs_pb2.Response.DO_NOTHING
+
+        if status.authentication_token != constants.AUTHENTICATION_TOKEN:
+            print('Invalid token provided', status.authentication_token, "ignoring")
+            return response
+
+        db.save_status(status)
+
 
         # check if we have to transmit a command
         command = db.get_command()

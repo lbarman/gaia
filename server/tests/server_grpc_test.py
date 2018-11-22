@@ -95,7 +95,7 @@ class GRPCServerTest(unittest.TestCase):
         # send message
         status = dummy_status_message()
 
-        with pytest.raises(Exception) as e_info:
+        with pytest.raises(Exception):
             response = stub.Ping(status)
             assert response is None
 
@@ -140,11 +140,12 @@ class GRPCServerTest(unittest.TestCase):
 
         # send message
         status = dummy_status_message()
-        status.authentication_token = constants.AUTHENTICATION_TOKEN
 
-        with pytest.raises(Exception) as e_info:
+        with pytest.raises(Exception):
             response = stub.Ping(status)
             assert response is None
+
+        server.stop(0)
 
     def test_real_file_valid_auth(self):
 
