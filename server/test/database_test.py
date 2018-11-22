@@ -1,4 +1,7 @@
 import unittest
+import sys
+import os.path
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), os.path.pardir, 'gaia_server')))
 
 from database import *
 import protobufs_pb2

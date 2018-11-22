@@ -1,3 +1,7 @@
+import sys
+import os.path
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), os.path.pardir, 'gaia_server')))
+
 from server_grpc import *
 from time import sleep
 import unittest
@@ -53,7 +57,8 @@ class GRPCServerTest(unittest.TestCase):
 
     def test_dummy(self):
 
-        server = start_grpc_server(boot_type=GRPCServerBootingType.Dummy, verbose=True)
+        servicer = DummyServiceServicer()
+        server = start_grpc_server(override_servicer=servicer, verbose=True)
         sleep(1)
 
         # create the gRPC stub
@@ -78,7 +83,8 @@ class GRPCServerTest(unittest.TestCase):
 
     def test_real_inmemory(self):
 
-        server = start_grpc_server(boot_type=GRPCServerBootingType.RealButInMemoryOnly, verbose=True)
+        servicer = GaiaServiceServicer(real_database=False, verbose=True)
+        server = start_grpc_server(override_servicer=servicer, verbose=True)
         sleep(1)
 
         # create the gRPC stub

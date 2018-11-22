@@ -2,11 +2,12 @@ from concurrent import futures
 import grpc
 import protobufs_pb2
 import protobufs_pb2_grpc
-from server_grpc_test import DummyServiceServicer
 from database import Database
 from time import sleep
 from constants import GRPC_MAX_WORKERS, GRPC_SERVER_PORT
 from enum import Enum
+import sys
+import os.path
 
 _ONE_DAY_IN_SECONDS = 60 * 60 * 24
 
@@ -60,27 +61,19 @@ class GaiaServiceServicer(protobufs_pb2_grpc.GaiaServiceServicer):
 
         return response
 
-
-class GRPCServerBootingType(Enum):
-    Real = 0
-    RealButInMemoryOnly = 1
-    Dummy = 2
-
-
-def start_grpc_server(boot_type=GRPCServerBootingType.Real, verbose=False):
+def start_grpc_server(override_servicer=None, verbose=False):
     server = grpc.server(futures.ThreadPoolExecutor(max_workers=GRPC_MAX_WORKERS))
 
     servicer = None
 
-    if boot_type == GRPCServerBootingType.Real:
+    if override_servicer == None:
         servicer = GaiaServiceServicer(real_database=True, verbose=verbose)
-    elif boot_type == GRPCServerBootingType.RealButInMemoryOnly:
-        servicer = GaiaServiceServicer(real_database=False, verbose=verbose)
-    elif boot_type == GRPCServerBootingType.Dummy:
-        servicer = DummyServiceServicer()
+    else:
+        servicer = override_servicer
 
     protobufs_pb2_grpc.add_GaiaServiceServicer_to_server(servicer, server)
     server.add_insecure_port('[::]:' + str(GRPC_SERVER_PORT))
+    print("Starting gRPC server on port", GRPC_SERVER_PORT)
     server.start()
     return server
 

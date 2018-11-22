@@ -4,20 +4,20 @@ PYTHON_MODULES=requirements.txt
 
 import-protobuf:
 	$(MAKE) -C ../protobuf all
-	cp ../protobuf/protobufs_pb2.py .
-	cp ../protobuf/protobufs_pb2_grpc.py .
+	cp ../protobuf/protobufs_pb2.py gaia_server/
+	cp ../protobuf/protobufs_pb2_grpc.py gaia_server/
 
-protobufs_pb2.py: import-protobuf
-protobufs_pb2_grpc.py: import-protobuf
+gaia_server/protobufs_pb2.py: import-protobuf
+gaia_server/protobufs_pb2_grpc.py: import-protobuf
 
-serve-grpc: protobufs_pb2.py protobufs_pb2_grpc.py
-	python3 server-grpc.py
+serve-grpc: gaia_server/protobufs_pb2.py gaia_server/protobufs_pb2_grpc.py
+	python3 gaia_server/server_grpc.py
 
 db.sqlite:
-	python3 -c "from database import *; Database().recreate_database()"
+	python3 -c "import sys; sys.path.insert(0, 'gaia_server'); from database import *; Database().recreate_database()"
 
 serve-web: db.sqlite
-	gunicorn -w 4 -b 127.0.0.1:$(shell cat constants.py | grep WEB_SERVER_PORT | cut -d "=" -f 2 | xargs) server_web:webserver
+	gunicorn -w 4 -b 127.0.0.1:$(shell cat gaia_server/constants.py | grep WEB_SERVER_PORT | cut -d "=" -f 2 | xargs) --pythonpath gaia_server server_web:webserver
 
 test: protobufs_pb2.py protobufs_pb2_grpc.py
 	python3 database_test.py

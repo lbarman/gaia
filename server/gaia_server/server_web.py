@@ -6,15 +6,15 @@ from helpers import *
 from database import Database
 from time import sleep
 import re
-import os 
+import os
 
 webserver = Flask(__name__, static_url_path='')
 
 
 @webserver.route('/public/<path:filename>')
 def assets(filename):
-    dir_path = os.path.dirname(os.path.realpath(__file__))
-    return send_from_directory(dir_path+'/public', filename)
+    public_path = os.path.join(os.getcwd(), "public")
+    return send_from_directory(public_path, filename)
 
 
 @webserver.route('/command', methods=['POST'])
@@ -98,8 +98,7 @@ def update_command():
 def main():
 
     template_source = ''
-    dir_path = os.path.dirname(os.path.realpath(__file__))
-    with open(dir_path + '/' + TEMPLATE_FILE, 'r') as file:
+    with open(TEMPLATE_FILE, 'r') as file:
         template_source = file.read()
 
     # query the database
