@@ -187,6 +187,7 @@ class Database:
     def get_all_status(self):
         self.cursor.execute('SELECT \n'
                             '            status.id,\n'
+                            '            status.server_timestamp,\n'
                             '            status.local_timestamp,\n'
                             '            configs.feeding_module_activated,\n'
                             '            configs.watering_module_activated,\n'
@@ -209,19 +210,20 @@ class Database:
         for row in self.cursor:
             named_row = dict()
             named_row['id'] = row[0]
-            named_row['local_timestamp'] = datetime.strptime(row[1], "%Y-%m-%d %H:%M:%S")
-            named_row['feeding_module_activated'] = row[2]
-            named_row['watering_module_activated'] = row[3]
-            named_row['feeding_module_cronstring'] = row[4]
-            named_row['watering_module_cronstring'] = row[5]
-            named_row['watering_pump_1_duration'] = row[6]
-            named_row['watering_pump_2_duration'] = row[7]
-            named_row['watering_pump_3_duration'] = row[8]
-            named_row['watering_pump_4_duration'] = row[9]
-            named_row['uptime'] = row[10]
-            named_row['memory'] = row[11]
-            named_row['disk_usage'] = row[12]
-            named_row['processes'] = row[13]
+            named_row['server_timestamp'] = datetime.strptime(row[1], "%Y-%m-%d %H:%M:%S")
+            named_row['local_timestamp'] = datetime.strptime(row[2], "%Y-%m-%d %H:%M:%S")
+            named_row['feeding_module_activated'] = row[3]
+            named_row['watering_module_activated'] = row[4]
+            named_row['feeding_module_cronstring'] = row[5]
+            named_row['watering_module_cronstring'] = row[6]
+            named_row['watering_pump_1_duration'] = row[7]
+            named_row['watering_pump_2_duration'] = row[8]
+            named_row['watering_pump_3_duration'] = row[9]
+            named_row['watering_pump_4_duration'] = row[10]
+            named_row['uptime'] = row[11]
+            named_row['memory'] = row[12]
+            named_row['disk_usage'] = row[13]
+            named_row['processes'] = row[14]
             answer.append(named_row)
 
         return answer

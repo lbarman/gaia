@@ -13,7 +13,6 @@ def is_port_open(port):
         s.close()
 
 
-
 def build_port_open_html_string(is_open):
 
     css_class = 'portClosed'
@@ -53,3 +52,61 @@ def build_water_levels_dict(l1, l2, l3, l4, dict):
     if l4 is not None:
         dict['WATER4_NUMBER'] = str(l4)
         dict['WATER4_LEVEL'] = str(round(l4 / constants.WATER_DURATION_EQUAL_100_PERCENT * 100))
+
+
+def build_status_data_html(status):
+    res = ''
+
+    report_id = 0
+    for s in status:
+
+        feeding = 'Feeding: '
+        if s['watering_module_activated'] == 0:
+            feeding += 'No'
+        else:
+            feeding += 'Yes'
+        feeding += ', '+s['feeding_module_cronstring']
+
+        watering = 'Watering: '
+        if s['watering_module_activated'] == 0:
+            watering += 'No'
+        else:
+            watering += 'Yes'
+        watering += ', '+s['watering_module_cronstring']
+
+        water_levels = "{0},{1},{2},{3}".format(s['watering_pump_1_duration'], s['watering_pump_2_duration'], s['watering_pump_3_duration'], s['watering_pump_4_duration'])
+
+        display_config = 'block'
+        if report_id != 0:
+            display_config = 'none'
+
+        res += '''<div class="data">
+        <div class="reportId">#{id}</div>
+        <div class="timestamp">
+            <div class="server_ts">S: {server_ts}</div>
+            <div class="local_ts">L: {local_ts}</div>
+        </div>
+        <div class="system_status">
+            <div class="uptime">{uptime}</div>
+            <div class="memory">{memory}</div>
+            <div class="disk_usage">{disk_usage}</div>
+            <div class="processes">{processes}</div>
+        </div>
+        <div class="config" style="display:{displayConfig}">
+            <div class="feeding">{feeding}</div>
+            <div class="watering">{watering} (Pumps {waterlevels})</div>
+        </div>
+        </div>'''.format(id=report_id,
+                         server_ts=s['server_timestamp'].strftime("%H:%M:%S %d/%m/%Y"),
+                         local_ts=s['local_timestamp'].strftime("%H:%M:%S %d/%m/%Y"),
+                         uptime=s['uptime'],
+                         memory=s['memory'],
+                         disk_usage=s['disk_usage'],
+                         processes=s['processes'],
+                         feeding=feeding,
+                         watering=watering,
+                         waterlevels=water_levels,
+                         displayConfig=display_config)
+        report_id += 1
+
+    return res

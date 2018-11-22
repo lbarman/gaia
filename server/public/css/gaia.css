@@ -205,3 +205,28 @@ input[type="submit"]:focus {
     background-color: #8da99b;
     border-color: #5f8876;
 }
+
+.data {
+    display:block;
+    background-color: #f1f1f1;
+    padding: 10px;
+    border-radius: 2px;
+    margin-bottom: 10px;
+}
+
+.data .timestamp {
+    float: right;
+}
+
+.data .reportId {
+    float: left;
+    font-weight: bold;
+}
+
+.data .system_status {
+    margin-left: 40px;
+}
+.data .config {
+    margin-left: 40px;
+    margin-top: 20px;
+}

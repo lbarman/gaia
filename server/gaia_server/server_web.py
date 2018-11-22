@@ -109,15 +109,11 @@ def main():
     if next_command is not None:
         next_cmd_string = next_command['text']
 
-    all_status_string = ''
-    for status in all_status:
-        print(status)
-
     # prepare the array to replace in the template
     tokens = dict()
     tokens['TEST_PORT_SSH'] = helpers.build_port_open_html_string(helpers.is_port_open(constants.PORT_SSH))
     tokens['TEST_PORT_VIDEO'] = helpers.build_port_open_html_string(helpers.is_port_open(constants.PORT_VIDEO))
-    tokens['DATA'] = 'On'
+    tokens['DATA'] = helpers.build_status_data_html(all_status)
     tokens['NEXT_COMMAND'] = next_cmd_string
     tokens['PORT_VIDEO'] = str(constants.PORT_VIDEO)
     helpers.build_water_levels_dict(None, None, 100, None, tokens)
