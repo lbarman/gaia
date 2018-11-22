@@ -1,11 +1,9 @@
 from concurrent import futures
 from time import sleep
-
 import grpc
-
 import gaia_server.constants as constants
 import gaia_server.database as database
-import gaia_server.protobufs_pb2_grpc as protobufs_pb2
+import gaia_server.protobufs_pb2 as protobufs_pb2
 import gaia_server.protobufs_pb2_grpc as protobufs_pb2_grpc
 
 _ONE_DAY_IN_SECONDS = 60 * 60 * 24

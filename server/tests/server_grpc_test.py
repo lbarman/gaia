@@ -1,17 +1,18 @@
 import sys
 import os.path
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), os.path.pardir, 'gaia_server')))
-
-from server_grpc import *
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), os.path.pardir)))
+import gaia_server.server_grpc as server_grpc
 from time import sleep
 import unittest
 import grpc
-import protobufs_pb2
-import protobufs_pb2_grpc
-from constants import *
 import os.path
-from database_test import dummy_config
 from datetime import datetime
+import gaia_server.protobufs_pb2 as protobufs_pb2
+import gaia_server.protobufs_pb2_grpc as protobufs_pb2_grpc
+import gaia_server.database as database
+import gaia_server.constants as constants
+import tests.database_test as database_test
+
 
 def dummy_status_message():
     status = protobufs_pb2.Status()
@@ -58,11 +59,11 @@ class GRPCServerTest(unittest.TestCase):
     def test_dummy(self):
 
         servicer = DummyServiceServicer()
-        server = start_grpc_server(override_servicer=servicer, verbose=True)
+        server = server_grpc.start_grpc_server(override_servicer=servicer, verbose=True)
         sleep(1)
 
         # create the gRPC stub
-        channel = grpc.insecure_channel('127.0.0.1:'+str(GRPC_SERVER_PORT))
+        channel = grpc.insecure_channel('127.0.0.1:'+str(constants.GRPC_SERVER_PORT))
         stub = protobufs_pb2_grpc.GaiaServiceStub(channel)
 
         # send message
@@ -83,12 +84,12 @@ class GRPCServerTest(unittest.TestCase):
 
     def test_real_inmemory(self):
 
-        servicer = GaiaServiceServicer(real_database=False, verbose=True)
-        server = start_grpc_server(override_servicer=servicer, verbose=True)
+        servicer = server_grpc.GaiaServiceServicer(real_database=False, verbose=True)
+        server = server_grpc.start_grpc_server(override_servicer=servicer, verbose=True)
         sleep(1)
 
         # create the gRPC stub
-        channel = grpc.insecure_channel('127.0.0.1:'+str(GRPC_SERVER_PORT))
+        channel = grpc.insecure_channel('127.0.0.1:'+str(constants.GRPC_SERVER_PORT))
         stub = protobufs_pb2_grpc.GaiaServiceStub(channel)
 
         # send message
@@ -103,22 +104,22 @@ class GRPCServerTest(unittest.TestCase):
 
     def test_real_file(self):
 
-        if os.path.isfile(SQLITE_DATABASE_PATH):
-            self.skipTest("The file" + SQLITE_DATABASE_PATH + "already exists, cannot work with dirty data." +
-                          "This test is meant for travis only. To force-run, delete the file manually.")
+        if os.path.isfile(constants.SQLITE_DATABASE_PATH):
+            self.skipTest("The file" + constants.SQLITE_DATABASE_PATH + "already exists, cannot work with dirty data." +
+                          "This tests is meant for travis only. To force-run, delete the file manually.")
 
-        db = Database(in_memory=False)
+        db = database.Database(in_memory=False)
         db.recreate_database()
 
         # add a dummy command to the server
-        config = dummy_config()
+        config = database_test.dummy_config()
         db.save_command("REBOOT", config)
 
-        server = start_grpc_server(boot_type=GRPCServerBootingType.Real, verbose=True)
+        server = server_grpc.start_grpc_server(verbose=True)
         sleep(1)
 
         # create the gRPC stub
-        channel = grpc.insecure_channel('127.0.0.1:'+str(GRPC_SERVER_PORT))
+        channel = grpc.insecure_channel('127.0.0.1:'+str(constants.GRPC_SERVER_PORT))
         stub = protobufs_pb2_grpc.GaiaServiceStub(channel)
 
         # send message

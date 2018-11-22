@@ -1,10 +1,10 @@
-import unittest
 import sys
+import unittest
+from datetime import datetime
 import os.path
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), os.path.pardir, 'gaia_server')))
-
-from database import *
-import protobufs_pb2
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), os.path.pardir)))
+import gaia_server.database as database
+import gaia_server.protobufs_pb2 as protobufs_pb2
 
 
 def dummy_config():
@@ -55,7 +55,7 @@ def count_records(table, cursor):
 class DatabaseTest(unittest.TestCase):
 
     def test_db_creation(self):
-        db = Database(in_memory=True)
+        db = database.Database(in_memory=True)
         self.assertNotEqual(db.db, None)
         self.assertNotEqual(db.cursor, None)
 
@@ -72,7 +72,7 @@ class DatabaseTest(unittest.TestCase):
                 self.fail("Table " + expectedTable + " wasn't created")
 
     def test_command_creation(self):
-        db = Database(in_memory=True)
+        db = database.Database(in_memory=True)
         db.recreate_database()
 
         # initially, there should be no command
@@ -129,7 +129,7 @@ class DatabaseTest(unittest.TestCase):
         self.assertEqual(0, count_records('commands', db.cursor))
 
     def test_status_creation(self):
-        db = Database(in_memory=True)
+        db = database.Database(in_memory=True)
         db.recreate_database()
 
         # initially, there should be no command

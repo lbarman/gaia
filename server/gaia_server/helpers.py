@@ -1,5 +1,4 @@
 import socket
-
 import gaia_server.constants as constants
 
 

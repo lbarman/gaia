@@ -1,18 +1,17 @@
 import sys
 import os.path
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), os.path.pardir, 'gaia_server')))
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), os.path.pardir)))
 
 import urllib3
 import unittest
-from constants import *
-from server_web import webserver
+import gaia_server.constants as constants
+import gaia_server.server_web as server_web
 from time import sleep
 from multiprocessing import Process
-import logging
 
 
 def run_flask():
-    webserver.run(host='127.0.0.1', port=WEB_SERVER_PORT)
+    server_web.webserver.run(host='127.0.0.1', port=constants.WEB_SERVER_PORT)
 
 
 class MyTest(unittest.TestCase):
@@ -23,7 +22,7 @@ class MyTest(unittest.TestCase):
 
         sleep(2)
 
-        self.server_url = 'http://127.0.0.1:' + str(WEB_SERVER_PORT)
+        self.server_url = 'http://127.0.0.1:' + str(constants.WEB_SERVER_PORT)
         self.http = urllib3.PoolManager(1)
 
     def test_server_is_up_and_running(self):
@@ -59,7 +58,7 @@ class MyTest(unittest.TestCase):
         self.http.clear()
 
     def test_command_no_data(self):
-        data = {'passphrase': AUTHENTICATION_TOKEN}
+        data = {'passphrase': constants.AUTHENTICATION_TOKEN}
         r = self.http.request('POST', self.server_url + "/command", fields=data, timeout=2.0)
         self.assertEqual(r.status, 406)
         self.http.clear()

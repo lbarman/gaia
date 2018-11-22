@@ -1,9 +1,7 @@
 import time
-
 import os
 import re
 from flask import Flask, Response, send_from_directory, request
-
 import gaia_server.constants as constants
 import gaia_server.database as database
 import gaia_server.helpers as helpers

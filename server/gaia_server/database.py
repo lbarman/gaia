@@ -1,6 +1,5 @@
 import sqlite3
 from datetime import datetime, timedelta
-
 import gaia_server.constants as constants
 
 
