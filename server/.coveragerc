@@ -6,8 +6,12 @@ omit =
     */protobufs_pb2_grpc.py
     /home/jwhite/.virtualenvs
     /home/jwhite/.virtualenvs/*
+    /home/travis/build/lbarman/gaia/.venv/
+    /home/travis/build/lbarman/gaia/.venv/*
     .venv
+    .venv/*
     */.venv/
+    */.venv/*
 
 [report]
 exclude_lines =

@@ -27,6 +27,9 @@ class GaiaServiceServicer(protobufs_pb2_grpc.GaiaServiceServicer):
         if self.verbose:
             print("Got query", status, context)
 
+        if status.authentication_token != constants.AUTHENTICATION_TOKEN:
+            raise AssertionError('Invalid token provided', status.authentication_token)
+
         db.save_status(status)
 
         # prepare empty response

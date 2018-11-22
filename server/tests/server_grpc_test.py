@@ -12,7 +12,7 @@ import gaia_server.protobufs_pb2_grpc as protobufs_pb2_grpc
 import gaia_server.database as database
 import gaia_server.constants as constants
 import tests.database_test as database_test
-
+import pytest
 
 def dummy_status_message():
     status = protobufs_pb2.Status()
@@ -82,7 +82,7 @@ class GRPCServerTest(unittest.TestCase):
 
         server.stop(0)
 
-    def test_real_inmemory(self):
+    def test_real_in_memory_wrong_auth(self):
 
         servicer = server_grpc.GaiaServiceServicer(real_database=False, verbose=True)
         server = server_grpc.start_grpc_server(override_servicer=servicer, verbose=True)
@@ -94,6 +94,26 @@ class GRPCServerTest(unittest.TestCase):
 
         # send message
         status = dummy_status_message()
+
+        with pytest.raises(Exception) as e_info:
+            response = stub.Ping(status)
+            assert response is None
+
+        server.stop(0)
+
+    def test_real_in_memory_valid_auth(self):
+
+        servicer = server_grpc.GaiaServiceServicer(real_database=False, verbose=True)
+        server = server_grpc.start_grpc_server(override_servicer=servicer, verbose=True)
+        sleep(1)
+
+        # create the gRPC stub
+        channel = grpc.insecure_channel('127.0.0.1:'+str(constants.GRPC_SERVER_PORT))
+        stub = protobufs_pb2_grpc.GaiaServiceStub(channel)
+
+        # send message
+        status = dummy_status_message()
+        status.authentication_token = constants.AUTHENTICATION_TOKEN
         response = stub.Ping(status)
 
         # this should be the default
@@ -102,11 +122,7 @@ class GRPCServerTest(unittest.TestCase):
 
         server.stop(0)
 
-    def test_real_file(self):
-
-        if os.path.isfile(constants.SQLITE_DATABASE_PATH):
-            self.skipTest("The file" + constants.SQLITE_DATABASE_PATH + "already exists, cannot work with dirty data." +
-                          "This tests is meant for travis only. To force-run, delete the file manually.")
+    def test_real_file_wrong_auth_auth(self):
 
         db = database.Database(in_memory=False)
         db.recreate_database()
@@ -124,6 +140,31 @@ class GRPCServerTest(unittest.TestCase):
 
         # send message
         status = dummy_status_message()
+        status.authentication_token = constants.AUTHENTICATION_TOKEN
+
+        with pytest.raises(Exception) as e_info:
+            response = stub.Ping(status)
+            assert response is None
+
+    def test_real_file_valid_auth(self):
+
+        db = database.Database(in_memory=False)
+        db.recreate_database()
+
+        # add a dummy command to the server
+        config = database_test.dummy_config()
+        db.save_command("REBOOT", config)
+
+        server = server_grpc.start_grpc_server(verbose=True)
+        sleep(1)
+
+        # create the gRPC stub
+        channel = grpc.insecure_channel('127.0.0.1:'+str(constants.GRPC_SERVER_PORT))
+        stub = protobufs_pb2_grpc.GaiaServiceStub(channel)
+
+        # send message
+        status = dummy_status_message()
+        status.authentication_token = constants.AUTHENTICATION_TOKEN
         response = stub.Ping(status)
 
         # this should be the default
