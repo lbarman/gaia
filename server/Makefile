@@ -23,8 +23,14 @@ serve-web: db.sqlite
 test: gaia_server/protobufs_pb2.py gaia_server/protobufs_pb2_grpc.py
 	python3 tests/database_test.py
 	python3 tests/server_grpc_test.py
-	$(MAKE) -C . db.sqlite # the web server does *not* recreate the DB (since it is automatically spawned by gunicorn), so manually do it here
 	python3 tests/server_web_test.py
+
+coverage:
+	rm -f .coverage
+	$(MAKE) clean
+	coverage run -m py.test
+	cat .coverage
+	coveralls
 
 clean:
 	rm -rf db.sqlite
