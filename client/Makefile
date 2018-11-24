@@ -1,12 +1,7 @@
 .PHONY: install run install-cron uninstall-cron get-external-ip run test is-running kill autosync manual-feed manual-water water-fill-pipes cron-print cron-erase
 
 install:
-	pip install google --user
-	pip install google-cloud --user
-	pip install google-cloud-vision --user
-
-run:
-	chmod u+x run.sh
+	echo "Not implemented"
 
 install-gpio-boot:
 	echo "gpio -g mode 2 out" > /etc/rc.local
@@ -17,14 +12,8 @@ install-cron:
 uninstall-cron:
 	rm -f /etc/cron.d/gaia 
 
-get-external-ip:
-	curl icanhazip.com
-
 run:
 	./run.sh > logs/run.txt
-
-test:
-	python2 cron_test.py
 
 is-running:
 	ps -ux | grep "[p]ython2 gaia_client.py"
