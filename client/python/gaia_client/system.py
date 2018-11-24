@@ -1,45 +1,35 @@
-import requests
-import time
-import datetime
 import subprocess
-import urllib
-import sys
-import base64
-from constants import *
-from gpio_control import GPIOControl, cleanup_gpios
-from cron import Cron
 
-def __getShellOutput(cmd):
-    #eg. cmd = ["ps", "-u"]
-    o = "NULL"
-    try:
-        o = subprocess.Popen(cmd,stdout=subprocess.PIPE).communicate()[0];
-        o = o.decode('utf-8').strip()
-    except:
-        pass
 
-    return o
+def get_system_status():
 
-def status():
-    res = {}
-    res['3. uptime'] = __getShellOutput(["uptime"])
-    res['4. free'] = __getShellOutput(["free"])
-    res['5. df -h'] = __getShellOutput(["df", "-h"])
-    #res['top'] = __getShellOutput(["top", "-b" "-n1"])
+    res = dict()
+    res['uptime'] = __try_get_shell_output(["uptime", "-p"])
+    res['free'] = __try_get_shell_output(["free", "-h"])
+    res['df'] = __try_get_shell_output(["df", "-hT"])
+    ps = __try_get_shell_output(["ps", "-Ao", "%cpu,%mem,user,comm", "--sort", "-rss"])
+    ps = ps.split('\n')[:10]  # equals | head -n 10
+    res['ps'] = '\n'.join(ps)
     return res
 
+
+def __try_get_shell_output(cmd):
+    # eg. cmd = ["ps", "-u"]
+    output = "NULL"
+    try:
+        output = subprocess.Popen(cmd, stdout=subprocess.PIPE).communicate()[0]
+        output = output.decode('utf-8').strip()
+    except Exception:
+        pass
+
+    return output
+
+
 def reboot():
-    cleanup_gpios()
-    command = "/usr/bin/sudo /sbin/shutdown -r now"
-    import subprocess
-    process = subprocess.Popen(command.split(), stdout=subprocess.PIPE)
-    output = process.communicate()[0]
-    print output
+    command = "/usr/bin/sudo /sbin/shutdown -r now".split()
+    subprocess.Popen(command)
+
 
 def shutdown():
-    cleanup_gpios()
-    command = "/usr/bin/sudo /sbin/shutdown -h now"
-    import subprocess
-    process = subprocess.Popen(command.split(), stdout=subprocess.PIPE)
-    output = process.communicate()[0]
-    print output
+    command = "/usr/bin/sudo /sbin/shutdown -h now".split()
+    subprocess.Popen(command)

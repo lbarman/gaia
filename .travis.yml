@@ -13,5 +13,8 @@ script:
   - make coverage
   - rm -f .coverage
   - cat server/.coverage > .coverage
+  - make -C client/python test
+  - make -C client/python coverage
+  - cat client/python/.coverage >> .coverage
   - coveralls
   - deactivate

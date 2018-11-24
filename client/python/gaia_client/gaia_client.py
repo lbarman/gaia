@@ -6,44 +6,40 @@ import datetime
 import urllib
 import base64
 from constants import *
-from gpio_control import GPIOControl, cleanup_gpios
+from gpio_control import GPIOControl
 from cron import Cron
 import system
 
 gpio = None
 
-def buttonPressed():
-    print "Button pressed"
-    feed(datetime.datetime.now(), "Feeded manually")
-
 def feed(now, action="Feeded"):
     global gpio, db
     
-    gpio.servoFeed()
+    gpio.do_feeding()
     contactGaiaWebSite(now, action)
 
 def water(now):
     global gpio, db
     
-    report = gpio.waterPlants()
+    report = gpio.do_watering()
     contactGaiaWebSite(now, report)
 
 def getDataToUpload(now):
     global igorCron, plantsCron
 
-    data = system.status()
+    data = system.get_system_status()
 
-    n = igorCron.nextOccurence(now)
-    data['1. feed igor'] = [ "cron: "+str(igorCron), 
-        "last day fed: "+str(igorCron.lastDayExecuted()),
+    n = igorCron.next_occurrence(now)
+    data['1. feed igor'] = ["cron: "+str(igorCron),
+        "last day fed: "+str(igorCron.last_time_run()),
         "next occurence: "+str(n)+" (in "+str(n-now)+")"]
 
-    n = igorCron.nextOccurence(now)
+    n = igorCron.next_occurrence(now)
     data['2. water plants'] = ["cron: "+str(plantsCron),
-        "last day fed: "+str(plantsCron.lastDayExecuted()),
+        "last day fed: "+str(plantsCron.last_time_run()),
         "next occurence: "+str(n)+" (in "+str(n-now)+")"]
 
-    data['3. cron-db'] = igorCron.debug_printDB()
+    data['3. cron-db'] = igorCron.db_print()
 
 
     # encode to str
@@ -72,10 +68,10 @@ def contactGaiaWebSite(now, data):
         answer = r.content.strip()
     return answer
 
+
 print "[gaia-client.py] starting..."
 
 gpio = GPIOControl()
-gpio.buttonCallback = buttonPressed
 
 if gpio == None:
     print "GPIO not initialized, quitting"
@@ -90,21 +86,21 @@ plantsCron = Cron("plants", PLANTS_CRON)
 sleepCount = 0
 while True:
     # toggle Logic LEDS
-    gpio.toggleIgorFeedLed()
-    gpio.toggleWaterLed()
+    gpio.toggle_feeding_led()
+    gpio.toggle_watering_led()
 
     now = datetime.datetime.now() 
     print "It is now", now
 
-    print "igor last fed on      : ", igorCron.lastDayExecuted()
-    print "feeding in            : ", (igorCron.nextOccurence(now) - now)
-    print "plants last watered on: ", plantsCron.lastDayExecuted()
-    print "watering in           : ", (plantsCron.nextOccurence(now) - now)
+    print "igor last fed on      : ", igorCron.last_time_run()
+    print "feeding in            : ", (igorCron.next_occurrence(now) - now)
+    print "plants last watered on: ", plantsCron.last_time_run()
+    print "watering in           : ", (plantsCron.next_occurrence(now) - now)
 
-    if igorCron.shouldItRun(now):
+    if igorCron.should_it_run(now):
         print "feeding igor now"
         feed(now)
-    elif plantsCron.shouldItRun(now):
+    elif plantsCron.should_it_run(now):
         print "watering plants now"
         water(now)
     elif sleepCount >= GAIA_REPORT_EVERY_X_SLEEP:
@@ -126,6 +122,6 @@ while True:
             contactGaiaWebSite(now, "Gaia requested manual plant watering.")
             water(now)
 
-    #print "[gaia-client.py] waiting", WAITING_LOOP_SLEEP, "sec"
+    # print "[gaia-client.py] waiting", WAITING_LOOP_SLEEP, "sec"
     time.sleep(WAITING_LOOP_SLEEP)
     sleepCount += 1

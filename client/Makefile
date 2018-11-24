@@ -2,6 +2,7 @@
 
 install:
 	echo "Not implemented"
+	sudo apt-get -y install python3-rpi.gpio
 
 install-gpio-boot:
 	echo "gpio -g mode 2 out" > /etc/rc.local
