@@ -28,7 +28,6 @@ coverage:
 	$(MAKE) clean
 	coverage run -m py.test
 	cat .coverage
-	coveralls
 
 clean:
 	rm -rf db.sqlite

@@ -11,4 +11,7 @@ script:
   - make -C server install
   - make -C server test
   - make coverage
+  - rm -f .coverage
+  - cat server/.coverage > .coverage
+  - coveralls
   - deactivate
