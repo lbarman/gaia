@@ -165,7 +165,7 @@ class GPIOControl(ClassWithReport):
 
 
 def cleanup_gpios():
-    print "Application ending, cleaning up GPIOs"
+    print("Application ending, cleaning up GPIOs")
     GPIO.output(constants.RELAY_GPIO_1, GPIO.HIGH)
     GPIO.output(constants.RELAY_GPIO_2, GPIO.HIGH)
     GPIO.output(constants.RELAY_GPIO_3, GPIO.HIGH)

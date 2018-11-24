@@ -1,38 +1,35 @@
-from datetime import datetime, timedelta
+from datetime import timedelta
 import gaia_client.constants as constants
-import sqlite3
+import gaia_client.database as database
 import re
 
 
 # Cron string with format "h x,y,z" means "at X o'clock every x/y/z day of the week"
 class Cron:
 
-    time0 = datetime.now().replace(hour=0, minute=0, second=0, microsecond=0, day=1, month=1, year=1970)
+    db = None
     cron_name = "unknown"
     cron_string = ""
     hour = ""
     days = []
-    db = None
 
     # a Cron task runs exactly once in [target-CRON_WINDOW_BEFORE_DEADLINE; target] if called during that time
     def __init__(self, cron_name, cron_string, db_in_memory=False, window_before_deadline=30):
 
         # recreate the database
-        db_file = constants.SQLITE_FILE
-        if db_in_memory:
-            db_file = ':memory:'
+        self.db = database.Database(in_memory=db_in_memory)
+        self.db.recreate_database()
 
-        self.db = sqlite3.connect(db_file, detect_types=sqlite3.PARSE_DECLTYPES)
+        self.cron_name = cron_name
+        self.cron_string = cron_string
+        self.window_before_deadline = window_before_deadline
 
-        # sanity check
+        # sanity check before parsing
         pattern = re.compile(constants.CRON_REGEX_TESTER)
         if not pattern.match(cron_string):
             raise ValueError('Cron string is invalid:', cron_string)
 
-        # then, create this Cron. Parse the data and standardize it
-        self.cron_name = cron_name
-        self.cron_string = cron_string
-        self.window_before_deadline = window_before_deadline
+        # typically, this regex should validate all, but you're never so sure, so there are other sanity checks
 
         parts = self.cron_string.split(" ")
         if len(parts) != 2:
@@ -41,11 +38,13 @@ class Cron:
         hour = parts[0].strip().replace('h', '')
         days = parts[1].strip()
 
+        # check that the hour is a number
         if not hour.isdigit():
             raise ValueError("Hour not valid:" + hour)
 
         self.hour = int(hour)
 
+        # parse the days string. it can be either * for "all days", or some digit for specific days (mon=0)
         if days == "*":
             days = "0,1,2,3,4,5,6"
 
@@ -58,11 +57,8 @@ class Cron:
             if day < 0 or day > 6:
                 raise ValueError("Day not valid:" + str(day))
 
-        # make sure there is something in the DB w.r.t to this cron
-        self.db_recreate()
-
     def __str__(self):
-        return str(self.hour)+"h on "+','.join([constants.DAYS_STRING[x] for x in self.days])
+        return str(self.cron_name)+": "+ str(self.hour)+"h on "+','.join([constants.DAYS_STRING[x] for x in self.days])
 
     def next_occurrence(self, now):
         next_occurrence = self.__next_occurrence_irrespective_to_last_run(now)
@@ -98,7 +94,8 @@ class Cron:
         return next_run
 
     def last_time_run(self):
-        return self.db_read()
+        cron = self.db.get_cron_perhaps_create(self.cron_name)
+        return cron['last_run']
 
     # we run 30min before the deadline
     # if true, run the action
@@ -126,47 +123,7 @@ class Cron:
         
         # if: next execution is soon, CHECK: last execution must be a long time ago
         if diff_until_next_deadline < self.window_before_deadline <= diff_last_run_until_next_deadline:
-            self.db_update(next_occurrence)
+            self.db.save_cron(self.cron_name, self.cron_string, next_occurrence)
             return True
 
         return False
-
-    def db_read(self):
-        cursor = self.db.execute('SELECT last_run FROM cron WHERE NAME = (?)', (self.cron_name,))
-        data = cursor.fetchone()
-        return datetime.strptime(data[0], "%Y-%m-%d %H:%M:%S")
-
-    def db_update(self, last_run):
-        self.db.execute('UPDATE cron SET last_run=(?) WHERE name=(?)', (last_run, self.cron_name,))
-        self.db.commit()
-
-    def db_recreate(self):
-        self.db.execute('CREATE TABLE IF NOT EXISTS cron\n'
-                        '                 (name           VARCHAR(50)   NOT NULL,\n'
-                        '                  last_run        DATETIME);')
-        self.db.commit()
-
-        query = self.db.execute('SELECT count(*) FROM cron').fetchone()
-
-        if query[0] == 0:
-            self.db.execute("INSERT INTO cron (name, last_run) VALUES ((?), (?))", (self.cron_name, self.time0,))
-            self.db.commit()
-
-    def db_truncate(self):
-        self.db.execute('DROP TABLE cron;')
-        self.db.commit()
-
-    def db_print(self):
-        s = ""
-        try:
-            cursor = self.db.execute('SELECT * FROM cron')
-            data = cursor.fetchall()
-            for row in data:
-                if row is not None:
-                    print("CRON-DB-Row:", row)
-                    s += str(row) + '\n'
-        except Exception as err:
-            print("Cron error:", err)
-            s += str(err) + '\n'
-            pass
-        return s

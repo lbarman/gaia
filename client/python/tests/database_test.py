@@ -5,6 +5,7 @@ import os.path
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), os.path.pardir)))
 import gaia_client.database as database
 import gaia_client.protobufs_pb2 as protobufs_pb2
+import gaia_client.constants as constants
 
 def dummy_config():
     config = protobufs_pb2.Config()
@@ -150,6 +151,36 @@ class DatabaseTest(unittest.TestCase):
         single_dict[cron_name]['cron_string'] = cron_str
         single_dict[cron_name]['last_run'] = now
         self.assertDictEqual(db.get_all_cron(cron_name), single_dict)
+
+
+    def test_cron_empty(self):
+        db = database.Database(in_memory=True)
+        db.recreate_database()
+
+        # actually, the most important thing is that cron can always call "last_run()" (which internally calls
+        # db.read_all_crons()), even if the record is not there, it should pretend and return TIME0 as last run date!
+
+        self.assertEqual(count_records('cron', db.cursor), 0)
+        self.assertDictEqual(db.get_all_cron(), dict())
+
+        cron = db.get_cron_perhaps_create('test')
+
+        self.assertEqual(count_records('cron', db.cursor), 1)
+
+        self.assertEqual(cron['cron_string'], '?')
+        self.assertEqual(cron['last_run'], constants.CRON_TIME0)
+
+        now = datetime.now().replace(microsecond=0)
+        db.save_cron('test', cron_string='12h *', last_run=now)
+
+        cron = db.get_cron_perhaps_create('test')
+
+        self.assertEqual(count_records('cron', db.cursor), 1)
+
+        self.assertEqual(cron['cron_string'], '12h *')
+        self.assertEqual(cron['last_run'], now)
+        self.assertTrue(isinstance(cron['last_run'], datetime))
+
 
     def test_config(self):
         db = database.Database(in_memory=True)

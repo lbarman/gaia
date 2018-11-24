@@ -76,6 +76,22 @@ class Database:
 
         return res
 
+    def get_cron_perhaps_create(self, name):
+        self.cursor.execute('SELECT count(*) FROM cron WHERE name=(?)', (name,))
+        count = self.cursor.fetchone()
+
+        if count[0] == 0:
+            self.cursor.execute('INSERT INTO cron(name, cron_string, last_run) VALUES (?,?,?)',
+                                (name, '?', constants.CRON_TIME0))
+
+
+        self.cursor.execute('SELECT cron_string, last_run FROM cron WHERE name=?', (name,))
+        row = self.cursor.fetchone()
+
+        cron = dict()
+        cron['cron_string'] = row[0]
+        cron['last_run'] = datetime.strptime(row[1], "%Y-%m-%d %H:%M:%S")
+        return cron
 
 
     def save_config(self, config):
