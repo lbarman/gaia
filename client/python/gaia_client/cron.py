@@ -1,4 +1,6 @@
 from datetime import timedelta
+import sys
+print(sys.path)
 import gaia_client.constants as constants
 import gaia_client.database as database
 import re
