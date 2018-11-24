@@ -12,7 +12,7 @@ webserver = Flask(__name__, static_url_path='')
 
 @webserver.route('/public/<path:filename>')
 def assets(filename):
-    public_path = os.path.join(os.getcwd(), "server", "public")
+    public_path = os.path.join(os.getcwd(), "public")
     return send_from_directory(public_path, filename)
 
 
@@ -97,7 +97,7 @@ def update_command():
 def main():
 
     template_source = ''
-    template_file = os.path.join(os.getcwd(), "server", "templates", constants.TEMPLATE_FILE)
+    template_file = os.path.join(os.getcwd(), "templates", constants.TEMPLATE_FILE)
     with open(template_file, 'r') as file:
         template_source = file.read()
 

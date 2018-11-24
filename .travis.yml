@@ -10,7 +10,7 @@ script:
   - source .venv/bin/activate
   - make -C server install
   - make -C server test
-  - make coverage
+  - make -C coverage
   - rm -f .coverage
   - cat server/.coverage
   - cat server/.coverage > .coverage
