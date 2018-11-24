@@ -9,13 +9,35 @@ except RuntimeError:
     print("Error importing RPi.GPIO! Is this running with sudo ?")
 
 
-class GPIOControl:
+class ClassWithReport:
+
+    report = ''
+    is_verbose = False
+
+    def __init__(self, verbose=False):
+        self.is_verbose = verbose
+
+    def new_report(self):
+        self.report = ''
+
+    def do_report(self, s):
+        self.vprint(s)
+        self.report += s + '\n'
+
+    def vprint(self, s):
+        if self.verbose:
+            print(s)
+
+
+class GPIOControl(ClassWithReport):
     pwm = None
 
     feeding_led_state = False
     watering_led_state = False
 
     def __init__(self, verbose=True):
+
+        super(GPIOControl, self).__init__()
 
         self.verbose = verbose
         self.report = ''
@@ -140,17 +162,6 @@ class GPIOControl:
         else:
             self.watering_led_state = True
             GPIO.output(constants.GPIO_WATER_LOGIC_LED, GPIO.HIGH)
-
-    def new_report(self):
-        self.report = ''
-
-    def do_report(self, s):
-        self.vprint(s)
-        self.report += s + '\n'
-
-    def vprint(self, s):
-        if self.verbose:
-            print(s)
 
 
 def cleanup_gpios():

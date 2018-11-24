@@ -9,12 +9,8 @@ script:
   - virtualenv -p python3 .venv
   - source .venv/bin/activate
   - make -C server install
-  - make -C server test
-  - make coverage
+  - pytest
   - rm -f .coverage
-  - cat server/.coverage > .coverage
-  - make -C client/python test
-  - make -C client/python coverage
-  - cat client/python/.coverage >> .coverage
+  - coverage run -m py.test
   - coveralls
   - deactivate
