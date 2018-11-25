@@ -2,7 +2,7 @@ language: python3
 python:
   - "3.7"
 
-script2:
+script:
   - pip install --user --upgrade pip virtualenv
   - virtualenv -p python3 .venv
   - source .venv/bin/activate
