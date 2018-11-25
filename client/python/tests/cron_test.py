@@ -54,43 +54,43 @@ class TestCron(unittest.TestCase):
 
         # should run in two hours, not now
         self.assertEqual(c.should_it_run(now), False)
-        expected = datetime.now().replace(day=1,hour=12,minute=00, second=0, microsecond=0)
+        expected = datetime.now().replace(day=1,hour=12,minute=0, second=0, microsecond=0)
         self.assertEqual(c.next_occurrence(now), expected)
 
         # 30 minutes before, still not
         now = datetime.now().replace(day=1,hour=11,minute=29, second=0, microsecond=0)
         self.assertEqual(c.should_it_run(now), False)
-        expected = datetime.now().replace(day=1,hour=12,minute=00, second=0, microsecond=0)
+        expected = datetime.now().replace(day=1,hour=12,minute=0, second=0, microsecond=0)
         self.assertEqual(c.next_occurrence(now), expected)
 
         # 29 minutes before, should run exactly once
         now = datetime.now().replace(day=1,hour=11,minute=31, second=0, microsecond=0)
-        expected = datetime.now().replace(day=1,hour=12,minute=00, second=0, microsecond=0)
+        expected = datetime.now().replace(day=1,hour=12,minute=0, second=0, microsecond=0)
         self.assertEqual(c.next_occurrence(now), expected)
         self.assertEqual(c.should_it_run(now), True)
         self.assertEqual(c.should_it_run(now), False) #exactly once
         self.assertEqual(c.last_time_run(), expected)
 
         # then, it should run in 1 day
-        expected = datetime.now().replace(day=2,hour=12,minute=00, second=0, microsecond=0)
+        expected = datetime.now().replace(day=2,hour=12,minute=0, second=0, microsecond=0)
         self.assertEqual(c.next_occurrence(now), expected)
 
         # 30 minutes before, still not
         now = datetime.now().replace(day=2,hour=11,minute=29, second=0, microsecond=0)
         self.assertEqual(c.should_it_run(now), False)
-        expected = datetime.now().replace(day=2,hour=12,minute=00, second=0, microsecond=0)
+        expected = datetime.now().replace(day=2,hour=12,minute=0, second=0, microsecond=0)
         self.assertEqual(c.next_occurrence(now), expected)
 
         # 29 minutes before, should run exactly once
         now = datetime.now().replace(day=2,hour=11,minute=31, second=0, microsecond=0)
-        expected = datetime.now().replace(day=2,hour=12,minute=00, second=0, microsecond=0)
+        expected = datetime.now().replace(day=2,hour=12,minute=0, second=0, microsecond=0)
         self.assertEqual(c.next_occurrence(now), expected)
         self.assertEqual(c.should_it_run(now), True)
         self.assertEqual(c.should_it_run(now), False) #exactly once
         self.assertEqual(c.last_time_run(), expected)
 
         # then, it should run in 1 day
-        expected = datetime.now().replace(day=3,hour=12,minute=00, second=0, microsecond=0)
+        expected = datetime.now().replace(day=3,hour=12,minute=0, second=0, microsecond=0)
         self.assertEqual(c.next_occurrence(now), expected)
 
         # awesome, this work. Now test the edge case when the month is january and we're on the 31
@@ -102,19 +102,19 @@ class TestCron(unittest.TestCase):
 
         # should run in two hours, not now
         self.assertEqual(c.should_it_run(now), False)
-        expected = datetime.now().replace(year=2018,month=12,day=31,hour=12,minute=00, second=0, microsecond=0)
+        expected = datetime.now().replace(year=2018,month=12,day=31,hour=12,minute=0, second=0, microsecond=0)
         self.assertEqual(c.next_occurrence(now), expected)
 
         # 29 minutes before, should run exactly once
         now = datetime.now().replace(year=2018,month=12,day=31,hour=11,minute=31, second=0, microsecond=0)
-        expected = datetime.now().replace(year=2018,month=12,day=31,hour=12,minute=00, second=0, microsecond=0)
+        expected = datetime.now().replace(year=2018,month=12,day=31,hour=12,minute=0, second=0, microsecond=0)
         self.assertEqual(c.next_occurrence(now), expected)
         self.assertEqual(c.should_it_run(now), True)
         self.assertEqual(c.should_it_run(now), False) #exactly once
         self.assertEqual(c.last_time_run(), expected)
 
         # then, it should run in 1 day
-        expected = datetime.now().replace(year=2019,month=1,day=1,hour=12,minute=00, second=0, microsecond=0)
+        expected = datetime.now().replace(year=2019,month=1,day=1,hour=12,minute=0, second=0, microsecond=0)
         self.assertEqual(c.next_occurrence(now), expected)
 
     def test_cron_midnight(self):
@@ -127,43 +127,43 @@ class TestCron(unittest.TestCase):
         # should run in two hours, not now
         now = datetime.now().replace(year=2018,month=8,day=12,hour=22,minute=29, second=0, microsecond=0)
         self.assertEqual(c.should_it_run(now), False)
-        expected = datetime.now().replace(year=2018,month=8,day=14,hour=13,minute=00, second=0, microsecond=0)
+        expected = datetime.now().replace(year=2018,month=8,day=14,hour=13,minute=0, second=0, microsecond=0)
         self.assertEqual(c.next_occurrence(now), expected)
 
         # 1 minute before midnight, nothing changed
         now = datetime.now().replace(year=2018,month=8,day=12,hour=23,minute=59, second=0, microsecond=0)
         self.assertEqual(c.should_it_run(now), False)
-        expected = datetime.now().replace(year=2018,month=8,day=14,hour=13,minute=00, second=0, microsecond=0)
+        expected = datetime.now().replace(year=2018,month=8,day=14,hour=13,minute=0, second=0, microsecond=0)
         self.assertEqual(c.next_occurrence(now), expected)
 
         # 1 minute after midnight, nothing changed
         now = datetime.now().replace(year=2018,month=8,day=13,hour=0,minute=1, second=0, microsecond=0)
         self.assertEqual(c.should_it_run(now), False)
-        expected = datetime.now().replace(year=2018,month=8,day=14,hour=13,minute=00, second=0, microsecond=0)
+        expected = datetime.now().replace(year=2018,month=8,day=14,hour=13,minute=0, second=0, microsecond=0)
         self.assertEqual(c.next_occurrence(now), expected)
 
         # 1 minute before the next midnight, nothing changed
         now = datetime.now().replace(year=2018,month=8,day=13,hour=23,minute=59, second=0, microsecond=0)
         self.assertEqual(c.should_it_run(now), False)
-        expected = datetime.now().replace(year=2018,month=8,day=14,hour=13,minute=00, second=0, microsecond=0)
+        expected = datetime.now().replace(year=2018,month=8,day=14,hour=13,minute=0, second=0, microsecond=0)
         self.assertEqual(c.next_occurrence(now), expected)
 
         # 1 minute after the next midnight, nothing changed
         now = datetime.now().replace(year=2018,month=8,day=14,hour=0,minute=1, second=0, microsecond=0)
         self.assertEqual(c.should_it_run(now), False)
-        expected = datetime.now().replace(year=2018,month=8,day=14,hour=13,minute=00, second=0, microsecond=0)
+        expected = datetime.now().replace(year=2018,month=8,day=14,hour=13,minute=0, second=0, microsecond=0)
         self.assertEqual(c.next_occurrence(now), expected)
 
         # 29 minutes before, should run exactly once
         now = datetime.now().replace(year=2018,month=8,day=14,hour=12,minute=31, second=0, microsecond=0)
-        expected = datetime.now().replace(year=2018,month=8,day=14,hour=13,minute=00, second=0, microsecond=0)
+        expected = datetime.now().replace(year=2018,month=8,day=14,hour=13,minute=0, second=0, microsecond=0)
         self.assertEqual(c.next_occurrence(now), expected)
         self.assertEqual(c.should_it_run(now), True)
         self.assertEqual(c.should_it_run(now), False) #exactly once
         self.assertEqual(c.last_time_run(), expected)
 
         # then, it should run in 1 day (Friday)
-        expected = datetime.now().replace(year=2018,month=8,day=17,hour=13,minute=00, second=0, microsecond=0)
+        expected = datetime.now().replace(year=2018,month=8,day=17,hour=13,minute=0, second=0, microsecond=0)
         self.assertEqual(c.next_occurrence(now), expected)
 
     def test_cron_run_custom_schedule(self):
@@ -178,55 +178,55 @@ class TestCron(unittest.TestCase):
 
         # should run in two hours, not now
         self.assertEqual(c.should_it_run(now), False)
-        expected = datetime.now().replace(year=2018,month=7,day=23,hour=23,minute=00, second=0, microsecond=0)
+        expected = datetime.now().replace(year=2018,month=7,day=23,hour=23,minute=0, second=0, microsecond=0)
         self.assertEqual(c.next_occurrence(now), expected)
 
         # 30 minutes before, still not
         now = datetime.now().replace(year=2018,month=7,day=23,hour=22,minute=29, second=0, microsecond=0)
         self.assertEqual(c.should_it_run(now), False)
-        expected = datetime.now().replace(year=2018,month=7,day=23,hour=23,minute=00, second=0, microsecond=0)
+        expected = datetime.now().replace(year=2018,month=7,day=23,hour=23,minute=0, second=0, microsecond=0)
         self.assertEqual(c.next_occurrence(now), expected)
 
         # 29 minutes before, should run exactly once
         now = datetime.now().replace(year=2018,month=7,day=23,hour=22,minute=31, second=0, microsecond=0)
-        expected = datetime.now().replace(year=2018,month=7,day=23,hour=23,minute=00, second=0, microsecond=0)
+        expected = datetime.now().replace(year=2018,month=7,day=23,hour=23,minute=0, second=0, microsecond=0)
         self.assertEqual(c.next_occurrence(now), expected)
         self.assertEqual(c.should_it_run(now), True)
         self.assertEqual(c.should_it_run(now), False) #exactly once
         self.assertEqual(c.last_time_run(), expected)
 
         # then, it should run in 2 days, on wednesday
-        expected = datetime.now().replace(year=2018,month=7,day=25,hour=23,minute=00, second=0, microsecond=0)
+        expected = datetime.now().replace(year=2018,month=7,day=25,hour=23,minute=0, second=0, microsecond=0)
         self.assertEqual(c.next_occurrence(now), expected)
 
         # 30 minutes before, still not
         now = datetime.now().replace(year=2018,month=7,day=25,hour=22,minute=29, second=0, microsecond=0)
         self.assertEqual(c.should_it_run(now), False)
-        expected = datetime.now().replace(year=2018,month=7,day=25,hour=23,minute=00, second=0, microsecond=0)
+        expected = datetime.now().replace(year=2018,month=7,day=25,hour=23,minute=0, second=0, microsecond=0)
         self.assertEqual(c.next_occurrence(now), expected)
 
         # 29 minutes before, should run exactly once
         now = datetime.now().replace(year=2018,month=7,day=25,hour=22,minute=31, second=0, microsecond=0)
-        expected = datetime.now().replace(year=2018,month=7,day=25,hour=23,minute=00, second=0, microsecond=0)
+        expected = datetime.now().replace(year=2018,month=7,day=25,hour=23,minute=0, second=0, microsecond=0)
         self.assertEqual(c.next_occurrence(now), expected)
         self.assertEqual(c.should_it_run(now), True)
         self.assertEqual(c.should_it_run(now), False) #exactly once
         self.assertEqual(c.last_time_run(), expected)
 
         # then, it should run in 4 day (Sunday)
-        expected = datetime.now().replace(year=2018,month=7,day=29,hour=23,minute=00, second=0, microsecond=0)
+        expected = datetime.now().replace(year=2018,month=7,day=29,hour=23,minute=0, second=0, microsecond=0)
         self.assertEqual(c.next_occurrence(now), expected)
 
         # 29 minutes before, should run exactly once
         now = datetime.now().replace(year=2018,month=7,day=29,hour=22,minute=31, second=0, microsecond=0)
-        expected = datetime.now().replace(year=2018,month=7,day=29,hour=23,minute=00, second=0, microsecond=0)
+        expected = datetime.now().replace(year=2018,month=7,day=29,hour=23,minute=0, second=0, microsecond=0)
         self.assertEqual(c.next_occurrence(now), expected)
         self.assertEqual(c.should_it_run(now), True)
         self.assertEqual(c.should_it_run(now), False) #exactly once
         self.assertEqual(c.last_time_run(), expected)
 
         # then, it should run in 1 day (Monday)
-        expected = datetime.now().replace(year=2018,month=7,day=30,hour=23,minute=00, second=0, microsecond=0)
+        expected = datetime.now().replace(year=2018,month=7,day=30,hour=23,minute=0, second=0, microsecond=0)
         self.assertEqual(c.next_occurrence(now), expected)
 
 
@@ -241,18 +241,18 @@ class TestCron(unittest.TestCase):
 
         # should run in two hours, not now
         self.assertEqual(c.should_it_run(now), False)
-        expected = datetime.now().replace(year=2018,month=12,day=29,hour=00,minute=00, second=0, microsecond=0)
+        expected = datetime.now().replace(year=2018,month=12,day=29,hour=0,minute=0, second=0, microsecond=0)
         self.assertEqual(c.next_occurrence(now), expected)
 
         # 30 minutes before, still not
         now = datetime.now().replace(year=2018,month=12,day=28,hour=23,minute=29, second=0, microsecond=0)
         self.assertEqual(c.should_it_run(now), False)
-        expected = datetime.now().replace(year=2018,month=12,day=29,hour=00,minute=00, second=0, microsecond=0)
+        expected = datetime.now().replace(year=2018,month=12,day=29,hour=0,minute=0, second=0, microsecond=0)
         self.assertEqual(c.next_occurrence(now), expected)
 
         # 29 minutes before, should run exactly once
         now = datetime.now().replace(year=2018,month=12,day=28,hour=23,minute=31, second=0, microsecond=0)
-        expected = datetime.now().replace(year=2018,month=12,day=29,hour=00,minute=00, second=0, microsecond=0)
+        expected = datetime.now().replace(year=2018,month=12,day=29,hour=0,minute=0, second=0, microsecond=0)
         self.assertEqual(c.next_occurrence(now), expected)
         self.assertEqual(c.should_it_run(now), True)
         self.assertEqual(c.should_it_run(now), False) #exactly once
@@ -264,29 +264,29 @@ class TestCron(unittest.TestCase):
         # 30 minutes before, still not
         now = datetime.now().replace(year=2019,month=1,day=4,hour=23,minute=29, second=0, microsecond=0)
         self.assertEqual(c.should_it_run(now), False)
-        expected = datetime.now().replace(year=2019,month=1,day=5,hour=0,minute=00, second=0, microsecond=0)
+        expected = datetime.now().replace(year=2019,month=1,day=5,hour=0,minute=0, second=0, microsecond=0)
         self.assertEqual(c.next_occurrence(now), expected)
 
         # 29 minutes before, should run exactly once
         now = datetime.now().replace(year=2019,month=1,day=4,hour=23,minute=31, second=0, microsecond=0)
-        expected = datetime.now().replace(year=2019,month=1,day=5,hour=0,minute=00, second=0, microsecond=0)
+        expected = datetime.now().replace(year=2019,month=1,day=5,hour=0,minute=0, second=0, microsecond=0)
         self.assertEqual(c.next_occurrence(now), expected)
         self.assertEqual(c.should_it_run(now), True)
         self.assertEqual(c.should_it_run(now), False) #exactly once
 
         # then, it should run in 7 day (next saturday)
-        expected = datetime.now().replace(year=2019,month=1,day=12,hour=0,minute=00, second=0, microsecond=0)
+        expected = datetime.now().replace(year=2019,month=1,day=12,hour=0,minute=0, second=0, microsecond=0)
         self.assertEqual(c.next_occurrence(now), expected)
 
         # 29 minutes before, should run exactly once
         now = datetime.now().replace(year=2019,month=1,day=11,hour=23,minute=31, second=0, microsecond=0)
-        expected = datetime.now().replace(year=2019,month=1,day=12,hour=0,minute=00, second=0, microsecond=0)
+        expected = datetime.now().replace(year=2019,month=1,day=12,hour=0,minute=0, second=0, microsecond=0)
         self.assertEqual(c.next_occurrence(now), expected)
         self.assertEqual(c.should_it_run(now), True)
         self.assertEqual(c.should_it_run(now), False) #exactly once
 
         # then, it should run in 7 days
-        expected = datetime.now().replace(year=2019,month=1,day=19,hour=00,minute=00, second=0, microsecond=0)
+        expected = datetime.now().replace(year=2019,month=1,day=19,hour=0,minute=0, second=0, microsecond=0)
         self.assertEqual(c.next_occurrence(now), expected)
 
 
@@ -332,7 +332,7 @@ class TestCron(unittest.TestCase):
         day = 1
         while day < 30:
             start  = datetime.now().replace(day=day,hour=10,minute=30, second=0, microsecond=0)
-            target = datetime.now().replace(day=day,hour=12,minute=00, second=0, microsecond=0)
+            target = datetime.now().replace(day=day,hour=12,minute=0, second=0, microsecond=0)
             end    = datetime.now().replace(day=(day+1),hour=11,minute=29, second=0, microsecond=0)
             print("Testing for", target)
             self.nextCronShouldOccur(c, last_run, start, target, end)
@@ -349,7 +349,7 @@ class TestCron(unittest.TestCase):
         day = 23
         while day < 30:
             start  = datetime.now().replace(year=2018,month=7,day=day,hour=20,minute=30, second=0, microsecond=0)
-            target = datetime.now().replace(year=2018,month=7,day=day,hour=23,minute=00, second=0, microsecond=0)
+            target = datetime.now().replace(year=2018,month=7,day=day,hour=23,minute=0, second=0, microsecond=0)
             end    = datetime.now().replace(year=2018,month=7,day=(day+1),hour=22,minute=29, second=0, microsecond=0)
             print("Testing for", target)
             self.nextCronShouldOccur(c, last_run, start, target, end)
@@ -363,7 +363,7 @@ class TestCron(unittest.TestCase):
         day = 1
         while day < 12:
             start  = datetime.now().replace(year=2018,month=8,day=day,hour=20,minute=30, second=0, microsecond=0)
-            target = datetime.now().replace(year=2018,month=8,day=day,hour=23,minute=00, second=0, microsecond=0)
+            target = datetime.now().replace(year=2018,month=8,day=day,hour=23,minute=0, second=0, microsecond=0)
             end    = datetime.now().replace(year=2018,month=8,day=(day+1),hour=22,minute=29, second=0, microsecond=0)
             print("Testing for", target)
             self.nextCronShouldOccur(c, last_run, start, target, end)
@@ -383,7 +383,7 @@ class TestCron(unittest.TestCase):
         day = 24
         while day < 29:
             start  = datetime.now().replace(year=2018,month=12,day=day,hour=22,minute=30, second=0, microsecond=0)
-            target = datetime.now().replace(year=2018,month=12,day=(day+1),hour=00,minute=00, second=0, microsecond=0)
+            target = datetime.now().replace(year=2018,month=12,day=(day+1),hour=0,minute=0, second=0, microsecond=0)
             end    = datetime.now().replace(year=2018,month=12,day=(day+1),hour=22,minute=29, second=0, microsecond=0)
             print("Testing for", target)
             self.nextCronShouldOccur(c, last_run, start, target, end)
@@ -397,7 +397,7 @@ class TestCron(unittest.TestCase):
         day = 3
         while day < 11:
             start  = datetime.now().replace(year=2019,month=1,day=day,hour=22,minute=30, second=0, microsecond=0)
-            target = datetime.now().replace(year=2019,month=1,day=(day+1),hour=00,minute=00, second=0, microsecond=0)
+            target = datetime.now().replace(year=2019,month=1,day=(day+1),hour=0,minute=0, second=0, microsecond=0)
             end    = datetime.now().replace(year=2019,month=1,day=(day+1),hour=22,minute=29, second=0, microsecond=0)
             print("Testing for", target)
             self.nextCronShouldOccur(c, last_run, start, target, end)
