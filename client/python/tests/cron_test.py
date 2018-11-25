@@ -45,7 +45,7 @@ class TestCron(unittest.TestCase):
 
         self.assertEqual(c.last_time_run(), constants.CRON_TIME0)
 
-    def test_cron_run_everyday(self):
+    def test_cron_run_everyday_1(self):
         print("Testing cron schedule when run everyday")
 
         now = datetime.now().replace(day=1,hour=10,minute=30, second=0, microsecond=0)
@@ -95,7 +95,7 @@ class TestCron(unittest.TestCase):
 
         # awesome, this work. Now test the edge case when the month is january and we're on the 31
 
-    def test_cron_run_everyday2(self):
+    def test_cron_run_everyday_2(self):
         c = cron.Cron("test", "12h *", db_in_memory=True)
 
         now = datetime.now().replace(year=2018,month=12,day=31,hour=10,minute=30, second=0, microsecond=0)
@@ -166,7 +166,7 @@ class TestCron(unittest.TestCase):
         expected = datetime.now().replace(year=2018,month=8,day=17,hour=13,minute=0, second=0, microsecond=0)
         self.assertEqual(c.next_occurrence(now), expected)
 
-    def test_cron_run_custom_schedule(self):
+    def test_cron_run_custom_schedule_1(self):
         print("Testing cron schedule when run monday, wednesday, and sunday")
 
         cronString = "23h 0,2,6"
@@ -230,7 +230,7 @@ class TestCron(unittest.TestCase):
         self.assertEqual(c.next_occurrence(now), expected)
 
 
-    def test_cron_run_custom_schedule2(self):
+    def test_cron_run_custom_schedule_2(self):
         print("Testing cron schedule when run every saturday")
 
         cron_string = "0h 5" #midnight on friday (00:00 saturday)
@@ -324,7 +324,7 @@ class TestCron(unittest.TestCase):
             now = now + timedelta(seconds=ticks_seconds)
 
 
-    def test_cron_run_everyday(self):
+    def test_cron_run_everyday_3(self):
         print("Testing cron schedule when run everyday :")
         c = cron.Cron("test", "12h *", db_in_memory=True)
         last_run = constants.CRON_TIME0
@@ -340,7 +340,7 @@ class TestCron(unittest.TestCase):
 
             day += 1
 
-    def test_cron_run_custom_schedule(self):
+    def test_cron_run_custom_schedule_3(self):
         print("Testing cron schedule when run monday, wednesday, and sunday")
 
         c = cron.Cron("test", "23h 0,2,6", db_in_memory=True)
