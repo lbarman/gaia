@@ -15,7 +15,7 @@ db.sqlite:
 	python3 -c "from gaia_client.cron import *; Cron()"
 
 test: gaia_client/protobufs_pb2.py gaia_client/protobufs_pb2_grpc.py
-	pytest
+	python -m pytest -v
 
 coverage:
 	rm -f .coverage
