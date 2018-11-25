@@ -10,12 +10,10 @@ script:
   - make -C server test
   - make -C server coverage
   - rm -f .coverage
-  - cat server/.coverage
-  - cat server/.coverage > .coverage
+  - cat server/.coverage > .coverage_server
   - make -C client/python test
   - make -C client/python coverage
-  - cat client/python/.coverage
-  - cat client/python/.coverage >> .coverage
-  - cat .coverage
+  - cat client/python/.coverage > .coverage_client
+  - coverage combine
   - coveralls
   - deactivate
