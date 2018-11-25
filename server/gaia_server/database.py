@@ -1,6 +1,7 @@
 import sqlite3
 from datetime import datetime, timedelta
 import gaia_server.constants as constants
+import gaia_server.protobufs_pb2 as protobufs_pb2
 
 
 class Database:
@@ -16,6 +17,15 @@ class Database:
         self.cursor.execute('PRAGMA foreign_keys=ON;')
 
     def recreate_database(self):
+        self.cursor.execute('\n'
+                            '            CREATE TABLE IF NOT EXISTS action_reports (\n'
+                            '              `id` INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,\n'
+                            '              `server_timestamp` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,\n'
+                            '              `local_timestamp` DATETIME DEFAULT NULL,\n'
+                            '              `action_type` BOOLEAN DEFAULT 0,\n'
+                            '              `action_details` TEXT DEFAULT NULL\n'
+                            '            )\n'
+                            '        ')
         self.cursor.execute('\n'
                             '            CREATE TABLE IF NOT EXISTS status (\n'
                             '              `id` INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,\n'
@@ -227,3 +237,48 @@ class Database:
             answer.append(named_row)
 
         return answer
+
+
+    def get_all_action_reports(self):
+        self.cursor.execute('SELECT \n'
+                            '            id,\n'
+                            '            server_timestamp,\n'
+                            '            local_timestamp,\n'
+                            '            action_type,\n'
+                            '            action_details\n'
+                            '            FROM action_reports \n'
+                            '            ORDER BY id DESC')
+
+        answer = []
+        for row in self.cursor:
+            named_row = dict()
+            named_row['id'] = row[0]
+            named_row['server_timestamp'] = datetime.strptime(row[1], "%Y-%m-%d %H:%M:%S")
+            named_row['local_timestamp'] = datetime.strptime(row[2], "%Y-%m-%d %H:%M:%S")
+            named_row['action_type'] = row[3]
+            named_row['action_details'] = row[4]
+            answer.append(named_row)
+
+        return answer
+
+    def save_action_report(self, action_report, number_of_days_to_keep_status=constants.NUMBER_OF_DAYS_TO_KEEP_STATUS):
+
+        # delete things older than 1 week ago
+        one_week_ago = datetime.today() - timedelta(days=number_of_days_to_keep_status)
+        one_week_ago_str = one_week_ago.strftime("%Y-%m-%d %H:%M:%S")
+        self.cursor.execute('DELETE FROM action_reports WHERE server_timestamp <= (?)', (one_week_ago_str,))
+
+        action_type = 0
+        if action_report.action == protobufs_pb2.ActionReport.FEEDING:
+            action_type = 1
+        elif action_report.action == protobufs_pb2.ActionReport.WATERING:
+            action_type = 2
+
+        self.cursor.execute('INSERT INTO action_reports(\n'
+                            '            local_timestamp,\n'
+                            '            action_type,\n'
+                            '            action_details) VALUES (?,?,?)',
+                            (action_report.local_timestamp,
+                             action_type,
+                             action_report.action_details))
+        self.db.commit()

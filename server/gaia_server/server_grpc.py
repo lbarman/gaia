@@ -19,13 +19,13 @@ class GaiaServiceServicer(protobufs_pb2_grpc.GaiaServiceServicer):
 
         db = None
         if self.useRealDatabase:
-            db = database.Database(in_memory=False)  # sql schema was already instanciated
+            db = database.Database(in_memory=False)  # sql schema was already instantiated
         else:
             db = database.Database(in_memory=True)
             db.recreate_database()
 
         if self.verbose:
-            print("Got query", status, context)
+            print("Got Ping", status, context)
 
         # prepare empty response
         response = protobufs_pb2.Response()
@@ -62,6 +62,36 @@ class GaiaServiceServicer(protobufs_pb2_grpc.GaiaServiceServicer):
             print("Answering with", response)
 
         return response
+
+
+    def ActionDone(self, action_report, context):
+
+        db = None
+        if self.useRealDatabase:
+            db = database.Database(in_memory=False)  # sql schema was already instantiated
+        else:
+            db = database.Database(in_memory=True)
+            db.recreate_database()
+
+        if self.verbose:
+            print("Got ActionReport", action_report, context)
+
+        # prepare empty response
+        response = protobufs_pb2.Response()
+        response.action = protobufs_pb2.Response.DO_NOTHING
+
+        if action_report.authentication_token != constants.AUTHENTICATION_TOKEN:
+            print('Invalid token provided', action_report.authentication_token, "ignoring")
+            return response
+
+        #db.save_status(status)
+
+        # prepare empty response
+        response = protobufs_pb2.Response()
+        response.action = protobufs_pb2.Response.DO_NOTHING
+        return response
+
+
 
 def start_grpc_server(override_servicer=None, verbose=False):
     server = grpc.server(futures.ThreadPoolExecutor(max_workers=constants.GRPC_MAX_WORKERS))

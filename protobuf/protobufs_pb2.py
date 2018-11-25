@@ -19,14 +19,40 @@ DESCRIPTOR = _descriptor.FileDescriptor(
   package='gaia',
   syntax='proto2',
   serialized_options=None,
-  serialized_pb=_b('\n\x0fprotobufs.proto\x12\x04gaia\"\x9c\x02\n\x06\x43onfig\x12 \n\x18\x66\x65\x65\x64ing_module_activated\x18\x01 \x02(\x08\x12!\n\x19watering_module_activated\x18\x02 \x02(\x08\x12!\n\x19\x66\x65\x65\x64ing_module_cronstring\x18\x03 \x02(\t\x12\"\n\x1awatering_module_cronstring\x18\x04 \x02(\t\x12 \n\x18watering_pump_1_duration\x18\x05 \x02(\x05\x12 \n\x18watering_pump_2_duration\x18\x06 \x02(\x05\x12 \n\x18watering_pump_3_duration\x18\x07 \x02(\x05\x12 \n\x18watering_pump_4_duration\x18\x08 \x02(\x05\"U\n\x0cSystemStatus\x12\x0e\n\x06uptime\x18\x01 \x02(\t\x12\x0e\n\x06memory\x18\x02 \x02(\t\x12\x12\n\ndisk_usage\x18\x03 \x02(\t\x12\x11\n\tprocesses\x18\x04 \x02(\t\"\x90\x01\n\x06Status\x12\x1c\n\x14\x61uthentication_token\x18\x01 \x02(\t\x12\x17\n\x0flocal_timestamp\x18\x02 \x02(\t\x12$\n\x0e\x63urrent_config\x18\x03 \x02(\x0b\x32\x0c.gaia.Config\x12)\n\rsystem_status\x18\x04 \x02(\x0b\x32\x12.gaia.SystemStatus\"\x83\x01\n\x08Response\x12%\n\x06\x61\x63tion\x18\x01 \x02(\x0e\x32\x15.gaia.Response.Action\x12\x1c\n\x06\x63onfig\x18\x02 \x01(\x0b\x32\x0c.gaia.Config\"2\n\x06\x41\x63tion\x12\x0e\n\nDO_NOTHING\x10\x00\x12\n\n\x06REBOOT\x10\x01\x12\x0c\n\x08SHUTDOWN\x10\x02\x32\x35\n\x0bGaiaService\x12&\n\x04Ping\x12\x0c.gaia.Status\x1a\x0e.gaia.Response\"\x00')
+  serialized_pb=_b('\n\x0fprotobufs.proto\x12\x04gaia\"\x9c\x02\n\x06\x43onfig\x12 \n\x18\x66\x65\x65\x64ing_module_activated\x18\x01 \x02(\x08\x12!\n\x19watering_module_activated\x18\x02 \x02(\x08\x12!\n\x19\x66\x65\x65\x64ing_module_cronstring\x18\x03 \x02(\t\x12\"\n\x1awatering_module_cronstring\x18\x04 \x02(\t\x12 \n\x18watering_pump_1_duration\x18\x05 \x02(\x05\x12 \n\x18watering_pump_2_duration\x18\x06 \x02(\x05\x12 \n\x18watering_pump_3_duration\x18\x07 \x02(\x05\x12 \n\x18watering_pump_4_duration\x18\x08 \x02(\x05\"U\n\x0cSystemStatus\x12\x0e\n\x06uptime\x18\x01 \x02(\t\x12\x0e\n\x06memory\x18\x02 \x02(\t\x12\x12\n\ndisk_usage\x18\x03 \x02(\t\x12\x11\n\tprocesses\x18\x04 \x02(\t\"\x90\x01\n\x06Status\x12\x1c\n\x14\x61uthentication_token\x18\x01 \x02(\t\x12\x17\n\x0flocal_timestamp\x18\x02 \x02(\t\x12$\n\x0e\x63urrent_config\x18\x03 \x02(\x0b\x32\x0c.gaia.Config\x12)\n\rsystem_status\x18\x04 \x02(\x0b\x32\x12.gaia.SystemStatus\"\xd4\x01\n\x0c\x41\x63tionReport\x12\x1c\n\x14\x61uthentication_token\x18\x01 \x02(\t\x12\x17\n\x0flocal_timestamp\x18\x02 \x02(\t\x12\x35\n\x06\x61\x63tion\x18\x03 \x02(\x0e\x32%.gaia.ActionReport.ActionReportAction\x12\x16\n\x0e\x61\x63tion_details\x18\x04 \x02(\t\">\n\x12\x41\x63tionReportAction\x12\r\n\tUNDEFINED\x10\x00\x12\x0b\n\x07\x46\x45\x45\x44ING\x10\x01\x12\x0c\n\x08WATERING\x10\x02\"\x93\x01\n\x08Response\x12-\n\x06\x61\x63tion\x18\x01 \x02(\x0e\x32\x1d.gaia.Response.ResponseAction\x12\x1c\n\x06\x63onfig\x18\x02 \x01(\x0b\x32\x0c.gaia.Config\":\n\x0eResponseAction\x12\x0e\n\nDO_NOTHING\x10\x00\x12\n\n\x06REBOOT\x10\x01\x12\x0c\n\x08SHUTDOWN\x10\x02\x32\x65\n\x0bGaiaService\x12$\n\x04Ping\x12\x0c.gaia.Status\x1a\x0e.gaia.Response\x12\x30\n\nActionDone\x12\x12.gaia.ActionReport\x1a\x0e.gaia.Response')
 )
 
 
 
-_RESPONSE_ACTION = _descriptor.EnumDescriptor(
-  name='Action',
-  full_name='gaia.Response.Action',
+_ACTIONREPORT_ACTIONREPORTACTION = _descriptor.EnumDescriptor(
+  name='ActionReportAction',
+  full_name='gaia.ActionReport.ActionReportAction',
+  filename=None,
+  file=DESCRIPTOR,
+  values=[
+    _descriptor.EnumValueDescriptor(
+      name='UNDEFINED', index=0, number=0,
+      serialized_options=None,
+      type=None),
+    _descriptor.EnumValueDescriptor(
+      name='FEEDING', index=1, number=1,
+      serialized_options=None,
+      type=None),
+    _descriptor.EnumValueDescriptor(
+      name='WATERING', index=2, number=2,
+      serialized_options=None,
+      type=None),
+  ],
+  containing_type=None,
+  serialized_options=None,
+  serialized_start=697,
+  serialized_end=759,
+)
+_sym_db.RegisterEnumDescriptor(_ACTIONREPORT_ACTIONREPORTACTION)
+
+_RESPONSE_RESPONSEACTION = _descriptor.EnumDescriptor(
+  name='ResponseAction',
+  full_name='gaia.Response.ResponseAction',
   filename=None,
   file=DESCRIPTOR,
   values=[
@@ -45,10 +71,10 @@ _RESPONSE_ACTION = _descriptor.EnumDescriptor(
   ],
   containing_type=None,
   serialized_options=None,
-  serialized_start=628,
-  serialized_end=678,
+  serialized_start=851,
+  serialized_end=909,
 )
-_sym_db.RegisterEnumDescriptor(_RESPONSE_ACTION)
+_sym_db.RegisterEnumDescriptor(_RESPONSE_RESPONSEACTION)
 
 
 _CONFIG = _descriptor.Descriptor(
@@ -235,6 +261,59 @@ _STATUS = _descriptor.Descriptor(
 )
 
 
+_ACTIONREPORT = _descriptor.Descriptor(
+  name='ActionReport',
+  full_name='gaia.ActionReport',
+  filename=None,
+  file=DESCRIPTOR,
+  containing_type=None,
+  fields=[
+    _descriptor.FieldDescriptor(
+      name='authentication_token', full_name='gaia.ActionReport.authentication_token', index=0,
+      number=1, type=9, cpp_type=9, label=2,
+      has_default_value=False, default_value=_b("").decode('utf-8'),
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR),
+    _descriptor.FieldDescriptor(
+      name='local_timestamp', full_name='gaia.ActionReport.local_timestamp', index=1,
+      number=2, type=9, cpp_type=9, label=2,
+      has_default_value=False, default_value=_b("").decode('utf-8'),
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR),
+    _descriptor.FieldDescriptor(
+      name='action', full_name='gaia.ActionReport.action', index=2,
+      number=3, type=14, cpp_type=8, label=2,
+      has_default_value=False, default_value=0,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR),
+    _descriptor.FieldDescriptor(
+      name='action_details', full_name='gaia.ActionReport.action_details', index=3,
+      number=4, type=9, cpp_type=9, label=2,
+      has_default_value=False, default_value=_b("").decode('utf-8'),
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR),
+  ],
+  extensions=[
+  ],
+  nested_types=[],
+  enum_types=[
+    _ACTIONREPORT_ACTIONREPORTACTION,
+  ],
+  serialized_options=None,
+  is_extendable=False,
+  syntax='proto2',
+  extension_ranges=[],
+  oneofs=[
+  ],
+  serialized_start=547,
+  serialized_end=759,
+)
+
+
 _RESPONSE = _descriptor.Descriptor(
   name='Response',
   full_name='gaia.Response',
@@ -261,7 +340,7 @@ _RESPONSE = _descriptor.Descriptor(
   ],
   nested_types=[],
   enum_types=[
-    _RESPONSE_ACTION,
+    _RESPONSE_RESPONSEACTION,
   ],
   serialized_options=None,
   is_extendable=False,
@@ -269,18 +348,21 @@ _RESPONSE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=547,
-  serialized_end=678,
+  serialized_start=762,
+  serialized_end=909,
 )
 
 _STATUS.fields_by_name['current_config'].message_type = _CONFIG
 _STATUS.fields_by_name['system_status'].message_type = _SYSTEMSTATUS
-_RESPONSE.fields_by_name['action'].enum_type = _RESPONSE_ACTION
+_ACTIONREPORT.fields_by_name['action'].enum_type = _ACTIONREPORT_ACTIONREPORTACTION
+_ACTIONREPORT_ACTIONREPORTACTION.containing_type = _ACTIONREPORT
+_RESPONSE.fields_by_name['action'].enum_type = _RESPONSE_RESPONSEACTION
 _RESPONSE.fields_by_name['config'].message_type = _CONFIG
-_RESPONSE_ACTION.containing_type = _RESPONSE
+_RESPONSE_RESPONSEACTION.containing_type = _RESPONSE
 DESCRIPTOR.message_types_by_name['Config'] = _CONFIG
 DESCRIPTOR.message_types_by_name['SystemStatus'] = _SYSTEMSTATUS
 DESCRIPTOR.message_types_by_name['Status'] = _STATUS
+DESCRIPTOR.message_types_by_name['ActionReport'] = _ACTIONREPORT
 DESCRIPTOR.message_types_by_name['Response'] = _RESPONSE
 _sym_db.RegisterFileDescriptor(DESCRIPTOR)
 
@@ -305,6 +387,13 @@ Status = _reflection.GeneratedProtocolMessageType('Status', (_message.Message,),
   ))
 _sym_db.RegisterMessage(Status)
 
+ActionReport = _reflection.GeneratedProtocolMessageType('ActionReport', (_message.Message,), dict(
+  DESCRIPTOR = _ACTIONREPORT,
+  __module__ = 'protobufs_pb2'
+  # @@protoc_insertion_point(class_scope:gaia.ActionReport)
+  ))
+_sym_db.RegisterMessage(ActionReport)
+
 Response = _reflection.GeneratedProtocolMessageType('Response', (_message.Message,), dict(
   DESCRIPTOR = _RESPONSE,
   __module__ = 'protobufs_pb2'
@@ -320,8 +409,8 @@ _GAIASERVICE = _descriptor.ServiceDescriptor(
   file=DESCRIPTOR,
   index=0,
   serialized_options=None,
-  serialized_start=680,
-  serialized_end=733,
+  serialized_start=911,
+  serialized_end=1012,
   methods=[
   _descriptor.MethodDescriptor(
     name='Ping',
@@ -329,6 +418,15 @@ _GAIASERVICE = _descriptor.ServiceDescriptor(
     index=0,
     containing_service=None,
     input_type=_STATUS,
+    output_type=_RESPONSE,
+    serialized_options=None,
+  ),
+  _descriptor.MethodDescriptor(
+    name='ActionDone',
+    full_name='gaia.GaiaService.ActionDone',
+    index=1,
+    containing_service=None,
+    input_type=_ACTIONREPORT,
     output_type=_RESPONSE,
     serialized_options=None,
   ),

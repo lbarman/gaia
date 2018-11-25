@@ -2,7 +2,8 @@ syntax = "proto2";
 package gaia;
 
 service GaiaService {
-  rpc Ping(Status) returns (Response) {}
+  rpc Ping(Status) returns (Response);
+  rpc ActionDone(ActionReport) returns (Response);
 }
 
 message Config {
@@ -30,12 +31,24 @@ message Status {
   required SystemStatus system_status = 4;
 }
 
+message ActionReport {
+  enum ActionReportAction {
+    UNDEFINED = 0;
+    FEEDING = 1;
+    WATERING = 2;
+  }
+  required string authentication_token = 1;
+  required string local_timestamp = 2;
+  required ActionReportAction action = 3;
+  required string action_details = 4;
+}
+
 message Response {
-  enum Action {
+  enum ResponseAction {
     DO_NOTHING = 0;
     REBOOT = 1;
     SHUTDOWN = 2;
   }
-  required Action action = 1;
+  required ResponseAction action = 1;
   optional Config config = 2;
 }

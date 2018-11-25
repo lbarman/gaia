@@ -19,6 +19,13 @@ def dummy_config():
     config.watering_pump_4_duration = 40
     return config
 
+def dummy_action_report():
+    action_report = protobufs_pb2.ActionReport()
+    action_report.local_timestamp = datetime(2009, 12, 1, 19, 31, 1, 40113).strftime("%Y-%m-%d %H:%M:%S")
+    action_report.action = protobufs_pb2.ActionReport.FEEDING
+    action_report.action_details = "a long string"
+    return action_report
+
 
 def dummy_status_update():
     status = protobufs_pb2.Status()
@@ -172,6 +179,49 @@ class DatabaseTest(unittest.TestCase):
         self.assertEqual(1, count_records('configs', db.cursor))
         self.assertEqual(1, count_records('system_status', db.cursor))
         self.assertEqual(1, count_records('status', db.cursor))
+
+
+    def test_action_report(self):
+        db = database.Database(in_memory=True)
+        db.recreate_database()
+
+        # initially, there should be no command
+        self.assertEqual(db.get_all_action_reports(), [])
+
+        # save and retrieve one
+        report1 = dummy_action_report()
+
+        db.save_action_report(report1)
+        all_reports = db.get_all_action_reports()
+        self.assertNotEqual(all_reports, None)
+        self.assertEqual(len(all_reports), 1)
+        report2 = all_reports[0]
+
+        self.assertEqual(report2['local_timestamp'].strftime("%Y-%m-%d %H:%M:%S"), report1.local_timestamp)
+        self.assertEqual(report2['action_type'], 1)
+        self.assertEqual(report2['action_details'], report1.action_details)
+
+
+        # save and retrieve two
+        report3 = dummy_action_report()
+        report3.action = protobufs_pb2.ActionReport.WATERING
+        report3.action_details = 'test'
+
+        db.save_action_report(report3)
+        all_reports = db.get_all_action_reports()
+        self.assertNotEqual(all_reports, None)
+        self.assertEqual(len(all_reports), 2)
+
+        self.assertEqual(all_reports[0]['local_timestamp'].strftime("%Y-%m-%d %H:%M:%S"), report3.local_timestamp)
+        self.assertEqual(all_reports[0]['action_type'], 2)
+        self.assertEqual(all_reports[0]['action_details'], report3.action_details)
+        self.assertEqual(all_reports[1]['local_timestamp'].strftime("%Y-%m-%d %H:%M:%S"), report1.local_timestamp)
+        self.assertEqual(all_reports[1]['action_type'], 1)
+        self.assertEqual(all_reports[1]['action_details'], report1.action_details)
+
+        # should remove all things older than X days, here with X=0 => table should be truncated
+        db.save_action_report(report3, number_of_days_to_keep_status=0)
+        self.assertEqual(1, count_records('action_records', db.cursor))
 
 
 if __name__ == '__main__':

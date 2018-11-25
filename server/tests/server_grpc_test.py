@@ -14,6 +14,14 @@ import gaia_server.constants as constants
 import tests.database_test as database_test
 import pytest
 
+def dummy_action_report():
+    action_report = protobufs_pb2.ActionReport()
+    action_report.local_timestamp = datetime(2009, 12, 1, 19, 31, 1, 40113).strftime("%Y-%m-%d %H:%M:%S")
+    action_report.action = protobufs_pb2.ActionReport.FEEDING
+    action_report.action_details = "a long string"
+    action_report.authentication_token = 'invalid'
+    return action_report
+
 def dummy_status_message():
     status = protobufs_pb2.Status()
     status.authentication_token = "authentication_token_str"
@@ -51,6 +59,11 @@ class DummyServiceServicer(protobufs_pb2_grpc.GaiaServiceServicer):
         config.watering_pump_2_duration = 20
         config.watering_pump_3_duration = 30
         config.watering_pump_4_duration = 40
+        return answer
+
+    def ActionDone(self, request, context):
+        answer = protobufs_pb2.Response()
+        answer.action = protobufs_pb2.Response.DO_NOTHING
         return answer
 
 
@@ -93,10 +106,13 @@ class GRPCServerTest(unittest.TestCase):
         stub = protobufs_pb2_grpc.GaiaServiceStub(channel)
 
         # send message
-        status = dummy_status_message()
 
         with pytest.raises(Exception):
-            response = stub.Ping(status)
+            response = stub.Ping(dummy_status_message())
+            assert response is None
+
+        with pytest.raises(Exception):
+            response = stub.ActionDone(dummy_action_report())
             assert response is None
 
         server.stop(0)
@@ -120,6 +136,15 @@ class GRPCServerTest(unittest.TestCase):
         self.assertEqual(response.action, protobufs_pb2.Response.DO_NOTHING)
         self.assertEqual(response.HasField('config'), False)
 
+        # send message
+        report = dummy_action_report()
+        report.authentication_token = constants.AUTHENTICATION_TOKEN
+        response = stub.ActionDone(report)
+
+        # this should be the default
+        self.assertEqual(response.action, protobufs_pb2.Response.DO_NOTHING)
+        self.assertEqual(response.HasField('config'), False)
+
         server.stop(0)
 
     def test_real_file_wrong_auth_auth(self):
@@ -138,11 +163,12 @@ class GRPCServerTest(unittest.TestCase):
         channel = grpc.insecure_channel('127.0.0.1:'+str(constants.GRPC_SERVER_PORT))
         stub = protobufs_pb2_grpc.GaiaServiceStub(channel)
 
-        # send message
-        status = dummy_status_message()
+        with pytest.raises(Exception):
+            response = stub.Ping(dummy_status_message())
+            assert response is None
 
         with pytest.raises(Exception):
-            response = stub.Ping(status)
+            response = stub.ActionDone(dummy_action_report())
             assert response is None
 
         server.stop(0)
@@ -180,6 +206,15 @@ class GRPCServerTest(unittest.TestCase):
         self.assertEqual(response.config.watering_pump_2_duration, config.watering_pump_2_duration)
         self.assertEqual(response.config.watering_pump_3_duration, config.watering_pump_3_duration)
         self.assertEqual(response.config.watering_pump_4_duration, config.watering_pump_4_duration)
+
+        # send message
+        report = dummy_action_report()
+        report.authentication_token = constants.AUTHENTICATION_TOKEN
+        response = stub.ActionDone(report)
+
+        # this should be the default
+        self.assertEqual(response.action, protobufs_pb2.Response.DO_NOTHING)
+        self.assertEqual(response.HasField('config'), False)
 
         server.stop(0)
 
