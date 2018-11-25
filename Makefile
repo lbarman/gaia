@@ -6,6 +6,7 @@ protobuf:
 
 test:
 	$(MAKE) -C server test
+	$(MAKE) -C client/python test
 
 coverage:
 	$(MAKE) -C server coverage
