@@ -5,7 +5,7 @@ sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), os.path.
 import gaia_client.cron as cron
 import gaia_client.constants as constants
 from datetime import datetime, timedelta
-import pytest
+
 
 class TestCron(unittest.TestCase):
 
@@ -45,7 +45,6 @@ class TestCron(unittest.TestCase):
 
         self.assertEqual(c.last_time_run(), constants.CRON_TIME0)
 
-    @pytest.mark.slow
     def test_cron_run_everyday(self):
         print("Testing cron schedule when run everyday")
 
@@ -341,7 +340,6 @@ class TestCron(unittest.TestCase):
 
             day += 1
 
-    @pytest.mark.slow
     def test_cron_run_custom_schedule(self):
         print("Testing cron schedule when run monday, wednesday, and sunday")
 
@@ -376,7 +374,6 @@ class TestCron(unittest.TestCase):
             while day == 2 or day == 3 or day == 4 or day == 7 or day == 9 or day == 10 or day == 11:
                 day += 1
 
-    @pytest.mark.slow
     def test_cron_run_over_new_year(self):
         print("Testing cron schedule when run monday, thursday")
 
