@@ -6,10 +6,6 @@ script:
   - pip install --user --upgrade pip virtualenv
   - virtualenv -p python3 .venv
   - source .venv/bin/activate
-  - make -C server install
+  - make -C client/python install
   - make -C client/python test
-  - make -C client/python coverage
-  - cat client/python/.coverage
-  - cat client/python/.coverage >> .coverage
-  - coveralls
   - deactivate
