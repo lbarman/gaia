@@ -26,7 +26,7 @@ test: gaia_server/protobufs_pb2.py gaia_server/protobufs_pb2_grpc.py
 coverage:
 	rm -f .coverage
 	$(MAKE) clean
-	coverage run -m py.test
+	coverage run -m py.test -v
 
 clean:
 	rm -rf db.sqlite
