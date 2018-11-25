@@ -1,0 +1,25 @@
+[run]
+omit =
+    protobufs_pb2.py
+    */protobufs_pb2.py
+    protobufs_pb2_grpc.py
+    */protobufs_pb2_grpc.py
+    /home/jwhite/.virtualenvs
+    /home/jwhite/.virtualenvs/*
+    /home/travis/build/lbarman/gaia/.venv/
+    /home/travis/build/lbarman/gaia/.venv/*
+    .venv
+    .venv/*
+    */.venv/
+    */.venv/*
+
+[report]
+exclude_lines =
+    pragma: no cover
+    def __repr__
+    if self.debug:
+    if settings.DEBUG
+    raise AssertionError
+    raise NotImplementedError
+    if 0:
+    if __name__ == .__main__.:

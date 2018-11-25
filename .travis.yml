@@ -16,5 +16,6 @@ script:
   - make -C client/python coverage
   - cat client/python/.coverage
   - cat client/python/.coverage >> .coverage
+  - cat .coverage
   - coveralls
   - deactivate
