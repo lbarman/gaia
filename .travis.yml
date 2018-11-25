@@ -14,6 +14,9 @@ script:
   - make -C client/python test
   - make -C client/python coverage
   - cat client/python/.coverage > .coverage_client
+  - cat .coverage_client
+  - cat .coverage_server
   - coverage combine
+  - cat .coverage
   - coveralls
   - deactivate
