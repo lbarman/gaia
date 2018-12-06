@@ -221,7 +221,7 @@ class DatabaseTest(unittest.TestCase):
 
         # should remove all things older than X days, here with X=0 => table should be truncated
         db.save_action_report(report3, number_of_days_to_keep_status=0)
-        self.assertEqual(1, count_records('action_records', db.cursor))
+        self.assertEqual(1, count_records('action_reports', db.cursor))
 
 
 if __name__ == '__main__':
