@@ -12,7 +12,7 @@ gaia_server/protobufs_pb2.py: import-protobuf
 gaia_server/protobufs_pb2_grpc.py: import-protobuf
 
 serve-grpc: gaia_server/protobufs_pb2.py gaia_server/protobufs_pb2_grpc.py
-	python3 gaia_server/server_grpc.py
+	PYTHONPATH=$(shell pwd) python3 gaia_server/server_grpc.py
 
 db.sqlite:
 	python3 -c "from gaia_server.database import *; Database().recreate_database()"
