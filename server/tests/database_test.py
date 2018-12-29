@@ -31,6 +31,10 @@ def dummy_status_update():
     status = protobufs_pb2.Status()
     status.authentication_token = "authentication_token_str"
     status.local_timestamp = datetime(2009, 12, 1, 19, 31, 1, 40113).strftime("%Y-%m-%d %H:%M:%S")
+    status.temperature = 12
+    status.humidity = 13
+    status.temperature2 = 24.1
+    status.temperature3 = 25.2
 
     config = status.current_config
     config.feeding_module_activated = True

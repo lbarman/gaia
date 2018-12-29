@@ -30,7 +30,11 @@ class Database:
                             '            CREATE TABLE IF NOT EXISTS status (\n'
                             '              `id` INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,\n'
                             '              `server_timestamp` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,\n'
-                            '              `local_timestamp` DATETIME DEFAULT NULL\n'
+                            '              `local_timestamp` DATETIME DEFAULT NULL,\n'
+                            '              `temperature` INTEGER DEFAULT -1,\n'
+                            '              `humidity` INTEGER DEFAULT -1,\n'
+                            '              `temperature2` REAL DEFAULT -1.0,\n'
+                            '              `temperature3` REAL DEFAULT -1.0\n'
                             '            )\n'
                             '        ')
         self.cursor.execute('\n'
