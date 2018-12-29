@@ -105,6 +105,7 @@ def main():
     db = database.Database()
     next_command = db.get_command()
     all_status = db.get_all_status()
+    all_reports = db.get_all_action_reports()
 
     next_cmd_string = '&bot;'
     if next_command is not None:
@@ -114,16 +115,13 @@ def main():
     tokens = dict()
     tokens['TEST_PORT_SSH'] = helpers.build_port_open_html_string(helpers.is_port_open(constants.PORT_SSH))
     tokens['TEST_PORT_VIDEO'] = helpers.build_port_open_html_string(helpers.is_port_open(constants.PORT_VIDEO))
-    tokens['DATA'] = helpers.build_status_data_html(all_status)
+    tokens['STATUS'] = helpers.build_status_data_html(all_status)
+    tokens['REPORTS'] = helpers.build_reports_data_html(all_reports)
+    tokens['CURRENT_CONFIG'] = helpers.build_current_config(all_status[0])
     tokens['NEXT_COMMAND'] = next_cmd_string
     tokens['PORT_VIDEO'] = str(constants.PORT_VIDEO)
     helpers.build_water_levels_dict(None, None, 100, None, tokens)
 
-    tokens['FEEDING_HOUR'] = '12'
-    tokens['WATERING_HOUR'] = '14'
-
-    tokens['FEEDING_DISABLED'] = ''  # 'disabled'
-    tokens['WATERING_DISABLED'] = ''  # 'disabled'
 
     # build the template
     html = template_source

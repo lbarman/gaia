@@ -29,65 +29,15 @@
             </div>
         </div>
 
-        <div id="current_config">
-            <h3>Current Config</h3>
-            <div id="feeder-module" class="module {{FEEDING_DISABLED}}">
-                <div class="foodbox">
-                    <div class="foodpill" style="top:20px; left: 10px"></div>
-                    <div class="foodpill" style="top:40px; left: 0px"></div>
-                    <div class="foodpill" style="top:40px; left: 15px"></div>
-                </div>
-                <div class="label">Feeder</div>
-            </div>
-
-            <div id="water-module" class="module {{WATERING_DISABLED}}">
-                <div id="glasscontainer">
-                    <div id="glass1" class="glass"><div class="water" style="height:{{WATER1_LEVEL}}%"></div><span>{{WATER1_NUMBER}}</span></div>
-                    <div id="glass2" class="glass"><div class="water" style="height:{{WATER2_LEVEL}}%"></div><span>{{WATER2_NUMBER}}</span></div>
-                    <div id="glass3" class="glass"><div class="water" style="height:{{WATER3_LEVEL}}%"></div><span>{{WATER3_NUMBER}}</span></div>
-                    <div id="glass4" class="glass"><div class="water" style="height:{{WATER4_LEVEL}}%"></div><span>{{WATER4_NUMBER}}</span></div>
-                </div>
-                <div class="label">Watering system</div>
-            </div>
-
-            <div id="weekdays-module" class="module">
-                <div id="weekdays-feeder" class="weekdays {{FEEDING_DISABLED}}">
-                    <table>
-                        <tr>
-                            <td class="weekday_on">M</td>
-                            <td class="weekday_on">T</td>
-                            <td class="weekday_on">W</td>
-                            <td class="weekday_on">T</td>
-                            <td class="weekday_on">F</td>
-                            <td class="weekday_on">S</td>
-                            <td class="weekday_on">S</td>
-                        </tr>
-                    </table>
-                    <span>@</span>
-                    <div class="hour">{{FEEDING_HOUR}}h</div>
-                </div>
-                <div id="weekdays-water" class="weekdays {{WATERING_DISABLED}}">
-                    <table>
-                        <tr>
-                            <td class="weekday_on">M</td>
-                            <td>T</td>
-                            <td class="weekday_on">W</td>
-                            <td>T</td>
-                            <td class="weekday_on">F</td>
-                            <td>S</td>
-                            <td>S</td>
-                        </tr>
-                    </table>
-                    <span>@</span>
-                    <div class="hour">{{WATERING_HOUR}}h</div>
-                </div>
-            </div>
-        </div>
+        {{CURRENT_CONFIG}}
 
         <div id="update_response">
             <h3>Update Config</h3>
-            Pending config update: <pre>{{NEXT_COMMAND}}</pre>
-            <form id="formNewCommand" method="post" action="/command">
+            Pending config update: 
+            <pre>{{NEXT_COMMAND}}</pre>
+            <a href="#" id="update_config_link">(change)</a>
+
+            <form id="formNewCommand" method="post" action="/command" style="display:none">
                 <p>Add new command: <select id="newCommand"  name="newCommand" >
                   <option value="0">DO_NOTHING</option>
                   <option value="1">SHUTDOWN</option>
@@ -126,9 +76,15 @@
             </form>
         </div>
 
-        <div id="data">
-            <h3>Data</h3>
-            {{DATA}}
+        <div class="header">
+            <h3><a href="#" id="status_link">Status</a> / <a href="#" id="reports_link">Reports</a></h3>
+        </div>
+
+        <div id="status">
+            {{STATUS}}
+        </div>
+        <div id="reports" style="display:none">
+            {{REPORTS}}
         </div>
 
     <script>
@@ -137,6 +93,28 @@
             $('#live_feed').html(videoStream);
             return false;
         }
+
+        function togglePanel(showPanel) {
+            //$('#summary').css('display', 'none')
+            $('#status').css('display', 'none')
+            $('#reports').css('display', 'none')
+            $('#'+showPanel).css('display', 'block')
+        }
+
+        $('#status_link').on('click', function(){
+            togglePanel('status')
+            return false;
+        });
+        $('#reports_link').on('click', function(){
+            togglePanel('reports')
+            return false;
+        });
+
+        $('#update_config_link').on('click', function(){
+            $('#formNewCommand').css('display', 'block')
+            $('#update_config_link').css('display', 'none')
+            return false;
+        })
 
         $('#updateConfig').on('change', function(){
             if(this.value == '1') {
