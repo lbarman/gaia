@@ -39,5 +39,5 @@ freeze:
 install: $(PYTHON_MODULES)
 	pip install -r $(PYTHON_MODULES)
 
-dummy_status: $(SQLITE_DB)
-	python3 -c "from tests.pings_dummy import *; insert_dummy_pings()"
+dummy_data: $(SQLITE_DB)
+	python3 tests/dummy_data.py

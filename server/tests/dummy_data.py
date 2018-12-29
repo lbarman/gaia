@@ -7,9 +7,12 @@ import gaia_server.database as database
 import gaia_server.protobufs_pb2 as protobufs_pb2
 
 
-def dummy_status_update(index):
+def dummy_status_update(day, hour):
+
+    index = day + 24 * hour
+
     status = protobufs_pb2.Status()
-    status_date = datetime.today() - timedelta(days=index)
+    status_date = datetime.today() - timedelta(days=day, hours=hour)
 
     status.authentication_token = "authentication_token_str"
     status.local_timestamp = status_date.strftime("%Y-%m-%d %H:%M:%S")
@@ -35,14 +38,39 @@ def dummy_status_update(index):
     systemstatus.processes = "processes_str" + str(index)
     return status
 
+def dummy_action_report(day):
+    report_date = datetime.today() - timedelta(days=day)
+
+    action_report = protobufs_pb2.ActionReport()
+    action_report.local_timestamp = report_date.strftime("%Y-%m-%d %H:%M:%S")
+
+    if day % 2 == 0:
+        action_report.action = protobufs_pb2.ActionReport.FEEDING
+    else:
+        action_report.action = protobufs_pb2.ActionReport.WATERING
+
+    action_report.action_details = "a long string for day " + str(day)
+    return action_report
+
+    return status
+
 
 def insert_dummy_pings():
     db = database.Database()
     db.recreate_database()
 
-    for i in range(0, 40):
-        db.save_status(dummy_status_update(i))
+    for day in range(0,14):
+        for hour in range(0,24):
+            db.save_status(dummy_status_update(day, hour))
+
+def insert_dummy_action_report():
+    db = database.Database()
+    db.recreate_database()
+
+    for i in range(0,14):
+        db.save_action_report(dummy_action_report(i))
 
 
 if __name__ == '__main__':
     insert_dummy_pings()
+    insert_dummy_action_report()

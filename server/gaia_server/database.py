@@ -158,8 +158,16 @@ class Database:
         self.cursor.execute('DELETE FROM status WHERE server_timestamp <= (?)', (one_week_ago_str,))
 
         # insert new
-        self.cursor.execute('INSERT INTO status(local_timestamp) VALUES (?)',
-                            (status_pb2.local_timestamp,))
+        self.cursor.execute('INSERT INTO status(local_timestamp,\n'
+                            '                   temperature,\n'
+                            '                   humidity,\n'
+                            '                   temperature2,\n'
+                            '                   temperature3) VALUES (?, ?, ?, ?, ?)',
+                            (status_pb2.local_timestamp,
+                             status_pb2.temperature,
+                             status_pb2.humidity,
+                             status_pb2.temperature2,
+                             status_pb2.temperature3,))
         status_id = self.cursor.execute('SELECT last_insert_rowid()').fetchone()[0]
 
         config = status_pb2.current_config
@@ -203,6 +211,10 @@ class Database:
                             '            status.id,\n'
                             '            status.server_timestamp,\n'
                             '            status.local_timestamp,\n'
+                            '            status.temperature,\n'
+                            '            status.humidity,\n'
+                            '            status.temperature2,\n'
+                            '            status.temperature3,\n'
                             '            configs.feeding_module_activated,\n'
                             '            configs.watering_module_activated,\n'
                             '            configs.feeding_module_cronstring,\n'
@@ -226,18 +238,22 @@ class Database:
             named_row['id'] = row[0]
             named_row['server_timestamp'] = datetime.strptime(row[1], "%Y-%m-%d %H:%M:%S")
             named_row['local_timestamp'] = datetime.strptime(row[2], "%Y-%m-%d %H:%M:%S")
-            named_row['feeding_module_activated'] = row[3]
-            named_row['watering_module_activated'] = row[4]
-            named_row['feeding_module_cronstring'] = row[5]
-            named_row['watering_module_cronstring'] = row[6]
-            named_row['watering_pump_1_duration'] = row[7]
-            named_row['watering_pump_2_duration'] = row[8]
-            named_row['watering_pump_3_duration'] = row[9]
-            named_row['watering_pump_4_duration'] = row[10]
-            named_row['uptime'] = row[11]
-            named_row['memory'] = row[12]
-            named_row['disk_usage'] = row[13]
-            named_row['processes'] = row[14]
+            named_row['temperature'] = row[3]
+            named_row['humidity'] = row[4]
+            named_row['temperature2'] = row[5]
+            named_row['temperature3'] = row[6]
+            named_row['feeding_module_activated'] = row[7]
+            named_row['watering_module_activated'] = row[8]
+            named_row['feeding_module_cronstring'] = row[9]
+            named_row['watering_module_cronstring'] = row[10]
+            named_row['watering_pump_1_duration'] = row[11]
+            named_row['watering_pump_2_duration'] = row[12]
+            named_row['watering_pump_3_duration'] = row[13]
+            named_row['watering_pump_4_duration'] = row[14]
+            named_row['uptime'] = row[15]
+            named_row['memory'] = row[16]
+            named_row['disk_usage'] = row[17]
+            named_row['processes'] = row[18]
             answer.append(named_row)
 
         return answer
