@@ -13,10 +13,10 @@ def dummy_status_update(index):
 
     status.authentication_token = "authentication_token_str"
     status.local_timestamp = status_date.strftime("%Y-%m-%d %H:%M:%S")
-    status.temperature = 12
-    status.humidity = 13
-    status.temperature2 = 24.1
-    status.temperature3 = 25.2
+    status.temperature = (10 + index) % 20 + 10
+    status.humidity = (20 + index) % 20 + 10
+    status.temperature2 = (10.1 + index) % 20 + 10
+    status.temperature3 = (20.2 + index) % 20 + 10
 
     config = status.current_config
     config.feeding_module_activated = (index % 2 == 0)
@@ -40,7 +40,7 @@ def insert_dummy_pings():
     db = database.Database()
     db.recreate_database()
 
-    for i in range(0, 20):
+    for i in range(0, 40):
         db.save_status(dummy_status_update(i))
 
 
