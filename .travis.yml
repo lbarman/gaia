@@ -7,6 +7,7 @@ script:
   - virtualenv -p python3 .venv
   - source .venv/bin/activate
   - make -C server install
+  - make -C server db
   - make -C server test
   - make -C server coverage
   - cat server/.coverage > .coverage.server
