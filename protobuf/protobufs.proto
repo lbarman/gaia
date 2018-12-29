@@ -29,6 +29,10 @@ message Status {
   required string local_timestamp = 2;
   required Config current_config = 3;
   required SystemStatus system_status = 4;
+  required int32 temperature = 5;
+  required int32 humidity = 6;
+  required float temperature2 = 7;
+  required float temperature3 = 8;
 }
 
 message ActionReport {
