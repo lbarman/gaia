@@ -30,7 +30,7 @@ def dummy_status_message():
     return status
 
 # create the gRPC stub
-channel = grpc.insecure_channel('127.0.0.1:80')
+channel = grpc.insecure_channel('127.0.0.1:8080')
 stub = protobufs_pb2_grpc.GaiaServiceStub(channel)
 
 # send message
