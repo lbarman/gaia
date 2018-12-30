@@ -118,6 +118,7 @@ def main():
     tokens['STATUS'] = helpers.build_status_data_html(all_status)
     tokens['REPORTS'] = helpers.build_reports_data_html(all_reports)
     tokens['CURRENT_CONFIG'] = helpers.build_current_config(all_status[0])
+    tokens['JS_ARRAYS'] = helpers.build_js_arrays(all_status, all_reports)
     tokens['NEXT_COMMAND'] = next_cmd_string
     tokens['PORT_VIDEO'] = str(constants.PORT_VIDEO)
     helpers.build_water_levels_dict(None, None, 100, None, tokens)

@@ -1,6 +1,6 @@
 import socket
 import gaia_server.constants as constants
-
+import time
 
 def is_port_open(port):
     s = socket.socket()
@@ -285,3 +285,28 @@ def build_current_config(config):
                          w5=w5,
                          w6=w6)
     return res
+
+def build_js_arrays(status, reports):
+
+    # builds array[time]=>1 when a status/feeding/watering occured
+    # a is pings, b is feeding, c is watering
+    # this is just to avoid transmitting too much bits
+    # d is temperature/humidity
+
+    js = "var a={};var b={};var c={};var d={};"
+
+    def roundTemp(t):
+        return str(round(t * 10) / 10)
+
+    for s in status:
+        js += "a['"+str(time.mktime(s['local_timestamp'].timetuple()))+"']=1;"
+        temp_array = "["+roundTemp(s['temperature'])+","+roundTemp(s['humidity'])+","+roundTemp(s['temperature2'])+","+roundTemp(s['temperature3'])+"]"
+        js += "d['"+str(time.mktime(s['local_timestamp'].timetuple()))+"']=" + temp_array+";"
+    for r in reports:
+        if r['action_type'] == 1:
+            js += "b['"+str(time.mktime(r['local_timestamp'].timetuple()))+"']=1;"
+        elif r['action_type'] == 2:
+            js += "c['"+str(time.mktime(r['local_timestamp'].timetuple()))+"']=1;"
+    js += "var data_status=a; var data_feeding=b; var data_watering=c; var data_temps=d;"
+
+    return js

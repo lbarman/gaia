@@ -7,7 +7,7 @@
         <link rel="stylesheet" type="text/css" href="public/css/sakura.css">
         <link rel="stylesheet" type="text/css" href="public/css/gaia.css">
         <script src="public/js/jquery-3.3.1.min.js"></script>
-        <script src="public/js/Chart-2.7.2.min.js"></script>
+        <script src="public/js/chart-2.7.2.min.js"></script>
         <link rel="icon" type="image/png" sizes="32x32" href="public/img/favicon-32x32.png">
         <link rel="icon" type="image/png" sizes="96x96" href="public/img/favicon-96x96.png">
         <link rel="icon" type="image/png" sizes="16x16" href="public/img/favicon-16x16.png">
@@ -22,10 +22,18 @@
             <div id="live_feed"></div>
         </div>
 
-        <div id="graph" style="display:none">
-            <h3>Graph</h3>
+        <div id="graph">
+            <h3><a href="#" id="linkStatusGraph">Status & Actions</a> / <a href="#" id="linkSensorGraph">Sensors</a> Graph</h3>
             <div id="canvas-holder1" style="width:100%;">
                 <canvas id="chart1"></canvas>
+            </div>
+            <div id="canvas-holder2" style="width:100%; display:none">
+                <canvas id="chart2"></canvas>
+            </div>
+            <div id="graph_data">
+                <script>
+                    {{JS_ARRAYS}}
+                </script>
             </div>
         </div>
 
@@ -89,13 +97,27 @@
 
     <script>
         function loadFeed(){
-            const videoStream = '<img src="http://lbarman.ch:{{PORT_VIDEO}}/" alt="Video stream" class="shrinkToFit" width="632" height="474">'
+            const videoStream = '<img id="liveStream" src="http://lbarman.ch:{{PORT_VIDEO}}/" alt="Loading video stream..." class="shrinkToFit" width="632" height="474">'
             $('#live_feed').html(videoStream);
             return false;
         }
 
+        function toggleGraph(showGraph) {
+            $('#canvas-holder1').css('display', 'none')
+            $('#canvas-holder2').css('display', 'none')
+            $('#'+showGraph).css('display', 'block')
+        }
+
+        $('#linkStatusGraph').on('click', function(){
+            toggleGraph('canvas-holder1')
+            return false;
+        });
+        $('#linkSensorGraph').on('click', function(){
+            toggleGraph('canvas-holder2')
+            return false;
+        });
+
         function togglePanel(showPanel) {
-            //$('#summary').css('display', 'none')
             $('#status').css('display', 'none')
             $('#reports').css('display', 'none')
             $('#'+showPanel).css('display', 'block')
@@ -143,5 +165,6 @@
             e.preventDefault();
         });
     </script>
+    <script src="public/js/chart.js"></script>
     </body>
 </html>

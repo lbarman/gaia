@@ -263,3 +263,11 @@ input[type="submit"]:focus {
 a, a:hover, a:active, a:visited {
     color:#4a4a4a;
 }
+
+#liveStream {
+    background-color: #f1f1f1;
+    height: 474px;
+    width: 632px;
+    display: block;
+    padding: 20px;
+}

@@ -7,19 +7,19 @@ import gaia_server.database as database
 import gaia_server.protobufs_pb2 as protobufs_pb2
 
 
-def dummy_status_update(day, hour):
+def dummy_status_update(day, hour, min):
 
-    index = day + 24 * hour
+    index = day + 24 * hour + 60 * min
 
     status = protobufs_pb2.Status()
-    status_date = datetime.today() - timedelta(days=day, hours=hour)
+    status_date = datetime.today() - timedelta(days=day, hours=hour, minutes=10*min)
 
     status.authentication_token = "authentication_token_str"
     status.local_timestamp = status_date.strftime("%Y-%m-%d %H:%M:%S")
     status.temperature = (10 + index) % 20 + 10
     status.humidity = (20 + index) % 20 + 10
-    status.temperature2 = (10.1 + index) % 20 + 10
-    status.temperature3 = (20.2 + index) % 20 + 10
+    status.temperature2 = (15.1 + index) % 20 + 10
+    status.temperature3 = (25.2 + index) % 20 + 10
 
     config = status.current_config
     config.feeding_module_activated = (index % 2 == 0)
@@ -59,9 +59,10 @@ def insert_dummy_pings():
     db = database.Database()
     db.recreate_database()
 
-    for day in range(0,14):
+    for day in range(0,7):
         for hour in range(0,24):
-            db.save_status(dummy_status_update(day, hour))
+            for min in range(0,6):
+                db.save_status(dummy_status_update(day, hour, min))
 
 def insert_dummy_action_report():
     db = database.Database()
