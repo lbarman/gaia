@@ -151,19 +151,19 @@ var barChartData = {
     labels: labels,
     datasets: [{
         label: 'Ping',
-        backgroundColor: color(green).alpha(0.2).rgbString(),
+        backgroundColor: color(green).alpha(0.4).rgbString(),
         borderColor: green,
         pointBackgroundColor: green,
         data: pingsLabelsAndVals[1],
     }, {
         label: 'Feeding',
-        backgroundColor: color(red).alpha(0.2).rgbString(),
+        backgroundColor: color(red).alpha(0.4).rgbString(),
         borderColor: red,
         pointBackgroundColor: red,
         data: feedingLabelsAndVals[1],
     }, {
         label: 'Watering',
-        backgroundColor: color(blue).alpha(0.2).rgbString(),
+        backgroundColor: color(blue).alpha(0.4).rgbString(),
         borderColor: blue,
         pointBackgroundColor: blue,
         data: wateringLabelsAndVals[1],
@@ -186,22 +186,22 @@ var lineChartData = {
     datasets: [{
         label: 'Temperature',
         backgroundColor: color(red).alpha(0.1).rgbString(),
-        borderColor: color(red).alpha(0.5).rgbString(),
+        borderColor: color(red).alpha(0.6).rgbString(),
         data: temp1Values,
     }, {
         label: 'Humidity',
         backgroundColor: color(blue).alpha(0.1).rgbString(),
-        borderColor: color(blue).alpha(0.5).rgbString(),
+        borderColor: color(blue).alpha(0.6).rgbString(),
         data: humidityValues,
     },{
         label: 'Temperature 2',
         backgroundColor: color(green).alpha(0.1).rgbString(),
-        borderColor: color(green).alpha(0.5).rgbString(),
+        borderColor: color(green).alpha(0.6).rgbString(),
         data: temp2Values,
     },{
         label: 'Temperature 3',
         backgroundColor: color(purple).alpha(0.1).rgbString(),
-        borderColor: color(purple).alpha(0.5).rgbString(),
+        borderColor: color(purple).alpha(0.6).rgbString(),
         data: temp3Values,
     }]
 };

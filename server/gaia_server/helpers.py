@@ -169,6 +169,13 @@ def split_regex(regex):
 
 def build_current_config(config):
 
+    def water_level(key):
+        v = 100.0 * config[key] / constants.WATER_DURATION_EQUAL_100_PERCENT
+        if v>100.0:
+            return 100;
+        return round(v)
+
+
     feeding_enabled = (config['feeding_module_activated'] == 1)
     watering_enabled = (config['watering_module_activated'] == 1)
 
@@ -188,10 +195,10 @@ def build_current_config(config):
     watering_disabled = 'disabled'
     if watering_enabled:
         watering_disabled = ''
-        water1level = max(100, round(100 * config['watering_pump_1_duration'] / constants.WATER_DURATION_EQUAL_100_PERCENT))
-        water2level = max(100, round(100 * config['watering_pump_2_duration'] / constants.WATER_DURATION_EQUAL_100_PERCENT))
-        water3level = max(100, round(100 * config['watering_pump_3_duration'] / constants.WATER_DURATION_EQUAL_100_PERCENT))
-        water4level = max(100, round(100 * config['watering_pump_4_duration'] / constants.WATER_DURATION_EQUAL_100_PERCENT))
+        water1level = water_level('watering_pump_1_duration')
+        water2level = water_level('watering_pump_2_duration')
+        water3level = water_level('watering_pump_3_duration')
+        water4level = water_level('watering_pump_4_duration')
         water1number = config['watering_pump_1_duration']
         water2number = config['watering_pump_2_duration']
         water3number = config['watering_pump_3_duration']
