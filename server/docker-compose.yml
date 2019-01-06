@@ -2,7 +2,7 @@ gaia-server:
   build: .
   restart: always
   ports:
-    - "127.0.0.1:8080:50051"
-    - "127.0.0.1:8081:8080"
+    - "127.0.0.1:8014:8080"
+    - "127.0.0.1:8015:50051"
   volumes:
     - './data:/usr/src/app/data'

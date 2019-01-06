@@ -11,6 +11,10 @@ def dummy_status_message():
     status = protobufs_pb2.Status()
     status.authentication_token = "authentication_token_str"
     status.local_timestamp = datetime(2009, 12, 1, 19, 31, 1, 40113).strftime("%Y-%m-%d %H:%M:%S")
+    status.temperature = 12
+    status.humidity = 13
+    status.temperature2 = 24.1
+    status.temperature3 = 25.2
 
     config = status.current_config
     config.feeding_module_activated = True
@@ -30,7 +34,8 @@ def dummy_status_message():
     return status
 
 # create the gRPC stub
-channel = grpc.insecure_channel('127.0.0.1:8080')
+credentials = grpc.ssl_channel_credentials(root_certificates=None)
+channel = grpc.secure_channel('gaiagrpc.lbarman.ch:443', credentials)
 stub = protobufs_pb2_grpc.GaiaServiceStub(channel)
 
 # send message

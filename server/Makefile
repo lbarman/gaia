@@ -5,10 +5,11 @@ SQLITE_DB="data/db.sqlite"
 PYTHON_MODULES=requirements.txt
 
 import-protobuf:
-	$(MAKE) -C ../protobuf all
-	cp ../protobuf/protobufs_pb2.py gaia_server/
-	cp ../protobuf/protobufs_pb2_grpc.py gaia_server/
-	sed -i 's/import protobufs_pb2/import gaia_server.protobufs_pb2/g' gaia_server/protobufs_pb2_grpc.py
+	# minus indicates to continue even if the command fail. Required on server which doesn't have ../
+	-$(MAKE) -C ../protobuf all
+	-cp ../protobuf/protobufs_pb2.py gaia_server/
+	-cp ../protobuf/protobufs_pb2_grpc.py gaia_server/
+	-sed -i 's/import protobufs_pb2/import gaia_server.protobufs_pb2/g' gaia_server/protobufs_pb2_grpc.py
 
 gaia_server/protobufs_pb2.py: import-protobuf
 gaia_server/protobufs_pb2_grpc.py: import-protobuf
