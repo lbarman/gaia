@@ -9,7 +9,7 @@ import gaia_server.protobufs_pb2_grpc as protobufs_pb2_grpc
 
 def dummy_status_message():
     status = protobufs_pb2.Status()
-    status.authentication_token = "authentication_token_str"
+    status.authentication_token = "abc"
     status.local_timestamp = datetime(2009, 12, 1, 19, 31, 1, 40113).strftime("%Y-%m-%d %H:%M:%S")
     status.temperature = 12
     status.humidity = 13
