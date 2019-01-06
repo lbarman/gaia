@@ -184,6 +184,11 @@ class DatabaseTest(unittest.TestCase):
         self.assertEqual(1, count_records('system_status', db.cursor))
         self.assertEqual(1, count_records('status', db.cursor))
 
+        db.truncate()
+        self.assertEqual(0, count_records('configs', db.cursor))
+        self.assertEqual(0, count_records('system_status', db.cursor))
+        self.assertEqual(0, count_records('status', db.cursor))
+
 
     def test_action_report(self):
         db = database.Database(in_memory=True)

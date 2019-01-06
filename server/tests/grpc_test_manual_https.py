@@ -34,7 +34,7 @@ def dummy_status_message():
     return status
 
 # create the gRPC stub
-credentials = grpc.ssl_channel_credentials(root_certificates=None)
+credentials = grpc.ssl_channel_credentials(root_certificates=None) # do be correct, we should pin the .crt file from the server here
 channel = grpc.secure_channel('gaiagrpc.lbarman.ch:443', credentials)
 stub = protobufs_pb2_grpc.GaiaServiceStub(channel)
 

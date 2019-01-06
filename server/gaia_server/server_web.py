@@ -16,6 +16,56 @@ def assets(filename):
     return send_from_directory(public_path, filename)
 
 
+def save_new_config_to_db(cmd_text = 'UNKNOWN_COMMAND'):
+    new_config = None
+
+    if request.form.get('updateConfig') == '1':
+        new_config = protobufs_pb2.Config()
+
+        # manually parse those
+        new_config.feeding_module_activated = False
+        if request.form.get('feedingEnabled') == '1':
+            new_config.feeding_module_activated = True
+
+        new_config.watering_module_activated = False
+        if request.form.get('wateringEnabled') == '1':
+            new_config.watering_module_activated = True
+
+        # regex-validate those
+        feeding_cron = request.form.get('feedingCron')
+        watering_cron = request.form.get('wateringCron')
+
+        pattern = re.compile(constants.CRON_REGEX_TESTER)
+        if not pattern.match(feeding_cron):
+            raise ValueError('Feeding cron is invalid:', feeding_cron)
+        if not pattern.match(watering_cron):
+            raise ValueError('Watering cron is invalid:', feeding_cron)
+
+        new_config.feeding_module_cronstring = feeding_cron
+        new_config.watering_module_cronstring = watering_cron
+
+        # manual sanity check on those values
+        d1 = int(request.form.get('pump1Duration'))
+        d2 = int(request.form.get('pump2Duration'))
+        d3 = int(request.form.get('pump3Duration'))
+        d4 = int(request.form.get('pump4Duration'))
+
+        if d1 < 0 or d2 < 0 or d3 < 0 or d4 < 0:
+            raise ValueError('A watering duration is below zero:', d1, d2, d3, d4)
+
+        m = constants.WATERING_DURATION_MAX_VALUE
+        if d1 > m or d2 > m or d3 > m or d4 > m:
+            raise ValueError('A watering duration exceeds the max value:', d1, d2, d3, d4)
+
+        # protobuf raise exception if we're not actually inputting numbers
+        new_config.watering_pump_1_duration = d1
+        new_config.watering_pump_2_duration = d2
+        new_config.watering_pump_3_duration = d3
+        new_config.watering_pump_4_duration = d4
+
+    db = database.Database()
+    db.save_command(cmd_text, new_config)
+
 @webserver.route('/command', methods=['POST'])
 def update_command():
     try:
@@ -28,64 +78,27 @@ def update_command():
             return Response(status=401)
 
         cmd_id = request.form.get('newCommand')
-        cmd_text = 'UNKNOWN_COMMAND'
         if cmd_id == '0':
-            cmd_text = 'DO_NOTHING'
+            save_new_config_to_db('DO_NOTHING')
         elif cmd_id == '1':
-            cmd_text = 'SHUTDOWN'
+            save_new_config_to_db('SHUTDOWN')
         elif cmd_id == '2':
-            cmd_text = 'REBOOT'
+            save_new_config_to_db('REBOOT')
+        elif cmd_id == '3': # empty server db
+            db = database.Database()
+            db.recreate_database()
+            db.truncate()
+        elif cmd_id == '4': # reset server db to dummy config
+            db = database.Database()
+            db.recreate_database()
+            db.truncate()
+            import tests.dummy_data as dummy_data
+            dummy_data.insert_dummy_action_report()
+            dummy_data.insert_dummy_pings()
         else:
             return Response(status=406)
 
-        new_config = None
 
-        if request.form.get('updateConfig') == '1':
-            new_config = protobufs_pb2.Config()
-
-            # manually parse those
-            new_config.feeding_module_activated = False
-            if request.form.get('feedingEnabled') == '1':
-                new_config.feeding_module_activated = True
-
-            new_config.watering_module_activated = False
-            if request.form.get('wateringEnabled') == '1':
-                new_config.watering_module_activated = True
-
-            # regex-validate those
-            feeding_cron = request.form.get('feedingCron')
-            watering_cron = request.form.get('wateringCron')
-
-            pattern = re.compile(constants.CRON_REGEX_TESTER)
-            if not pattern.match(feeding_cron):
-                raise ValueError('Feeding cron is invalid:', feeding_cron)
-            if not pattern.match(watering_cron):
-                raise ValueError('Watering cron is invalid:', feeding_cron)
-
-            new_config.feeding_module_cronstring = feeding_cron
-            new_config.watering_module_cronstring = watering_cron
-
-            # manual sanity check on those values
-            d1 = int(request.form.get('pump1Duration'))
-            d2 = int(request.form.get('pump2Duration'))
-            d3 = int(request.form.get('pump3Duration'))
-            d4 = int(request.form.get('pump4Duration'))
-
-            if d1 < 0 or d2 < 0 or d3 < 0 or d4 < 0:
-                raise ValueError('A watering duration is below zero:', d1, d2, d3, d4)
-
-            m = constants.WATERING_DURATION_MAX_VALUE
-            if d1 > m or d2 > m or d3 > m or d4 > m:
-                raise ValueError('A watering duration exceeds the max value:', d1, d2, d3, d4)
-
-            # protobuf raise exception if we're not actually inputting numbers
-            new_config.watering_pump_1_duration = d1
-            new_config.watering_pump_2_duration = d2
-            new_config.watering_pump_3_duration = d3
-            new_config.watering_pump_4_duration = d4
-
-        db = database.Database()
-        db.save_command(cmd_text, new_config)
         return Response(status=201)
 
     except Exception as e:
@@ -117,7 +130,10 @@ def main():
     tokens['TEST_PORT_VIDEO'] = helpers.build_port_open_html_string(helpers.is_port_open(constants.PORT_VIDEO))
     tokens['STATUS'] = helpers.build_status_data_html(all_status)
     tokens['REPORTS'] = helpers.build_reports_data_html(all_reports)
-    tokens['CURRENT_CONFIG'] = helpers.build_current_config(all_status[0])
+    if len(all_status) > 0:
+        tokens['CURRENT_CONFIG'] = helpers.build_current_config(all_status[0])
+    else:
+        tokens['CURRENT_CONFIG'] = '<div id="current_config"><h3>Current Config</h3>No config</div>'
     tokens['JS_ARRAYS'] = helpers.build_js_arrays(all_status, all_reports)
     tokens['NEXT_COMMAND'] = next_cmd_string
     tokens['PORT_VIDEO'] = str(constants.PORT_VIDEO)

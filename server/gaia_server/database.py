@@ -74,6 +74,19 @@ class Database:
                             '        ')
         self.db.commit()
 
+
+    def truncate(self):
+        self.cursor.execute('DELETE FROM system_status')
+        self.db.commit()
+        self.cursor.execute('DELETE FROM configs')
+        self.db.commit()
+        self.cursor.execute('DELETE FROM commands')
+        self.db.commit()
+        self.cursor.execute('DELETE FROM status')
+        self.db.commit()
+        self.cursor.execute('DELETE FROM action_reports')
+        self.db.commit()
+
     def delete_all_commands(self):
         self.cursor.execute('DELETE FROM commands')
         self.db.commit()
