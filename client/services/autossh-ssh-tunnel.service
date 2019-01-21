@@ -1,0 +1,10 @@
+[Unit]
+Description=AutoSSH tunnel service - SSH local 22 remote 127.0.0.1:11734
+After=network.target
+
+[Service]
+Environment="AUTOSSH_GATETIME=0"
+ExecStart=/usr/bin/autossh -M 0 -o "ServerAliveInterval 30" -o "ServerAliveCountMax 3" -NL 11734:localhost:22 raspi@lbarman.ch -p 11733
+
+[Install]
+WantedBy=multi-user.target
