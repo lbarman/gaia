@@ -4,7 +4,7 @@ After=network.target
 
 [Service]
 Environment="AUTOSSH_GATETIME=0"
-ExecStart=/usr/bin/autossh -M 0 -o "ServerAliveInterval 30" -o "ServerAliveCountMax 3" -NL 11735:localhost:8081 raspi@lbarman.ch -p 11733
+ExecStart=/usr/bin/autossh -M 0 -o "ServerAliveInterval 30" -o "ServerAliveCountMax 3" -nNTR 127.0.0.1:11735:localhost:8081 raspi@lbarman.ch -p 11733
 
 [Install]
 WantedBy=multi-user.target
