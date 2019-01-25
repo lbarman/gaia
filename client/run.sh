@@ -13,10 +13,9 @@ echo "$isRunning"
 
 if [ "$isRunning" -ne 1 ]; then
 	pkill python
-	pkill python2
 	echo "Starting script ${SCRIPT_NAME}..."
 	rm -f "$LOG_FILE_GAIA"
-	nohup python2 "${SCRIPT_NAME}" 2>&1 >"$LOG_FILE_GAIA" &
+	nohup python3 "${SCRIPT_NAME}" 2>&1 >"$LOG_FILE_GAIA" &
 else
 	echo "Script ${SCRIPT_NAME} already running, not starting"
 fi

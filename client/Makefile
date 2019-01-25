@@ -2,12 +2,17 @@
 
 install:
 	sudo apt-get -y install python3-rpi.gpio autossh motion
+	$(MAKE) -C python install
 
 install-gpio-boot:
 	echo "gpio -g mode 2 out" > /etc/rc.local
 
 install-cron:
-	echo "* * * * * root /root/gaia/client/run.sh > /root/gaia/client/logs/cron.txt" > /etc/cron.d/gaia 
+	echo "* * * * * root /root/gaia/client/run.sh > /root/gaia/client/var/cron.gaia.log" > /etc/cron.d/gaia
+	echo "*/30 * * * * /root/gaia/client/cron/check_inet_connection.sh > /root/gaia/client/var/cron.inet_test.log" > /etc/cron.d/inet_test
+
+uninstall-cron:
+	rm -f /etc/cron.d/gaia 
 
 install-services:
 	sudo cp services/* /lib/systemd/system/
@@ -39,16 +44,13 @@ autosync:
 	contscp . root@192.168.0.10:/root/gaia/client 22
 
 manual-feed:
-	python2 -c "from gpio_control import *; g=GPIOControl(); g.servoFeed()"
+	cd python && python3 -c "from gaia_client.gpio_control import *; g = GPIOControl(); g.do_feeding()"
 
 manual-water:
-	python2 -c "from gpio_control import *; g=GPIOControl(); g.waterPlants()"
+	cd python && python3 -c "from gaia_client.gpio_control import *; g = GPIOControl(); g.do_watering()"
 
 water-fill-pipes:
-	python2 -c "from gpio_control import *; g=GPIOControl(); g.fillWaterPipes()"
+	cd python && python3 -c "from gaia_client.gpio_control import *; g = GPIOControl(); g.fill_watering_tubes()"
 
 cron-erase:
 	rm -rf sqlite.db
-
-uninstall-cron:
-	rm -f /etc/cron.d/gaia 

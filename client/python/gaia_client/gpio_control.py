@@ -30,7 +30,6 @@ class ClassWithReport:
 
 
 class GPIOControl(ClassWithReport):
-    pwm = None
 
     feeding_led_state = False
     watering_led_state = False
@@ -46,78 +45,58 @@ class GPIOControl(ClassWithReport):
         GPIO.setwarnings(False)
 
         # turn off the "logic" LEDs
-        GPIO.setup(constants.GPIO_IGOR_LOGIC_LED, GPIO.OUT, initial=GPIO.LOW)
+        GPIO.setup(constants.GPIO_FISH_LOGIC_LED, GPIO.OUT, initial=GPIO.LOW)
         GPIO.setup(constants.GPIO_WATER_LOGIC_LED, GPIO.OUT, initial=GPIO.LOW)
-        GPIO.output(constants.GPIO_IGOR_LOGIC_LED, GPIO.LOW)
+        GPIO.output(constants.GPIO_FISH_LOGIC_LED, GPIO.LOW)
         GPIO.output(constants.GPIO_WATER_LOGIC_LED, GPIO.LOW)
 
         # set up the relays
-        GPIO.setup(constants.RELAY_GPIO_1, GPIO.OUT, initial=GPIO.HIGH)
-        GPIO.setup(constants.RELAY_GPIO_2, GPIO.OUT, initial=GPIO.HIGH)
-        GPIO.setup(constants.RELAY_GPIO_3, GPIO.OUT, initial=GPIO.HIGH)
-        GPIO.setup(constants.RELAY_GPIO_4, GPIO.OUT, initial=GPIO.HIGH)
+        GPIO.setup(constants.GPIO_WATERING_1, GPIO.OUT, initial=GPIO.HIGH)
+        GPIO.setup(constants.GPIO_WATERING_2, GPIO.OUT, initial=GPIO.HIGH)
+        GPIO.setup(constants.GPIO_WATERING_3, GPIO.OUT, initial=GPIO.HIGH)
+        GPIO.setup(constants.GPIO_WATERING_4, GPIO.OUT, initial=GPIO.HIGH)
 
         # redundant, but to be sure
-        GPIO.output(constants.RELAY_GPIO_1, GPIO.HIGH)
-        GPIO.output(constants.RELAY_GPIO_2, GPIO.HIGH)
-        GPIO.output(constants.RELAY_GPIO_3, GPIO.HIGH)
-        GPIO.output(constants.RELAY_GPIO_4, GPIO.HIGH)
+        GPIO.output(constants.GPIO_WATERING_1, GPIO.HIGH)
+        GPIO.output(constants.GPIO_WATERING_2, GPIO.HIGH)
+        GPIO.output(constants.GPIO_WATERING_3, GPIO.HIGH)
+        GPIO.output(constants.GPIO_WATERING_4, GPIO.HIGH)
 
-        # start controlling the servo
-        GPIO.setup(constants.GPIO_SERVO, GPIO.OUT)
-        self.pwm = GPIO.PWM(constants.GPIO_SERVO, constants.SERVO_CARRIER_WIDTH)
-        # startAngle = self.__servoAngleToDuty(SERVO_FEED_POS1)
-        # self.pwm.start(startAngle)
+        # set up the relays
+        GPIO.setup(constants.GPIO_FISH_SERVO, GPIO.OUT)
 
     def do_feeding(self):
         self.vprint("Starting feed routine...")
 
-        start_angle = self.__servo_angle_to_duty(constants.SERVO_FEED_POS1)
-        self.pwm.start(start_angle)
+        t1 = time.time()
+        pwm = GPIO.PWM(constants.GPIO_FISH_SERVO, constants.SERVO_ACTIVE_PWM)
+        pwm.start(1)
 
-        self.__servo_rotate(constants.SERVO_FEED_POS1)
-        time.sleep(1)
+        stop = False
+        while not stop:
+            t2 = time.time()
+            if t2 - t1 < constants.FISH_SERVO_ACTIVE_DURATION:
+                time.sleep(0.1)
+            else:
+                stop = True
 
-        self.__servo_rotate(constants.SERVO_FEED_POS2)
+        pwm.stop(1)
 
-        i = 0
-        while i < 20:
-            time.sleep(0.1)
-            self.__servo_rotate(constants.SERVO_FEED_POS2 + constants.SERVO_WIGGLE_ANGLE)
-            time.sleep(0.1)
-            self.__servo_rotate(constants.SERVO_FEED_POS2 - constants.SERVO_WIGGLE_ANGLE)
-            i += 1
-        time.sleep(0.1)
-        self.__servo_rotate(constants.SERVO_FEED_POS2)
-        time.sleep(1)
-
-        self.__servo_rotate(constants.SERVO_FEED_POS1)
-        time.sleep(1)
-
-        self.pwm.stop()
-        self.vprint("Done feeding.")
+        self.vprint("Stopping feeding after " + str(round(t2 - t1)) + " seconds")
 
     def do_watering(self):
 
         self.new_report()
         self.do_report("Starting plant watering routine...")
 
-        self.__watering_plants_inner_loop(1, constants.RELAY_GPIO_1, constants.WATER_PLANT_RELAY1_DURATION)
-        self.__watering_plants_inner_loop(2, constants.RELAY_GPIO_2, constants.WATER_PLANT_RELAY2_DURATION)
-        self.__watering_plants_inner_loop(3, constants.RELAY_GPIO_3, constants.WATER_PLANT_RELAY3_DURATION)
-        self.__watering_plants_inner_loop(4, constants.RELAY_GPIO_4, constants.WATER_PLANT_RELAY4_DURATION)
+        self.__watering_plants_inner_loop(1, constants.GPIO_WATERING_1, constants.WATER_PLANT_RELAY1_DURATION)
+        self.__watering_plants_inner_loop(2, constants.GPIO_WATERING_2, constants.WATER_PLANT_RELAY2_DURATION)
+        self.__watering_plants_inner_loop(3, constants.GPIO_WATERING_3, constants.WATER_PLANT_RELAY3_DURATION)
+        self.__watering_plants_inner_loop(4, constants.GPIO_WATERING_4, constants.WATER_PLANT_RELAY4_DURATION)
 
         self.do_report("Plant watering routine done.")
         return self.report
 
-    @staticmethod
-    def __servo_angle_to_duty(angle):
-        duty = float(angle) / 180 * (constants.SERVO_DUTY_END - constants.SERVO_DUTY_START) + constants.SERVO_DUTY_START
-        return duty
-
-    def __servo_rotate(self, angle):
-        duty = self.__servo_angle_to_duty(angle)
-        self.pwm.ChangeDutyCycle(duty)
 
     def __watering_plants_inner_loop(self, relay_id, gpio_pin, duration_sec):
         if duration_sec == -1:
@@ -141,19 +120,19 @@ class GPIOControl(ClassWithReport):
 
     def fill_watering_tubes(self):
         self.vprint("Filling pipes...")
-        self.__watering_plants_inner_loop(1, constants.RELAY_GPIO_1, constants.WATER_PLANT_FILL_PIPES_DURATION)
-        self.__watering_plants_inner_loop(2, constants.RELAY_GPIO_2, constants.WATER_PLANT_FILL_PIPES_DURATION)
-        self.__watering_plants_inner_loop(3, constants.RELAY_GPIO_3, constants.WATER_PLANT_FILL_PIPES_DURATION)
-        self.__watering_plants_inner_loop(4, constants.RELAY_GPIO_4, constants.WATER_PLANT_FILL_PIPES_DURATION)
+        self.__watering_plants_inner_loop(1, constants.GPIO_WATERING_1, constants.WATER_PLANT_FILL_PIPES_DURATION)
+        self.__watering_plants_inner_loop(2, constants.GPIO_WATERING_2, constants.WATER_PLANT_FILL_PIPES_DURATION)
+        self.__watering_plants_inner_loop(3, constants.GPIO_WATERING_3, constants.WATER_PLANT_FILL_PIPES_DURATION)
+        self.__watering_plants_inner_loop(4, constants.GPIO_WATERING_4, constants.WATER_PLANT_FILL_PIPES_DURATION)
         self.vprint("Done.")
 
     def toggle_feeding_led(self):
         if self.feeding_led_state:
             self.feeding_led_state = False
-            GPIO.output(constants.GPIO_IGOR_LOGIC_LED, GPIO.LOW)
+            GPIO.output(constants.GPIO_FISH_LOGIC_LED, GPIO.LOW)
         else:
             self.feeding_led_state = True
-            GPIO.output(constants.GPIO_IGOR_LOGIC_LED, GPIO.HIGH)
+            GPIO.output(constants.GPIO_FISH_LOGIC_LED, GPIO.HIGH)
 
     def toggle_watering_led(self):
         if self.watering_led_state:
@@ -166,11 +145,11 @@ class GPIOControl(ClassWithReport):
 
 def cleanup_gpios():
     print("Application ending, cleaning up GPIOs")
-    GPIO.output(constants.RELAY_GPIO_1, GPIO.HIGH)
-    GPIO.output(constants.RELAY_GPIO_2, GPIO.HIGH)
-    GPIO.output(constants.RELAY_GPIO_3, GPIO.HIGH)
-    GPIO.output(constants.RELAY_GPIO_4, GPIO.HIGH)
-    GPIO.output(constants.GPIO_IGOR_LOGIC_LED, GPIO.LOW)
+    GPIO.output(constants.GPIO_WATERING_1, GPIO.HIGH)
+    GPIO.output(constants.GPIO_WATERING_2, GPIO.HIGH)
+    GPIO.output(constants.GPIO_WATERING_3, GPIO.HIGH)
+    GPIO.output(constants.GPIO_WATERING_4, GPIO.HIGH)
+    GPIO.output(constants.GPIO_FISH_LOGIC_LED, GPIO.LOW)
     GPIO.output(constants.GPIO_WATER_LOGIC_LED, GPIO.LOW)
     GPIO.cleanup()
 
