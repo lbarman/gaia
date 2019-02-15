@@ -4,8 +4,12 @@ import os.path
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), os.path.pardir)))
 import gaia_client.cron as cron
 import gaia_client.constants as constants
+import gaia_client.database as database
 from datetime import datetime, timedelta
 
+
+def db_in_memory():
+    return database.Database(in_memory=True)
 
 class TestCron(unittest.TestCase):
 
@@ -13,35 +17,35 @@ class TestCron(unittest.TestCase):
         print("Testing cron creation")
 
         # all days
-        c = cron.Cron("test", "12h *", db_in_memory=True)
+        c = cron.Cron("test", "12h *", db=db_in_memory())
 
         self.assertEqual(c.hour, 12)
         self.assertEqual(c.days, [0,1,2,3,4,5,6])
 
         # a subset of days
-        c = cron.Cron("test", "01h 1,4,6", db_in_memory=True)
+        c = cron.Cron("test", "01h 1,4,6", db=db_in_memory())
         self.assertEqual(c.hour, 1)
         self.assertEqual(c.days, [1,4,6])
 
         # a subset of days
-        c = cron.Cron("test", "23h 3,1,0", db_in_memory=True)
+        c = cron.Cron("test", "23h 3,1,0", db=db_in_memory())
         self.assertEqual(c.hour, 23)
         self.assertEqual(c.days, [0,1,3])
 
         with self.assertRaises(ValueError):
-            cron.Cron("test", "a *", db_in_memory=True)
+            cron.Cron("test", "a *", db=db_in_memory())
 
         with self.assertRaises(ValueError):
-            cron.Cron("test", "-1 *", db_in_memory=True)
+            cron.Cron("test", "-1 *", db=db_in_memory())
 
         with self.assertRaises(ValueError):
-            cron.Cron("test", "1 7", db_in_memory=True)
+            cron.Cron("test", "1 7", db=db_in_memory())
 
     def test_cron_db(self):
         print("Testing cron database")
 
         # all days
-        c = cron.Cron("test", "12h *", db_in_memory=True)
+        c = cron.Cron("test", "12h *", db=db_in_memory())
 
         self.assertEqual(c.last_time_run(), constants.CRON_TIME0)
 
@@ -49,7 +53,7 @@ class TestCron(unittest.TestCase):
         print("Testing cron schedule when run everyday")
 
         now = datetime.now().replace(day=1,hour=10,minute=30, second=0, microsecond=0)
-        c = cron.Cron("test", "12h *", db_in_memory=True)
+        c = cron.Cron("test", "12h *", db=db_in_memory())
         self.assertEqual(c.last_time_run(), constants.CRON_TIME0)
 
         # should run in two hours, not now
@@ -96,7 +100,7 @@ class TestCron(unittest.TestCase):
         # awesome, this work. Now test the edge case when the month is january and we're on the 31
 
     def test_cron_run_everyday_2(self):
-        c = cron.Cron("test", "12h *", db_in_memory=True)
+        c = cron.Cron("test", "12h *", db=db_in_memory())
 
         now = datetime.now().replace(year=2018,month=12,day=31,hour=10,minute=30, second=0, microsecond=0)
 
@@ -121,7 +125,7 @@ class TestCron(unittest.TestCase):
         print("Testing cron over midnight")
 
         # all days
-        c = cron.Cron("test", "13h 1,4", db_in_memory=True)
+        c = cron.Cron("test", "13h 1,4", db=db_in_memory())
         self.assertEqual(c.last_time_run(), constants.CRON_TIME0)
 
         # should run in two hours, not now
@@ -173,7 +177,7 @@ class TestCron(unittest.TestCase):
 
         # this is a monday
         now = datetime.now().replace(year=2018,month=7,day=23,hour=10,minute=30, second=0, microsecond=0)
-        c = cron.Cron("test", cronString, db_in_memory=True)
+        c = cron.Cron("test", cronString, db=db_in_memory())
         self.assertEqual(c.last_time_run(), constants.CRON_TIME0)
 
         # should run in two hours, not now
@@ -237,7 +241,7 @@ class TestCron(unittest.TestCase):
 
         # this is a monday
         now = datetime.now().replace(year=2018,month=12,day=27,hour=10,minute=30, second=0, microsecond=0)
-        c = cron.Cron("test", cron_string, db_in_memory=True)
+        c = cron.Cron("test", cron_string, db=db_in_memory())
 
         # should run in two hours, not now
         self.assertEqual(c.should_it_run(now), False)
@@ -326,11 +330,11 @@ class TestCron(unittest.TestCase):
 
     def test_cron_run_everyday_3(self):
         print("Testing cron schedule when run everyday :")
-        c = cron.Cron("test", "12h *", db_in_memory=True)
+        c = cron.Cron("test", "12h *", db=db_in_memory())
         last_run = constants.CRON_TIME0
 
         day = 1
-        while day < 30:
+        while day < 28:
             start  = datetime.now().replace(day=day,hour=10,minute=30, second=0, microsecond=0)
             target = datetime.now().replace(day=day,hour=12,minute=0, second=0, microsecond=0)
             end    = datetime.now().replace(day=(day+1),hour=11,minute=29, second=0, microsecond=0)
@@ -343,7 +347,7 @@ class TestCron(unittest.TestCase):
     def test_cron_run_custom_schedule_3(self):
         print("Testing cron schedule when run monday, wednesday, and sunday")
 
-        c = cron.Cron("test", "23h 0,2,6", db_in_memory=True)
+        c = cron.Cron("test", "23h 0,2,6", db=db_in_memory())
         last_run = constants.CRON_TIME0
 
         day = 23
@@ -377,7 +381,7 @@ class TestCron(unittest.TestCase):
     def test_cron_run_over_new_year(self):
         print("Testing cron schedule when run monday, thursday")
 
-        c = cron.Cron("test", "0h 1,4", db_in_memory=True) #midnight on monday (00:00 tuesday) and thursday (00:00 friday)
+        c = cron.Cron("test", "0h 1,4", db=db_in_memory()) #midnight on monday (00:00 tuesday) and thursday (00:00 friday)
         last_run = constants.CRON_TIME0
 
         day = 24

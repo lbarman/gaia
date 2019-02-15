@@ -54,3 +54,11 @@ water-fill-pipes:
 
 cron-erase:
 	rm -rf sqlite.db
+
+test: $(SQLITE_DB)
+	pytest -v
+
+coverage:
+	rm -f .coverage
+	$(MAKE) clean
+	coverage run -m py.test -v

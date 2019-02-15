@@ -16,10 +16,17 @@ class Cron:
     days = []
 
     # a Cron task runs exactly once in [target-CRON_WINDOW_BEFORE_DEADLINE; target] if called during that time
-    def __init__(self, cron_name, cron_string, db_in_memory=False, window_before_deadline=30):
+    def __init__(self, cron_name, cron_string, db=None, window_before_deadline=30):
 
-        # recreate the database
-        self.db = database.Database(in_memory=db_in_memory)
+        if db is None:
+            raise Exception('db can\'t be null')
+
+        if not isinstance(db, database.Database):
+            raise Exception('db isn\'t a Database')
+
+        self.db = db
+
+        # recreate the database (if needed)
         self.db.recreate_database()
 
         self.cron_name = cron_name
