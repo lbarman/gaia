@@ -131,6 +131,24 @@ class TestCronWithDefault(unittest.TestCase):
         c = cron.FeedingCron(db=db)
         self.assertEqual(c.cron_string, constants.FEEDING_DEFAULT_CRONSTRING)
 
+    def test_enabled_disabled(self):
+        db = database.Database(in_memory=True)
+        db.recreate_database()
+
+        c = cron.CronWithDefault(cron_name="watering_cron", cron_string_default="14h 1,2,3,4,5,6", cron_enabled=True, db=db)
+        self.assertEqual(c.cron_string, "14h 1,2,3,4,5,6")
+        self.assertEqual(c.enabled, True)
+        self.assertTrue("enabled" in str(c), "cron should be enabled")
+
+        config = dummy_config()
+        config.watering_module_activated = False
+        db.save_config(config)
+
+        c = cron.CronWithDefault(cron_name="watering_cron", cron_string_default="14h 1,2,3,4,5,6", cron_enabled=True, db=db)
+        self.assertEqual(c.cron_string, "23h 1,3,5")
+        self.assertEqual(c.enabled, False)
+        self.assertTrue("disabled" in str(c), "cron should be enabled")
+        self.assertFalse(c.should_it_run(None), False)
 
 if __name__ == '__main__':
     unittest.main()
