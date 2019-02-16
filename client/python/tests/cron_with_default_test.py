@@ -108,29 +108,6 @@ class TestCronWithDefault(unittest.TestCase):
         c = cron.WateringCron(db=db)
         self.assertEqual(c.cron_string, constants.WATERING_DEFAULT_CRONSTRING)
 
-    def test_feeding_and_watering(self):
-        config = dummy_config()
-        config.feeding_module_cronstring = "3h 1,2,3"
-        config.watering_module_cronstring = "4h 1,2,3"
-        db = database.Database(in_memory=True)
-        db.recreate_database()
-        db.save_config(config)
-
-
-        c = cron.FeedingCron(db=db)
-        self.assertEqual(c.cron_string, "3h 1,2,3")
-
-        c = cron.WateringCron(db=db)
-        self.assertEqual(c.cron_string, "4h 1,2,3")
-
-        db.cursor.execute('DELETE FROM current_config')
-
-        c = cron.WateringCron(db=db)
-        self.assertEqual(c.cron_string, constants.WATERING_DEFAULT_CRONSTRING)
-
-        c = cron.FeedingCron(db=db)
-        self.assertEqual(c.cron_string, constants.FEEDING_DEFAULT_CRONSTRING)
-
     def test_enabled_disabled(self):
         db = database.Database(in_memory=True)
         db.recreate_database()
@@ -149,6 +126,37 @@ class TestCronWithDefault(unittest.TestCase):
         self.assertEqual(c.enabled, False)
         self.assertTrue("disabled" in str(c), "cron should be enabled")
         self.assertFalse(c.should_it_run(None), False)
+
+
+
+    def test_feeding_and_watering(self):
+        config = dummy_config()
+        config.feeding_module_cronstring = "3h 1,2,3"
+        config.feeding_module_activated = False
+        config.watering_module_cronstring = "4h 1,2,3"
+        config.watering_module_activated = False
+        db = database.Database(in_memory=True)
+        db.recreate_database()
+        db.save_config(config)
+
+
+        c = cron.FeedingCron(db=db)
+        self.assertEqual(c.cron_string, "3h 1,2,3")
+        self.assertEqual(c.enabled, False)
+
+        c = cron.WateringCron(db=db)
+        self.assertEqual(c.cron_string, "4h 1,2,3")
+        self.assertEqual(c.enabled, False)
+
+        db.cursor.execute('DELETE FROM current_config')
+
+        c = cron.WateringCron(db=db)
+        self.assertEqual(c.cron_string, constants.WATERING_DEFAULT_CRONSTRING)
+        self.assertEqual(c.enabled, True)
+
+        c = cron.FeedingCron(db=db)
+        self.assertEqual(c.cron_string, constants.FEEDING_DEFAULT_CRONSTRING)
+        self.assertEqual(c.enabled, True)
 
 if __name__ == '__main__':
     unittest.main()
