@@ -25,6 +25,9 @@ install-services:
 	systemctl enable autossh-motion-tunnel.service
 	systemctl enable motion
 
+import-protobuf:
+	$(MAKE) -C python import-protobuf
+
 run:
 	./run.sh > logs/run.txt
 

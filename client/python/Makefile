@@ -4,9 +4,9 @@ PYTHON_MODULES=requirements.txt
 
 import-protobuf:
 	@echo "Protobufs files are made by the server, if they don't exist, switch pyenv to server, and do \"make all\" in \"protobufs/\"."
-	cp ../../protobuf/protobufs_pb2.py gaia_client/
-	cp ../../protobuf/protobufs_pb2_grpc.py gaia_client/
-	sed -i 's/import protobufs_pb2/import gaia_client.protobufs_pb2/g' gaia_client/protobufs_pb2_grpc.py
+	-cp ../../protobuf/protobufs_pb2.py gaia_client/
+	-cp ../../protobuf/protobufs_pb2_grpc.py gaia_client/
+	-sed -i 's/import protobufs_pb2/import gaia_client.protobufs_pb2/g' gaia_client/protobufs_pb2_grpc.py
 
 gaia_client/protobufs_pb2.py: import-protobuf
 gaia_client/protobufs_pb2_grpc.py: import-protobuf
