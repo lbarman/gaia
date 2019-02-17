@@ -3,7 +3,6 @@ import unittest
 import os.path
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), os.path.pardir)))
 import gaia_client.grpc_client as grpc_client
-import gaia_client.constants as constants
 import gaia_client.database as database
 import gaia_client.system as system
 import gaia_client.protobufs_pb2 as protobufs_pb2
@@ -18,18 +17,18 @@ class SystemTest(unittest.TestCase):
 
         db = database.Database(in_memory=True)
         db.recreate_database()
-        s = system.MockSystem()
+        action_handler = DummyActionHandler()
 
         with self.assertRaises(ValueError):
-            grpc_client.GRPC_Client(remote="localhost:12345", use_ssl=False, db=None, system=s)
+            grpc_client.GRPC_Client(remote="localhost:12345", use_ssl=False, db=None, action_handler=action_handler)
 
         with self.assertRaises(ValueError):
-            grpc_client.GRPC_Client(remote="localhost:12345", use_ssl=False, db=db, system=None)
+            grpc_client.GRPC_Client(remote="localhost:12345", use_ssl=False, db=db, action_handler=None)
 
         with self.assertRaises(ValueError):
-            grpc_client.GRPC_Client(remote="localhost:12345", use_ssl=False, db=None, system=None)
+            grpc_client.GRPC_Client(remote="localhost:12345", use_ssl=False, db=None, action_handler=None)
 
-        c = grpc_client.GRPC_Client(remote="localhost:12345", use_ssl=False, db=db, system=s)
+        c = grpc_client.GRPC_Client(remote="localhost:12345", use_ssl=False, db=db, action_handler=action_handler)
         self.assertNotEqual(c, None)
 
         # assert that this does not crash
@@ -40,17 +39,20 @@ class SystemTest(unittest.TestCase):
         answer.action = protobufs_pb2.Response.DO_NOTHING
         c.handle_response(answer)
 
-        self.assertFalse(c.system.reboot_called)
-        self.assertFalse(c.system.shutdown_called)
+        self.assertEqual(action_handler.n_shutdown, 0)
+        self.assertEqual(action_handler.n_reboot, 0)
+        self.assertEqual(action_handler.n_feed, 0)
+        self.assertEqual(action_handler.n_water, 0)
+        self.assertEqual(action_handler.n_reset_db, 0)
 
 
     def test_config_store(self):
 
         db = database.Database(in_memory=True)
         db.recreate_database()
-        s = system.MockSystem()
+        action_handler = DummyActionHandler()
 
-        c = grpc_client.GRPC_Client(remote="localhost:12345", use_ssl=False, db=db, system=s)
+        c = grpc_client.GRPC_Client(remote="localhost:12345", use_ssl=False, db=db, action_handler=action_handler)
 
         self.assertEqual(db.get_config(), None)
 
@@ -61,17 +63,20 @@ class SystemTest(unittest.TestCase):
         #no config in this message
         c.handle_response(answer)
 
-        self.assertFalse(c.system.reboot_called)
-        self.assertFalse(c.system.shutdown_called)
+        self.assertEqual(action_handler.n_shutdown, 0)
+        self.assertEqual(action_handler.n_reboot, 0)
+        self.assertEqual(action_handler.n_feed, 0)
+        self.assertEqual(action_handler.n_water, 0)
+        self.assertEqual(action_handler.n_reset_db, 0)
         self.assertEqual(db.get_config(), None)
 
     def test_config_store(self):
 
         db = database.Database(in_memory=True)
         db.recreate_database()
-        s = system.MockSystem()
+        action_handler = DummyActionHandler()
 
-        c = grpc_client.GRPC_Client(remote="localhost:12345", use_ssl=False, db=db, system=s)
+        c = grpc_client.GRPC_Client(remote="localhost:12345", use_ssl=False, db=db, action_handler=action_handler)
 
         self.assertEqual(db.get_config(), None)
 
@@ -90,8 +95,11 @@ class SystemTest(unittest.TestCase):
 
         c.handle_response(answer)
 
-        self.assertFalse(c.system.reboot_called)
-        self.assertFalse(c.system.shutdown_called)
+        self.assertEqual(action_handler.n_shutdown, 0)
+        self.assertEqual(action_handler.n_reboot, 0)
+        self.assertEqual(action_handler.n_feed, 0)
+        self.assertEqual(action_handler.n_water, 0)
+        self.assertEqual(action_handler.n_reset_db, 0)
         self.assertNotEqual(db.get_config(), None)
 
         config2 = db.get_config()
@@ -109,9 +117,9 @@ class SystemTest(unittest.TestCase):
 
         db = database.Database(in_memory=True)
         db.recreate_database()
-        s = system.MockSystem()
+        action_handler = DummyActionHandler()
 
-        c = grpc_client.GRPC_Client(remote="localhost:12345", use_ssl=False, db=db, system=s)
+        c = grpc_client.GRPC_Client(remote="localhost:12345", use_ssl=False, db=db, action_handler=action_handler)
 
         self.assertEqual(db.get_config(), None)
 
@@ -122,17 +130,20 @@ class SystemTest(unittest.TestCase):
         #no config in this message
         c.handle_response(answer)
 
-        self.assertFalse(c.system.reboot_called)
-        self.assertTrue(c.system.shutdown_called)
+        self.assertEqual(action_handler.n_shutdown, 1)
+        self.assertEqual(action_handler.n_reboot, 0)
+        self.assertEqual(action_handler.n_feed, 0)
+        self.assertEqual(action_handler.n_water, 0)
+        self.assertEqual(action_handler.n_reset_db, 0)
         self.assertEqual(db.get_config(), None)
 
     def test_reboot(self):
 
         db = database.Database(in_memory=True)
         db.recreate_database()
-        s = system.MockSystem()
+        action_handler = DummyActionHandler()
 
-        c = grpc_client.GRPC_Client(remote="localhost:12345", use_ssl=False, db=db, system=s)
+        c = grpc_client.GRPC_Client(remote="localhost:12345", use_ssl=False, db=db, action_handler=action_handler)
 
         self.assertEqual(db.get_config(), None)
 
@@ -143,8 +154,11 @@ class SystemTest(unittest.TestCase):
         #no config in this message
         c.handle_response(answer)
 
-        self.assertTrue(c.system.reboot_called)
-        self.assertFalse(c.system.shutdown_called)
+        self.assertEqual(action_handler.n_shutdown, 0)
+        self.assertEqual(action_handler.n_reboot, 1)
+        self.assertEqual(action_handler.n_feed, 0)
+        self.assertEqual(action_handler.n_water, 0)
+        self.assertEqual(action_handler.n_reset_db, 0)
         self.assertEqual(db.get_config(), None)
 
 
@@ -162,13 +176,19 @@ class SystemTest(unittest.TestCase):
 
         db = database.Database(in_memory=True)
         db.recreate_database()
-        s = system.MockSystem()
-        c = grpc_client.GRPC_Client(remote='127.0.0.1:'+str(port), use_ssl=False, db=db, system=s)
+        action_handler = DummyActionHandler()
+        c = grpc_client.GRPC_Client(remote='127.0.0.1:'+str(port), use_ssl=False, db=db, action_handler=action_handler)
 
         self.assertNotEqual(c, None)
 
+        temp = dict()
+        temp['t1'] = 0
+        temp['humidity'] = 1
+        temp['t2'] = 2
+        temp['t3'] = 3
+
         # try writing a message
-        m = c.build_status_message(temperature_sensors=None)
+        m = c.build_status_message(temperature_sensors=temp, system_status=system.get_system_status())
         answer = c.send_status_message(status_message=m)
 
         # assert that we got a response
@@ -178,8 +198,11 @@ class SystemTest(unittest.TestCase):
         # assert that response is treated correctly
         c.handle_response(answer)
 
-        self.assertFalse(c.system.reboot_called)
-        self.assertFalse(c.system.shutdown_called)
+        self.assertEqual(action_handler.n_shutdown, 0)
+        self.assertEqual(action_handler.n_reboot, 0)
+        self.assertEqual(action_handler.n_feed, 0)
+        self.assertEqual(action_handler.n_water, 0)
+        self.assertEqual(action_handler.n_reset_db, 0)
         self.assertNotEqual(db.get_config(), None)
 
         config2 = db.get_config()
@@ -210,8 +233,8 @@ class SystemTest(unittest.TestCase):
 
         db = database.Database(in_memory=True)
         db.recreate_database()
-        s = system.MockSystem()
-        c = grpc_client.GRPC_Client(remote='127.0.0.1:'+str(port), use_ssl=False, db=db, system=s)
+        action_handler = DummyActionHandler()
+        c = grpc_client.GRPC_Client(remote='127.0.0.1:'+str(port), use_ssl=False, db=db, action_handler=action_handler)
 
         self.assertNotEqual(c, None)
 
@@ -226,8 +249,11 @@ class SystemTest(unittest.TestCase):
         # assert that response is treated correctly
         c.handle_response(answer)
 
-        self.assertTrue(c.system.reboot_called)
-        self.assertFalse(c.system.shutdown_called)
+        self.assertEqual(action_handler.n_shutdown, 0)
+        self.assertEqual(action_handler.n_reboot, 1)
+        self.assertEqual(action_handler.n_feed, 0)
+        self.assertEqual(action_handler.n_water, 0)
+        self.assertEqual(action_handler.n_reset_db, 0)
         self.assertEqual(db.get_config(), None)
 
         server.stop(0)
@@ -238,8 +264,8 @@ class SystemTest(unittest.TestCase):
 
         db = database.Database(in_memory=True)
         db.recreate_database()
-        s = system.MockSystem()
-        c = grpc_client.GRPC_Client(remote='127.0.0.1:'+str(port), use_ssl=False, db=db, system=s)
+        action_handler = grpc_client.ActionHandler()
+        c = grpc_client.GRPC_Client(remote='127.0.0.1:'+str(port), use_ssl=False, db=db, action_handler=action_handler)
 
 
         with self.assertRaises(ValueError):
@@ -269,8 +295,8 @@ class SystemTest(unittest.TestCase):
 
         db = database.Database(in_memory=True)
         db.recreate_database()
-        s = system.MockSystem()
-        c = grpc_client.GRPC_Client(remote='127.0.0.1:'+str(port), use_ssl=False, db=db, system=s)
+        action_handler = DummyActionHandler()
+        c = grpc_client.GRPC_Client(remote='127.0.0.1:'+str(port), use_ssl=False, db=db, action_handler=action_handler)
 
         self.assertNotEqual(c, None)
 
@@ -285,12 +311,61 @@ class SystemTest(unittest.TestCase):
         # assert that response is treated correctly
         c.handle_response(answer)
 
-        self.assertFalse(c.system.reboot_called)
-        self.assertFalse(c.system.shutdown_called)
+        self.assertEqual(action_handler.n_shutdown, 0)
+        self.assertEqual(action_handler.n_reboot, 0)
+        self.assertEqual(action_handler.n_feed, 0)
+        self.assertEqual(action_handler.n_water, 0)
+        self.assertEqual(action_handler.n_reset_db, 0)
         self.assertEqual(db.get_config(), None)
 
         server.stop(0)
 
+    def test_no_error(self):
+
+        # should not crash if server is unreachable
+        port = 50051
+
+        db = database.Database(in_memory=True)
+        db.recreate_database()
+        action_handler = DummyActionHandler()
+        c = grpc_client.GRPC_Client(remote='127.0.0.1:'+str(port), use_ssl=False, db=db, action_handler=action_handler)
+
+        self.assertNotEqual(c, None)
+
+        # try writing a message
+        m = c.build_status_message(temperature_sensors=None)
+        answer = c.send_status_message(status_message=m)
+        self.assertEqual(answer, None)
+
+        # try writing a message
+        m = c.build_action_report_message(action="FEEDING", action_details="a long string")
+        answer = c.send_action_report_message(action_report=m)
+        self.assertEqual(answer, None)
+
+
+class DummyActionHandler(grpc_client.ActionHandler):
+
+    n_shutdown = 0
+    n_reboot = 0
+    n_feed = 0
+    n_water = 0
+    n_reset_db = 0
+
+    def handle(self, action):
+        if action == protobufs_pb2.Response.DO_NOTHING:
+            return
+        if action == protobufs_pb2.Response.SHUTDOWN:
+            self.n_shutdown += 1
+        elif action == protobufs_pb2.Response.REBOOT:
+            self.n_reboot += 1
+        elif action == protobufs_pb2.Response.FEED:
+            self.n_feed += 1
+        elif action == protobufs_pb2.Response.WATER:
+            self.n_water += 1
+        elif action == protobufs_pb2.Response.DELETE_DB:
+            self.n_reset_db += 1
+        else:
+            print("Warning: unknown action", action, "doing nothing")
 
 class DummyServiceServicer1(protobufs_pb2_grpc.GaiaServiceServicer):
 
