@@ -52,6 +52,9 @@ message Response {
     DO_NOTHING = 0;
     REBOOT = 1;
     SHUTDOWN = 2;
+    FEED = 3;
+    WATER = 4;
+    DELETE_DB = 5;
   }
   required ResponseAction action = 1;
   optional Config config = 2;

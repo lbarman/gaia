@@ -19,7 +19,7 @@ DESCRIPTOR = _descriptor.FileDescriptor(
   package='gaia',
   syntax='proto2',
   serialized_options=None,
-  serialized_pb=_b('\n\x0fprotobufs.proto\x12\x04gaia\"\x9c\x02\n\x06\x43onfig\x12 \n\x18\x66\x65\x65\x64ing_module_activated\x18\x01 \x02(\x08\x12!\n\x19watering_module_activated\x18\x02 \x02(\x08\x12!\n\x19\x66\x65\x65\x64ing_module_cronstring\x18\x03 \x02(\t\x12\"\n\x1awatering_module_cronstring\x18\x04 \x02(\t\x12 \n\x18watering_pump_1_duration\x18\x05 \x02(\x05\x12 \n\x18watering_pump_2_duration\x18\x06 \x02(\x05\x12 \n\x18watering_pump_3_duration\x18\x07 \x02(\x05\x12 \n\x18watering_pump_4_duration\x18\x08 \x02(\x05\"U\n\x0cSystemStatus\x12\x0e\n\x06uptime\x18\x01 \x02(\t\x12\x0e\n\x06memory\x18\x02 \x02(\t\x12\x12\n\ndisk_usage\x18\x03 \x02(\t\x12\x11\n\tprocesses\x18\x04 \x02(\t\"\xe3\x01\n\x06Status\x12\x1c\n\x14\x61uthentication_token\x18\x01 \x02(\t\x12\x17\n\x0flocal_timestamp\x18\x02 \x02(\t\x12$\n\x0e\x63urrent_config\x18\x03 \x02(\x0b\x32\x0c.gaia.Config\x12)\n\rsystem_status\x18\x04 \x02(\x0b\x32\x12.gaia.SystemStatus\x12\x13\n\x0btemperature\x18\x05 \x02(\x05\x12\x10\n\x08humidity\x18\x06 \x02(\x05\x12\x14\n\x0ctemperature2\x18\x07 \x02(\x02\x12\x14\n\x0ctemperature3\x18\x08 \x02(\x02\"\xd4\x01\n\x0c\x41\x63tionReport\x12\x1c\n\x14\x61uthentication_token\x18\x01 \x02(\t\x12\x17\n\x0flocal_timestamp\x18\x02 \x02(\t\x12\x35\n\x06\x61\x63tion\x18\x03 \x02(\x0e\x32%.gaia.ActionReport.ActionReportAction\x12\x16\n\x0e\x61\x63tion_details\x18\x04 \x02(\t\">\n\x12\x41\x63tionReportAction\x12\r\n\tUNDEFINED\x10\x00\x12\x0b\n\x07\x46\x45\x45\x44ING\x10\x01\x12\x0c\n\x08WATERING\x10\x02\"\x93\x01\n\x08Response\x12-\n\x06\x61\x63tion\x18\x01 \x02(\x0e\x32\x1d.gaia.Response.ResponseAction\x12\x1c\n\x06\x63onfig\x18\x02 \x01(\x0b\x32\x0c.gaia.Config\":\n\x0eResponseAction\x12\x0e\n\nDO_NOTHING\x10\x00\x12\n\n\x06REBOOT\x10\x01\x12\x0c\n\x08SHUTDOWN\x10\x02\x32\x65\n\x0bGaiaService\x12$\n\x04Ping\x12\x0c.gaia.Status\x1a\x0e.gaia.Response\x12\x30\n\nActionDone\x12\x12.gaia.ActionReport\x1a\x0e.gaia.Response')
+  serialized_pb=_b('\n\x0fprotobufs.proto\x12\x04gaia\"\x9c\x02\n\x06\x43onfig\x12 \n\x18\x66\x65\x65\x64ing_module_activated\x18\x01 \x02(\x08\x12!\n\x19watering_module_activated\x18\x02 \x02(\x08\x12!\n\x19\x66\x65\x65\x64ing_module_cronstring\x18\x03 \x02(\t\x12\"\n\x1awatering_module_cronstring\x18\x04 \x02(\t\x12 \n\x18watering_pump_1_duration\x18\x05 \x02(\x05\x12 \n\x18watering_pump_2_duration\x18\x06 \x02(\x05\x12 \n\x18watering_pump_3_duration\x18\x07 \x02(\x05\x12 \n\x18watering_pump_4_duration\x18\x08 \x02(\x05\"U\n\x0cSystemStatus\x12\x0e\n\x06uptime\x18\x01 \x02(\t\x12\x0e\n\x06memory\x18\x02 \x02(\t\x12\x12\n\ndisk_usage\x18\x03 \x02(\t\x12\x11\n\tprocesses\x18\x04 \x02(\t\"\xe3\x01\n\x06Status\x12\x1c\n\x14\x61uthentication_token\x18\x01 \x02(\t\x12\x17\n\x0flocal_timestamp\x18\x02 \x02(\t\x12$\n\x0e\x63urrent_config\x18\x03 \x02(\x0b\x32\x0c.gaia.Config\x12)\n\rsystem_status\x18\x04 \x02(\x0b\x32\x12.gaia.SystemStatus\x12\x13\n\x0btemperature\x18\x05 \x02(\x05\x12\x10\n\x08humidity\x18\x06 \x02(\x05\x12\x14\n\x0ctemperature2\x18\x07 \x02(\x02\x12\x14\n\x0ctemperature3\x18\x08 \x02(\x02\"\xd4\x01\n\x0c\x41\x63tionReport\x12\x1c\n\x14\x61uthentication_token\x18\x01 \x02(\t\x12\x17\n\x0flocal_timestamp\x18\x02 \x02(\t\x12\x35\n\x06\x61\x63tion\x18\x03 \x02(\x0e\x32%.gaia.ActionReport.ActionReportAction\x12\x16\n\x0e\x61\x63tion_details\x18\x04 \x02(\t\">\n\x12\x41\x63tionReportAction\x12\r\n\tUNDEFINED\x10\x00\x12\x0b\n\x07\x46\x45\x45\x44ING\x10\x01\x12\x0c\n\x08WATERING\x10\x02\"\xb7\x01\n\x08Response\x12-\n\x06\x61\x63tion\x18\x01 \x02(\x0e\x32\x1d.gaia.Response.ResponseAction\x12\x1c\n\x06\x63onfig\x18\x02 \x01(\x0b\x32\x0c.gaia.Config\"^\n\x0eResponseAction\x12\x0e\n\nDO_NOTHING\x10\x00\x12\n\n\x06REBOOT\x10\x01\x12\x0c\n\x08SHUTDOWN\x10\x02\x12\x08\n\x04\x46\x45\x45\x44\x10\x03\x12\t\n\x05WATER\x10\x04\x12\r\n\tDELETE_DB\x10\x05\x32\x65\n\x0bGaiaService\x12$\n\x04Ping\x12\x0c.gaia.Status\x1a\x0e.gaia.Response\x12\x30\n\nActionDone\x12\x12.gaia.ActionReport\x1a\x0e.gaia.Response')
 )
 
 
@@ -68,11 +68,23 @@ _RESPONSE_RESPONSEACTION = _descriptor.EnumDescriptor(
       name='SHUTDOWN', index=2, number=2,
       serialized_options=None,
       type=None),
+    _descriptor.EnumValueDescriptor(
+      name='FEED', index=3, number=3,
+      serialized_options=None,
+      type=None),
+    _descriptor.EnumValueDescriptor(
+      name='WATER', index=4, number=4,
+      serialized_options=None,
+      type=None),
+    _descriptor.EnumValueDescriptor(
+      name='DELETE_DB', index=5, number=5,
+      serialized_options=None,
+      type=None),
   ],
   containing_type=None,
   serialized_options=None,
   serialized_start=934,
-  serialized_end=992,
+  serialized_end=1028,
 )
 _sym_db.RegisterEnumDescriptor(_RESPONSE_RESPONSEACTION)
 
@@ -377,7 +389,7 @@ _RESPONSE = _descriptor.Descriptor(
   oneofs=[
   ],
   serialized_start=845,
-  serialized_end=992,
+  serialized_end=1028,
 )
 
 _STATUS.fields_by_name['current_config'].message_type = _CONFIG
@@ -437,8 +449,8 @@ _GAIASERVICE = _descriptor.ServiceDescriptor(
   file=DESCRIPTOR,
   index=0,
   serialized_options=None,
-  serialized_start=994,
-  serialized_end=1095,
+  serialized_start=1030,
+  serialized_end=1131,
   methods=[
   _descriptor.MethodDescriptor(
     name='Ping',
