@@ -142,6 +142,14 @@ class GPIOControl(ClassWithReport):
             self.watering_led_state = True
             GPIO.output(constants.GPIO_WATER_LOGIC_LED, GPIO.HIGH)
 
+    def read_temperature_sensors(self):
+        res = dict()
+        res['t1'] = 0
+        res['humidity'] = 1
+        res['t2'] = 2
+        res['t3'] = 3
+
+        return res
 
 def cleanup_gpios():
     print("Application ending, cleaning up GPIOs")

@@ -8,13 +8,38 @@ import gaia_client.system as system
 class SystemTest(unittest.TestCase):
 
     def test_system_status(self):
-        res = system.get_system_status()
+
+        s = system.System()
+        res = s.get_system_status()
 
         self.assertNotEqual(res, None)
         self.assertNotEqual(res['uptime'], None)
-        self.assertNotEqual(res['free'], None)
-        self.assertNotEqual(res['ps'], None)
-        self.assertNotEqual(res['df'], None)
+        self.assertNotEqual(res['memory'], None)
+        self.assertNotEqual(res['processes'], None)
+        self.assertNotEqual(res['disk_usage'], None)
+
+    def test_mock_system_status(self):
+
+        s = system.MockSystem()
+        res = s.get_system_status()
+
+        self.assertNotEqual(res, None)
+        self.assertNotEqual(res['uptime'], None)
+        self.assertNotEqual(res['memory'], None)
+        self.assertNotEqual(res['processes'], None)
+        self.assertNotEqual(res['disk_usage'], None)
+
+    def test_mock_shutdown(self):
+
+        s = system.MockSystem()
+        s.shutdown()
+        self.assertTrue(s.shutdown_called)
+
+    def test_mock_reboot(self):
+
+        s = system.MockSystem()
+        s.reboot()
+        self.assertTrue(s.reboot_called)
 
 
 if __name__ == '__main__':

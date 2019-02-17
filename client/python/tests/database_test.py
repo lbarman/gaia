@@ -214,6 +214,5 @@ class DatabaseTest(unittest.TestCase):
         self.assertEqual(config2['watering_pump_4_duration'], config.watering_pump_4_duration)
 
 
-
 if __name__ == '__main__':
     unittest.main()
