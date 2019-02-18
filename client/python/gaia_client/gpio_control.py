@@ -66,7 +66,8 @@ class GPIOControl(ClassWithReport):
         GPIO.setup(constants.GPIO_FISH_SERVO, GPIO.OUT)
 
     def do_feeding(self):
-        self.vprint("Starting feed routine...")
+        self.new_report()
+        self.do_report("Starting feed routine...")
 
         t1 = time.time()
         pwm = GPIO.PWM(constants.GPIO_FISH_SERVO, constants.SERVO_ACTIVE_PWM)
@@ -82,7 +83,8 @@ class GPIOControl(ClassWithReport):
 
         pwm.stop(1)
 
-        self.vprint("Stopping feeding after " + str(round(t2 - t1)) + " seconds")
+        self.do_report("Stopping feeding after " + str(round(t2 - t1)) + " seconds")
+        return self.report
 
     def do_watering(self):
 

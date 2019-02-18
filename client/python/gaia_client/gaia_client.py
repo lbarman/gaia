@@ -21,10 +21,20 @@ class GaiaClient:
         self.db = database.Database(in_memory=True)
         self.db.recreate_database()
         self.system = system.System()
+
+        def __init__(self, shutdown_fn=noop, reboot_fn=noop, feed_fn=noop, water_fn=noop, reset_db_fn=noop):
+
+        action_handler = grpc_client.ActionHandler(shutdown_fn=system.shutdown,
+                                                   reboot_fn=system.reboot,
+                                                   feed_fn=self.__feed,
+                                                   water_fn=self.__water,
+                                                   reset_db_fn=db.
+                                                   )
+
         self.grpc_client = grpc_client.GRPC_Client(remote=constants.GAIA_GRPC_URL,
                                                    use_ssl=constants.GAIA_GRPC_USE_SSL,
                                                    db=self.grpc_client,
-                                                   system=self.system)
+                                                   action_handler=action_handler)
         self.feeding_cron = cron.FeedingCron(db=self.db)
         self.watering_cron = cron.WateringCron(db=self.db)
 
@@ -51,26 +61,23 @@ class GaiaClient:
                 self.__water()
             elif sleep_count >= constants.GAIA_REPORT_EVERY_X_SLEEP:
                 sleep_count = 0
-
-                print
-                "contacting Gaia now"
-                answer = contactGaiaWebSite(now, getDataToUpload(now))
-
-                if answer == "REBOOT" or answer == "RESTART":
-                    contactGaiaWebSite(now, "Gaia requested reboot.")
-                    system.reboot()
-                if answer == "SHUTDOWN":
-                    contactGaiaWebSite(now, "Gaia requested shutdown.")
-                    system.shutdown()
-                if answer == "FEED":
-                    contactGaiaWebSite(now, "Gaia requested manual feeding.")
-                    feed(now)
-                if answer == "WATER":
-                    contactGaiaWebSite(now, "Gaia requested manual plant watering.")
-                    water(now)
+                self.__contact_gaia_server()
 
             time.sleep(constants.WAITING_LOOP_SLEEP)
             sleep_count += 1
+
+    def __contact_gaia_server(self):
+        temperatures = self.gpio.read_temperature_sensors()
+        system_status = self.system.get_system_status()
+
+        m = self.grpc_client.build_status_message(temperature_sensors=temperatures, system_status=system_status)
+        print("contacting Gaia now with", m)
+        answer = self.grpc_client.send_status_message(status_message=m)
+
+        self.__handle_gaia_answer(answer)
+
+    def __handle_gaia_answer(self, answer):
+        self.grpc_client.handle_response(answer)
 
     def __feed(self):
         report = self.gpio.do_feeding()

@@ -187,8 +187,10 @@ class SystemTest(unittest.TestCase):
         temp['t2'] = 2
         temp['t3'] = 3
 
+        system_status = system.MockSystem().get_system_status()
+
         # try writing a message
-        m = c.build_status_message(temperature_sensors=temp, system_status=system.get_system_status())
+        m = c.build_status_message(temperature_sensors=temp, system_status=system_status)
         answer = c.send_status_message(status_message=m)
 
         # assert that we got a response
