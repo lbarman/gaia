@@ -20,7 +20,7 @@ class Database:
                             '              `name` VARCHAR(50)   NOT NULL,\n'
                             '              `cron_string` VARCHAR(50)   NOT NULL,\n'
                             '              `last_run` DATETIME\n'
-                            '      1<      )\n'
+                            '            )\n'
                             '        ')
         self.cursor.execute('\n'
                             '            CREATE TABLE IF NOT EXISTS current_config (\n'
