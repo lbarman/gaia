@@ -1,11 +1,11 @@
 .PHONY: install install-gpio-boot install-cron uninstall-cron install-services run gaia-running services-running kill autosync manual-feed manual-water water-fill-pipes cron-erase
 
 install:
-	sudo apt-get -y install python3-rpi.gpio autossh motion
+	sudo apt-get -y install python3-rpi.gpio autossh motion i2c-tools
 	$(MAKE) -C python install
 
 install-gpio-boot:
-	echo "gpio -g mode 2 out" > /etc/rc.local
+	# bad idea ! used by LCD screen now. echo "gpio -g mode 2 out" > /etc/rc.local
 
 install-cron:
 	echo "* * * * * root /root/gaia/client/run.sh > /root/gaia/client/var/cron.gaia.log" > /etc/cron.d/gaia
