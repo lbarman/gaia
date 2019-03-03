@@ -147,3 +147,9 @@ class Database:
         config['watering_pump_4_duration'] = row[9]
 
         return config
+
+    def db_reset(self):
+        self.cursor.execute('DROP TABLE cron;')
+        self.cursor.execute('DROP TABLE current_config;')
+        self.db.commit()
+        self.recreate_database()

@@ -1,4 +1,11 @@
-import RPi.GPIO as GPIO
+import sys
+import atexit
+
+try:
+    import RPi.GPIO as GPIO
+except RuntimeError:
+    print("Error importing RPi.GPIO! Is this running with sudo ?")
+    sys.exit(1)
 
 GPIO_PIN_1WIRE = 4
 GPIO_PIN_DHT11 = 17
@@ -13,6 +20,11 @@ GPIO_PIN_RELAY1_WATERING = 6
 GPIO_PIN_RELAY2_WATERING = 13
 GPIO_PIN_RELAY3_WATERING = 19
 GPIO_PIN_RELAY4_WATERING = 26
+
+SERVO_ACTIVE_PWM = 2500 # 1500 is idle, 2500 is forward full speed
+BUTTON_DEBOUNCE_DURATION = 200 # in ms
+LCD_TYPE='PCF8574'
+LCD_I2C_ADDRESS="0x27"
 
 # Sets INPUT/OUTPUT modes
 
@@ -39,3 +51,15 @@ GPIO.output(GPIO_PIN_RELAY1_WATERING, GPIO.HIGH) # Surprisingly, HIGH=Relay "off
 GPIO.output(GPIO_PIN_RELAY2_WATERING, GPIO.HIGH)
 GPIO.output(GPIO_PIN_RELAY3_WATERING, GPIO.HIGH)
 GPIO.output(GPIO_PIN_RELAY4_WATERING, GPIO.HIGH)
+
+def cleanup_gpios():
+    print("Application ending, cleaning up GPIOs")
+    GPIO.output(GPIO_PIN_LED_FEEDING, GPIO.LOW)
+    GPIO.output(GPIO_PIN_LED_WATERING, GPIO.LOW)
+    GPIO.output(GPIO_PIN_RELAY1_WATERING, GPIO.HIGH)  # Surprisingly, HIGH=Relay "off"
+    GPIO.output(GPIO_PIN_RELAY2_WATERING, GPIO.HIGH)
+    GPIO.output(GPIO_PIN_RELAY3_WATERING, GPIO.HIGH)
+    GPIO.output(GPIO_PIN_RELAY4_WATERING, GPIO.HIGH)
+    GPIO.cleanup()
+
+atexit.register(cleanup_gpios)

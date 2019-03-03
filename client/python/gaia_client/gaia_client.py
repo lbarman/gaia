@@ -18,27 +18,26 @@ class GaiaClient:
     def __init__(self):
         print("[GaiaClient] starting...")
 
-        self.db = database.Database(in_memory=True)
+        self.db = database.Database(in_memory=False)
         self.db.recreate_database()
         self.system = system.System()
-
-        def __init__(self, shutdown_fn=noop, reboot_fn=noop, feed_fn=noop, water_fn=noop, reset_db_fn=noop):
 
         action_handler = grpc_client.ActionHandler(shutdown_fn=system.shutdown,
                                                    reboot_fn=system.reboot,
                                                    feed_fn=self.__feed,
                                                    water_fn=self.__water,
-                                                   reset_db_fn=db.
+                                                   reset_db_fn=db.reset_db,
                                                    )
 
         self.grpc_client = grpc_client.GRPC_Client(remote=constants.GAIA_GRPC_URL,
                                                    use_ssl=constants.GAIA_GRPC_USE_SSL,
-                                                   db=self.grpc_client,
+                                                   db=self.db,
                                                    action_handler=action_handler)
         self.feeding_cron = cron.FeedingCron(db=self.db)
         self.watering_cron = cron.WateringCron(db=self.db)
 
         print("[GaiaClient] instantiated, db/system/grpc/cron OK")
+        self.gpio.lcd_write("Gaia-client booted.")
 
     def run(self):
         sleep_count = 0
@@ -64,6 +63,7 @@ class GaiaClient:
                 self.__contact_gaia_server()
 
             time.sleep(constants.WAITING_LOOP_SLEEP)
+            self.gpio.lcd_print_status()
             sleep_count += 1
 
     def __contact_gaia_server(self):
