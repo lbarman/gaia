@@ -1,7 +1,7 @@
 .PHONY: install install-gpio-boot install-cron uninstall-cron install-services run gaia-running services-running kill autosync manual-feed manual-water water-fill-pipes cron-erase
 
 install:
-	sudo apt-get -y install python3-rpi.gpio autossh motion i2c-tools
+	sudo apt-get -y install python3 python3-pip autossh motion i2c-tools
 	$(MAKE) -C python install
 
 install-gpio-boot:

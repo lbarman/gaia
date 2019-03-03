@@ -4,6 +4,7 @@ import subprocess
 import datetime
 from os import listdir
 from os.path import join
+import RPi.GPIO as GPIO
 
 separator = "*" * 60
 
@@ -11,19 +12,15 @@ def shell(cmd):
     result = subprocess.run(cmd, stdout=subprocess.PIPE)
     return result.stdout.decode('utf-8')
 
-# Constants, to be moved somewhere else
+from constants_hardware import *
+
 LCD_I2C_ADDRESS="0x27"
-DHT11_SENSOR_GPIO_PIN = 17
-FEEDING_MOTOR_GPIO_PIN = 18
-FEEDING_BUTTON_GPIO_PIN = 23
 
 print(separator)
 print("*** The DHT11 temperature/humidity ***\n")
-import RPi.GPIO as GPIO
 import dht11
 
-GPIO.setmode(GPIO.BCM)
-instance = dht11.DHT11(pin=DHT11_SENSOR_GPIO_PIN)
+instance = dht11.DHT11(pin=GPIO_PIN_DHT11)
 
 result = instance.read()
 if result.is_valid():
@@ -34,21 +31,6 @@ else:
 
 print("Continue ? [Enter]")
 input()
-
-
-print(separator)
-print("*** Feeder's continuous servo ***\n")
-
-print("This will start the motor. Press Enter to stop afterwards. Start ? [Enter]")
-input()
-
-GPIO.setmode(GPIO.BCM)
-GPIO.setup(FEEDING_MOTOR_GPIO_PIN, GPIO.OUT)
-p = GPIO.PWM(FEEDING_MOTOR_GPIO_PIN, 2500)
-p.start(1)
-input('Press return to stop:')   # use raw_input for Python 2
-p.stop()
-
 
 print(separator)
 print("*** Testing for the LCD screen ***\n")
@@ -82,25 +64,115 @@ print("Continue ? [Enter]")
 input()
 
 print(separator)
-print("*** Testing the feeder's button ***\n")
+print("*** Testing the feeder's led ***\n")
 
+GPIO.output(GPIO_PIN_LED_FEEDING, GPIO.HIGH)
+print("Feeder's LED should be ON. Continue ? [Enter]")
+input()
+
+GPIO.output(GPIO_PIN_LED_FEEDING, GPIO.LOW)
+print("Feeder's LED should be OFF. Continue ? [Enter]")
+input()
+
+print(separator)
+print("*** Testing the feeder's button ***\n")
+print("Press on the button. The LCD should display the event.")
 
 def callback(channel):
-    if GPIO.input(FEEDING_BUTTON_GPIO_PIN) == GPIO.HIGH:
+    if GPIO.input(GPIO_PIN_BUTTON_FEEDING) == GPIO.HIGH:
         lcd.clear()
-        lcd.write_string('BUTTON ___ ' + str(datetime.datetime.now().time())[0:8])
-        print("Button pressed  ___")
+        lcd.write_string('BUTTON1 ___ ' + str(datetime.datetime.now().time())[0:8])
+        print("Feeder's Button pressed  ___")
     else:
         lcd.clear()
-        lcd.write_string('BUTTON _-_ ' + str(datetime.datetime.now().time())[0:8])
-        print("Button released _-_")
+        lcd.write_string('BUTTON1 _-_ ' + str(datetime.datetime.now().time())[0:8])
+        print("Feeder's Button released _-_")
 
 
-GPIO.setup(FEEDING_BUTTON_GPIO_PIN, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
-GPIO.add_event_detect(FEEDING_BUTTON_GPIO_PIN, GPIO.BOTH, callback=callback, bouncetime=200)
-
+GPIO.setup(GPIO_PIN_BUTTON_FEEDING, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
+GPIO.add_event_detect(GPIO_PIN_BUTTON_FEEDING, GPIO.BOTH, callback=callback, bouncetime=200)
 
 print("Continue ? [Enter]")
 input()
 
+print(separator)
+print("*** Feeder's continuous servo ***\n")
+
+print("This will start the motor. Press Enter to stop afterwards. Start ? [Enter]")
+input()
+
+GPIO.setup(GPIO_PIN_SERVO_FEEDING, GPIO.OUT)
+p = GPIO.PWM(GPIO_PIN_SERVO_FEEDING, 2500)
+p.start(1)
+input('Press return to stop:')   # use raw_input for Python 2
+p.stop()
+
+print(separator)
+print("*** Testing the watering system's led ***\n")
+
+GPIO.output(GPIO_PIN_LED_WATERING, GPIO.HIGH)
+print("Watering system's LED should be ON. Continue ? [Enter]")
+input()
+
+GPIO.output(GPIO_PIN_LED_WATERING, GPIO.LOW)
+print("Watering system's LED should be OFF. Continue ? [Enter]")
+input()
+
+print(separator)
+print("*** Testing the watering systems's button ***\n")
+print("Press on the button. The LCD should display the event.")
+
+def callback2(channel):
+    if GPIO.input(GPIO_PIN_BUTTON_WATERING) == GPIO.HIGH:
+        lcd.clear()
+        lcd.write_string('BUTTON2 ___ ' + str(datetime.datetime.now().time())[0:8])
+        print("Watering System's Button pressed  ___")
+    else:
+        lcd.clear()
+        lcd.write_string('BUTTON2 _-_ ' + str(datetime.datetime.now().time())[0:8])
+        print("Watering System's Button released _-_")
+
+
+GPIO.setup(GPIO_PIN_BUTTON_WATERING, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
+GPIO.add_event_detect(GPIO_PIN_BUTTON_WATERING, GPIO.BOTH, callback=callback2, bouncetime=200)
+
+print("Continue ? [Enter]")
+input()
+
+print(separator)
+print("*** Testing the watering system's led ***\n")
+
+GPIO.output(GPIO_PIN_RELAY1_WATERING, GPIO.HIGH)
+print("Watering system's Relay 1 should be ON. Continue ? [Enter]")
+input()
+
+GPIO.output(GPIO_PIN_RELAY1_WATERING, GPIO.LOW)
+print("Watering system's Relay 1 should be OFF. Continue ? [Enter]")
+input()
+
+GPIO.output(GPIO_PIN_RELAY2_WATERING, GPIO.HIGH)
+print("Watering system's Relay 2 should be ON. Continue ? [Enter]")
+input()
+
+GPIO.output(GPIO_PIN_RELAY2_WATERING, GPIO.LOW)
+print("Watering system's Relay 2 should be OFF. Continue ? [Enter]")
+input()
+
+GPIO.output(GPIO_PIN_RELAY3_WATERING, GPIO.HIGH)
+print("Watering system's Relay 3 should be ON. Continue ? [Enter]")
+input()
+
+GPIO.output(GPIO_PIN_RELAY3_WATERING, GPIO.LOW)
+print("Watering system's Relay 3 should be OFF. Continue ? [Enter]")
+input()
+
+GPIO.output(GPIO_PIN_RELAY4_WATERING, GPIO.HIGH)
+print("Watering system's Relay 4 should be ON. Continue ? [Enter]")
+input()
+
+GPIO.output(GPIO_PIN_RELAY4_WATERING, GPIO.LOW)
+print("Watering system's Relay 4 should be OFF. Continue ? [Enter]")
+input()
+
+print("All done, cleaning up the GPIO's.")
 GPIO.cleanup()
