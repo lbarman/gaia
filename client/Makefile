@@ -59,7 +59,7 @@ cron-erase:
 	rm -rf sqlite.db
 
 test: $(SQLITE_DB)
-	pytest -v
+	pytest -v --ignore=python/tests/hardware_test.py
 
 coverage:
 	rm -f .coverage
