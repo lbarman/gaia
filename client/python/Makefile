@@ -15,12 +15,12 @@ db.sqlite:
 	python3 -c "from gaia_client.cron import *; Cron()"
 
 test: gaia_client/protobufs_pb2.py gaia_client/protobufs_pb2_grpc.py
-	pytest -v
+	pytest -v --ignore=tests/hardware_test.py
 
 coverage:
 	rm -f .coverage
 	$(MAKE) clean
-	coverage run -m py.test -v
+	coverage run -m py.test -v --ignore=tests/hardware_test.py
 
 clean:
 	rm -rf db.sqlite

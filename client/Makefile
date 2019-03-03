@@ -64,4 +64,4 @@ test: $(SQLITE_DB)
 coverage:
 	rm -f .coverage
 	$(MAKE) clean
-	coverage run -m py.test -v
+	coverage run -m py.test -v --ignore=python/tests/hardware_test.py
