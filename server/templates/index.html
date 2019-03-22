@@ -5,22 +5,36 @@
         <meta charset="utf-8">
         <title>Gaia</title>
         <link rel="stylesheet" type="text/css" href="public/css/sakura.css">
+        <link rel="stylesheet" type="text/css" href="public/css/jquery-ui.min.css">
         <link rel="stylesheet" type="text/css" href="public/css/gaia.css">
         <script src="public/js/jquery-3.3.1.min.js"></script>
+        <script src="public/js/jquery-ui.min.js"></script>
         <script src="public/js/chart-2.7.2.min.js"></script>
         <link rel="icon" type="image/png" sizes="32x32" href="public/img/favicon-32x32.png">
         <link rel="icon" type="image/png" sizes="96x96" href="public/img/favicon-96x96.png">
         <link rel="icon" type="image/png" sizes="16x16" href="public/img/favicon-16x16.png">
     </head>
     <body>
-        <img id="logo" src="public/img/gaia.jpg" alt="logo" width="100" height="97" />
-        <h1>Gaia</h1>
+        <div id="header">
+            <img id="logo" src="public/img/gaia.jpg" alt="logo" width="100" height="97" />
+            <h1>Gaia</h1>
+        </div>
 
         <div id="connectivity">
-            <p>Connectivity: Ping={{TEST_PORT_SSH}} Video={{TEST_PORT_VIDEO}}</p>
+            <p>Connectivity: {{TEST_PORT_SSH}}</p>
+        </div>
+
+        <div id="stream_block">
             <div id="live_feed">
                 <iframe id="stream" src="https://player.twitch.tv/?channel=gasparovcam" frameborder="0" allowfullscreen="true" scrolling="no" height="540" width="960"></iframe>
             </div>
+            <div id="cinema_btn">
+                <a id="cinema_a" href="#">Mode cinema</a>
+            </div>
+            <audio id="stream_audio" controls loop>
+              <source src="public/audio/aquarium.ogg" type="audio/ogg">
+              <source src="public/audio/aquarium.mp3" type="audio/mpeg">
+            </audio>
         </div>
 
         <div id="graph">
@@ -91,7 +105,7 @@
             </form>
         </div>
 
-        <div class="header">
+        <div id="headers" class="headers">
             <h3><a href="#" id="status_link">Status</a> / <a href="#" id="reports_link">Reports</a></h3>
         </div>
 
@@ -171,6 +185,47 @@
             });
             e.preventDefault();
         });
+
+        var cinema = 0
+
+        $('#cinema_btn').on('click', function(){
+            if (cinema == 0) {
+                cinema = 1;
+                modeCinemaOn();
+            } else {
+                cinema = 0;
+                modeCinemaOff();
+            }
+
+            return false;
+        });
+
+        function modeCinemaOn(){
+            $("body").animate({backgroundColor: "#000"}, 'slow');
+            $("#header").animate({opacity: 0}, 'slow');
+            $("#connectivity").animate({opacity: 0}, 'slow');
+            $("#graph").animate({opacity: 0}, 'slow');
+            $("#current_config").animate({opacity: 0}, 'slow');
+            $("#update_response").animate({opacity: 0}, 'slow');
+            $("#headers").animate({opacity: 0}, 'slow');
+            $("#status").animate({opacity: 0}, 'slow');
+            $("#reports").animate({opacity: 0}, 'slow');
+            document.getElementById('stream_audio').play()
+        }
+
+        function modeCinemaOff(){
+            $("body").animate({backgroundColor: "#FFF"}, 'slow');
+            $("#header").animate({opacity: 1}, 'slow');
+            $("#connectivity").animate({opacity: 1}, 'slow');
+            $("#graph").animate({opacity: 1}, 'slow');
+            $("#current_config").animate({opacity: 1}, 'slow');
+            $("#update_response").animate({opacity: 1}, 'slow');
+            $("#headers").animate({opacity: 1}, 'slow');
+            $("#status").animate({opacity: 1}, 'slow');
+            $("#reports").animate({opacity: 1}, 'slow');
+            document.getElementById('stream_audio').pause()
+        }
+
     </script>
     <script src="public/js/chart.js"></script>
     </body>
