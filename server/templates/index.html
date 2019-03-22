@@ -18,8 +18,9 @@
 
         <div id="connectivity">
             <p>Connectivity: Ping={{TEST_PORT_SSH}} Video={{TEST_PORT_VIDEO}}</p>
-            <p><a href="#" onclick="loadFeed()">Load live feed</a></p>
-            <div id="live_feed"></div>
+            <div id="live_feed">
+                <iframe id="stream" src="https://player.twitch.tv/?channel=gasparovcam" frameborder="0" allowfullscreen="true" scrolling="no" height="540" width="960"></iframe>
+            </div>
         </div>
 
         <div id="graph">
@@ -102,11 +103,6 @@
         </div>
 
     <script>
-        function loadFeed(){
-            const videoStream = '<img id="liveStream" src="http://lbarman.ch:{{PORT_VIDEO}}/" alt="Loading video stream..." class="shrinkToFit" width="632" height="474">'
-            $('#live_feed').html(videoStream);
-            return false;
-        }
 
         function toggleGraph(showGraph) {
             $('#canvas-holder1').css('display', 'none')
