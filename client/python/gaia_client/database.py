@@ -148,7 +148,7 @@ class Database:
 
         return config
 
-    def db_reset(self):
+    def reset_db(self):
         self.cursor.execute('DROP TABLE cron;')
         self.cursor.execute('DROP TABLE current_config;')
         self.db.commit()

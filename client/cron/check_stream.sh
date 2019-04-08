@@ -1,0 +1,9 @@
+#!/bin/bash
+
+if [ `ps cax | grep ffmpeg | wc -l` -eq 0 ]; then
+    echo "Restarting stream..."
+    pkill ffmpeg
+    nohup ffmpeg -framerate 10 -video_size 1280x720 -i /dev/video0 -vsync 1 -c:v h264_omx -b:v 1024k -maxrate 1024k -bufsize 1024k -g 30 -pix_fmt yuv420p -framerate 15 -f flv rtmp://live.twitch.tv/app/live_424693626_cieaTZWRlvLuHdWydKh3cdRfxjHeYh >/dev/null 2>&1 &
+else
+    echo "Process already running, all good."
+fi

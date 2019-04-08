@@ -26,7 +26,10 @@ clean:
 	rm -rf db.sqlite
 
 freeze:
-	pip freeze > $(PYTHON_MODULES)
+	pip3 freeze > $(PYTHON_MODULES)
 
 install: $(PYTHON_MODULES)
-	pip install -r $(PYTHON_MODULES)
+	pip3 install -r $(PYTHON_MODULES)
+
+run:
+	python3 gaia_entrypoint.py

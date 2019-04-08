@@ -1,10 +1,12 @@
 import gaia_client.constants as constants
-import gaia_client.cron as cron
+import gaia_client.cron_with_default as cron
+import gaia_client.gpio_control as gpio
 import gaia_client.system as system
 import gaia_client.grpc_client as grpc_client
 import gaia_client.database as database
 from datetime import datetime
 import time
+import sys
 
 class GaiaClient:
 
@@ -21,12 +23,13 @@ class GaiaClient:
         self.db = database.Database(in_memory=False)
         self.db.recreate_database()
         self.system = system.System()
+        self.gpio = gpio.GPIOControl()
 
-        action_handler = grpc_client.ActionHandler(shutdown_fn=system.shutdown,
-                                                   reboot_fn=system.reboot,
+        action_handler = grpc_client.ActionHandler(shutdown_fn=self.system.shutdown,
+                                                   reboot_fn=self.system.reboot,
                                                    feed_fn=self.__feed,
                                                    water_fn=self.__water,
-                                                   reset_db_fn=db.reset_db,
+                                                   reset_db_fn=self.db.reset_db,
                                                    )
 
         self.grpc_client = grpc_client.GRPC_Client(remote=constants.GAIA_GRPC_URL,
@@ -37,10 +40,11 @@ class GaiaClient:
         self.watering_cron = cron.WateringCron(db=self.db)
 
         print("[GaiaClient] instantiated, db/system/grpc/cron OK")
-        self.gpio.lcd_write("Gaia-client booted.")
+        self.gpio.lcd_write("Gaia booting...")
 
     def run(self):
         sleep_count = 0
+        self.__contact_gaia_server()
 
         while True:
 
@@ -48,7 +52,7 @@ class GaiaClient:
             self.gpio.toggle_feeding_led()
             self.gpio.toggle_watering_led()
 
-            now = datetime.datetime.now()
+            now = datetime.now()
 
             print("It is now", now)
             print("Feeding cron:", str(self.feeding_cron), "last run", self.feeding_cron.last_time_run(), "running in", (self.feeding_cron.next_occurrence(now) - now))
@@ -89,3 +93,6 @@ class GaiaClient:
         action_report = self.grpc_client.build_action_report_message(action="WATERING", action_details=report)
         self.grpc_client.send_action_report_message(action_report=action_report)
 
+if __name__ == '__main__':
+    client = GaiaClient()
+    client.run()

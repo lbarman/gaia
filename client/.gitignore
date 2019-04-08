@@ -2,3 +2,5 @@
 .idea
 logs/*
 constants.py
+var/*
+.idea

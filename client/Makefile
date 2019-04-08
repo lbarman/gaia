@@ -1,4 +1,4 @@
-.PHONY: install install-gpio-boot install-cron uninstall-cron install-services run gaia-running services-running kill autosync manual-feed manual-water water-fill-pipes cron-erase
+.PHONY: install install-gpio-boot install-crons uninstall-crons install-services run gaia-running services-running kill autosync manual-feed manual-water water-fill-pipes cron-erase
 
 install:
 	sudo apt-get -y install python3 python3-pip autossh motion i2c-tools
@@ -7,23 +7,30 @@ install:
 install-gpio-boot:
 	# bad idea ! used by LCD screen now. echo "gpio -g mode 2 out" > /etc/rc.local
 
-install-cron:
+install-crons:
 	echo "* * * * * root /root/gaia/client/run.sh > /root/gaia/client/var/cron.gaia.log" > /etc/cron.d/gaia
 	echo "*/30 * * * * /root/gaia/client/cron/check_inet_connection.sh > /root/gaia/client/var/cron.inet_test.log" > /etc/cron.d/inet_test
+	echo "*/5 * * * * /root/gaia/client/cron/check_stream.sh" > /etc/cron.d/stream_test
+	echo "*/5 * * * * /root/gaia/client/cron/check_gaia.sh" > /etc/cron.d/gaia_test
 
-uninstall-cron:
+list-crons:
+	ls -al /etc/cron.d/
+
+uninstall-crons:
 	rm -f /etc/cron.d/gaia 
+	rm -f /etc/cron.d/inet_test
+	rm -f /etc/cron.d/stream_test
+	rm -f /etc/cron.d/gaia_test
 
 install-services:
 	sudo cp services/* /lib/systemd/system/
 	sudo sudo chmod 644 /lib/systemd/system/autossh-ssh-tunnel.service
-	sudo sudo chmod 644 /lib/systemd/system/autossh-motion-tunnel.service
 	systemctl start autossh-ssh-tunnel.service
-	systemctl start autossh-motion-tunnel.service
-	systemctl start motion
+	systemctl start autossh
 	systemctl enable autossh-ssh-tunnel.service
-	systemctl enable autossh-motion-tunnel.service
-	systemctl enable motion
+
+list-services:
+	systemctl status autossh-ssh-tunnel.service
 
 import-protobuf:
 	$(MAKE) -C python import-protobuf
@@ -32,12 +39,7 @@ run:
 	./run.sh > logs/run.txt
 
 gaia-running:
-	ps -ux | grep "[p]ython2 gaia_client.py"
-
-services-running:
-	systemctl status autossh-ssh-tunnel.service
-	systemctl status autossh-motion-tunnel.service
-	systemctl status motion
+	#ps -ux | grep "[p]ython2 gaia_client.py"
 
 kill:
 	pkill python

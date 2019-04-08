@@ -1,8 +1,8 @@
 # Control loop & Gaia Server
 WAITING_LOOP_SLEEP = 10
 
-GAIA_GRPC_URL = "gaia_url"
-GAIA_GRPC_USE_SSL = False
+GAIA_GRPC_URL = "gaiagrpc.lbarman.ch"
+GAIA_GRPC_USE_SSL = True
 GAIA_SECRETTOKEN = "abc"
 GAIA_REPORT_EVERY_X_SLEEP = 60
 
