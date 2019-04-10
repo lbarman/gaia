@@ -1,26 +1,32 @@
 .PHONY: install install-gpio-boot install-crons uninstall-crons install-services run gaia-running services-running kill autosync manual-feed manual-water water-fill-pipes cron-erase
 
+LOGFILE_DIR=/var/log/gaia/
+LOGFILE_INET=$(LOGFILE_DIR)inet_check.log
+LOGFILE_STREAM=$(LOGFILE_DIR)stream_check.log
+LOGFILE_GAIA=$(LOGFILE_DIR)gaia_check.log
+
 install:
-	sudo apt-get -y install python3 python3-pip autossh motion i2c-tools
+	sudo apt-get -y install python3 python3-pip autossh i2c-tools apache2-utils
 	$(MAKE) -C python install
 
 install-gpio-boot:
 	# bad idea ! used by LCD screen now. echo "gpio -g mode 2 out" > /etc/rc.local
 
 install-crons:
-	echo "* * * * * root /root/gaia/client/run.sh > /root/gaia/client/var/cron.gaia.log" > /etc/cron.d/gaia
-	echo "*/30 * * * * /root/gaia/client/cron/check_inet_connection.sh > /root/gaia/client/var/cron.inet_test.log" > /etc/cron.d/inet_test
-	echo "*/5 * * * * /root/gaia/client/cron/check_stream.sh" > /etc/cron.d/stream_test
-	echo "*/5 * * * * /root/gaia/client/cron/check_gaia.sh" > /etc/cron.d/gaia_test
+	mkdir -p $(LOGFILE_DIR)
+	echo "*/30 * * * * root /root/gaia/client/cron/check_inet_connection.sh | rotatelogs -n 5 "${LOGFILE_INET}" 1M" > /etc/cron.d/check_inet_connection
+	echo "*/5 * * * * root /root/gaia/client/cron/check_stream.sh | rotatelogs -n 5 "${LOGFILE_STREAM}" 1M" > /etc/cron.d/check_stream
+	echo "*/1 * * * * root /root/gaia/client/run.sh | rotatelogs -n 5 "${LOGFILE_GAIA}" 1M" > /etc/cron.d/check_gaia
+	echo "@reboot root /root/gaia/client/run.sh | rotatelogs -n 5 "${LOGFILE_GAIA}" 1M" > /etc/cron.d/check_gaia_reboot
 
 list-crons:
 	ls -al /etc/cron.d/
 
 uninstall-crons:
 	rm -f /etc/cron.d/gaia 
-	rm -f /etc/cron.d/inet_test
-	rm -f /etc/cron.d/stream_test
-	rm -f /etc/cron.d/gaia_test
+	rm -f /etc/cron.d/check_inet_connection
+	rm -f /etc/cron.d/check_stream
+	rm -f /etc/cron.d/check_gaia
 
 install-services:
 	sudo cp services/* /lib/systemd/system/
@@ -44,6 +50,7 @@ gaia-running:
 kill:
 	pkill python
 	pkill python2
+	pkill python3
 
 autosync:
 	contscp . root@192.168.0.10:/root/gaia/client 22

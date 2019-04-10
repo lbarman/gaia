@@ -1,21 +1,15 @@
 #!/usr/bin/env bash
 
-SCRIPT_NAME="gaia_client.py"
-LOG_FILE_GAIA="gaia-client.txt"
+LOG_FILE_GAIA="/var/log/gaia/gaia.log"
 
 # Always run stuff relative to this very folder, even when calling ./xxx/yyy/folder/gaia/client/run.sh
 cd "$(dirname "$0")"
 
-# Make sure the script is not running already
-ps -ux | grep "[p]ython2 ${SCRIPT_NAME}"
-isRunning=$(ps -ux | grep "[p]ython2 ${SCRIPT_NAME}" | wc -l)
-echo "$isRunning"
-
-if [ "$isRunning" -ne 1 ]; then
+if [ `ps ax | grep "[p]ython3 gaia_entrypoint.py" | wc -l` -ne 1 ]; then
 	pkill python
-	echo "Starting script ${SCRIPT_NAME}..."
-	rm -f "$LOG_FILE_GAIA"
-	nohup python3 "${SCRIPT_NAME}" 2>&1 >"$LOG_FILE_GAIA" &
+    pkill python3
+	echo "[`date +"%d-%m-%Y %H:%M:%S"`] Starting script ${SCRIPT_NAME}..."
+    cd python && nohup python3 gaia_entrypoint.py 2>&1 | rotatelogs -n 5 "${LOG_FILE_GAIA}" 1M &
 else
-	echo "Script ${SCRIPT_NAME} already running, not starting"
+	echo "[`date +"%d-%m-%Y %H:%M:%S"`] Script ${SCRIPT_NAME} already running, not starting"
 fi
