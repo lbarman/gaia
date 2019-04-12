@@ -126,8 +126,6 @@ def main():
 
     # prepare the array to replace in the template
     tokens = dict()
-    tokens['TEST_PORT_SSH'] = helpers.build_port_open_html_string(helpers.is_port_open(constants.PORT_SSH))
-    tokens['TEST_PORT_VIDEO'] = helpers.build_port_open_html_string(helpers.is_port_open(constants.PORT_VIDEO))
     tokens['STATUS'] = helpers.build_status_data_html(all_status)
     tokens['REPORTS'] = helpers.build_reports_data_html(all_reports)
     if len(all_status) > 0:

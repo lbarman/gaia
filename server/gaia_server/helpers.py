@@ -1,17 +1,8 @@
-import socket
 import gaia_server.constants as constants
 import time
 
-def is_port_open(port):
-    s = socket.socket()
-    try:
-        s.connect(('127.0.0.1', port))
-        return True
-    except socket.error:
-        return False
-    finally:
-        s.close()
-
+def nl2br(string):
+    return string.replace('\n','<br />\n')
 
 def build_port_open_html_string(is_open):
 
@@ -106,10 +97,10 @@ def build_status_data_html(status):
                          humidity=s['humidity'],
                          t2=round(s['temperature2']),
                          t3=round(s['temperature3']),
-                         uptime=s['uptime'],
-                         memory=s['memory'],
-                         disk_usage=s['disk_usage'],
-                         processes=s['processes'],
+                         uptime=nl2br(s['uptime']),
+                         memory=nl2br(s['memory']),
+                         disk_usage=nl2br(s['disk_usage']),
+                         processes=nl2br(s['processes']),
                          feeding=feeding,
                          watering=watering,
                          waterlevels=water_levels,
