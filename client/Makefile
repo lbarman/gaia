@@ -15,7 +15,7 @@ install-gpio-boot:
 install-crons:
 	mkdir -p $(LOGFILE_DIR)
 	echo "*/30 * * * * root /root/gaia/client/cron/check_inet_connection.sh | rotatelogs -n 5 "${LOGFILE_INET}" 1M" > /etc/cron.d/check_inet_connection
-	echo "*/5 * * * * root /root/gaia/client/cron/check_stream.sh | rotatelogs -n 5 "${LOGFILE_STREAM}" 1M" > /etc/cron.d/check_stream
+	echo "*/5 * * * * root /root/gaia/client/cron/check_stream_cron.sh | rotatelogs -n 5 "${LOGFILE_STREAM}" 1M" > /etc/cron.d/check_stream
 	echo "*/1 * * * * root /root/gaia/client/run.sh | rotatelogs -n 5 "${LOGFILE_GAIA}" 1M" > /etc/cron.d/check_gaia
 	echo "@reboot root /root/gaia/client/run.sh | rotatelogs -n 5 "${LOGFILE_GAIA}" 1M" > /etc/cron.d/check_gaia_reboot
 
