@@ -83,9 +83,14 @@ class GaiaClient:
     def __handle_gaia_answer(self, answer):
         self.grpc_client.handle_response(answer)
 
+        # reload crons
+        self.feeding_cron = cron.FeedingCron(db=self.db)
+        self.watering_cron = cron.WateringCron(db=self.db)
+
     def __feed(self):
         report = self.gpio.do_feeding()
         action_report = self.grpc_client.build_action_report_message(action="FEEDING", action_details=report)
+        print("Gonna send", action_report)
         self.grpc_client.send_action_report_message(action_report=action_report)
 
     def __water(self):

@@ -84,7 +84,7 @@ class GaiaServiceServicer(protobufs_pb2_grpc.GaiaServiceServicer):
             print('Invalid token provided', action_report.authentication_token, "ignoring")
             return response
 
-        #db.save_status(status)
+        db.save_action_report(action_report)
 
         # prepare empty response
         response = protobufs_pb2.Response()
@@ -115,7 +115,7 @@ if __name__ == '__main__':
     db = database.Database()
     db.recreate_database()
 
-    gprcServer = start_grpc_server()
+    gprcServer = start_grpc_server(verbose=True)
     try:
         while True:
             sleep(_ONE_DAY_IN_SECONDS)

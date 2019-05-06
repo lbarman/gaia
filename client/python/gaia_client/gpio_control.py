@@ -62,9 +62,6 @@ class GPIOControl(ClassWithReport):
         self.lcd = CharLCD(gpios.LCD_TYPE, int(gpios.LCD_I2C_ADDRESS, 16), charmap='A00')
         self.lcd.clear()
 
-        # instantiate motor's PWM
-        self.pwm = GPIO.PWM(gpios.GPIO_PIN_SERVO_FEEDING, gpios.SERVO_ACTIVE_PWM)
-
         # add hooks for buttons
         GPIO.setup(gpios.GPIO_PIN_BUTTON_FEEDING, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
         GPIO.setup(gpios.GPIO_PIN_BUTTON_WATERING, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
@@ -79,6 +76,9 @@ class GPIOControl(ClassWithReport):
         else:
             if GPIO.input(gpios.GPIO_PIN_BUTTON_FEEDING) == GPIO.HIGH:
                 self.lcd_write('Turning on Feeder')
+
+                # instantiate motor's PWM
+                self.pwm = GPIO.PWM(gpios.GPIO_PIN_SERVO_FEEDING, gpios.SERVO_ACTIVE_PWM)
                 self.pwm.start(1)
             else:
                 self.lcd_write('Turning off Feeder')
@@ -120,6 +120,11 @@ class GPIOControl(ClassWithReport):
             self.do_report("Starting feed routine...")
 
             t1 = time.time()
+
+
+            # instantiate motor's PWM
+            self.pwm = GPIO.PWM(gpios.GPIO_PIN_SERVO_FEEDING, gpios.SERVO_ACTIVE_PWM)
+
             self.pwm.start(1)
 
             i = 1

@@ -15,7 +15,7 @@ install-gpio-boot:
 install-crons:
 	mkdir -p $(LOGFILE_DIR)
 	echo "*/30 * * * * root /root/gaia/client/cron/check_inet_connection.sh | rotatelogs -n 5 "${LOGFILE_INET}" 1M" > /etc/cron.d/check_inet_connection
-	echo "*/5 * * * * root /root/gaia/client/cron/check_stream_cron.sh | rotatelogs -n 5 "${LOGFILE_STREAM}" 1M" > /etc/cron.d/check_stream
+	echo "*/2 * * * * root /root/gaia/client/cron/check_stream.sh | rotatelogs -n 5 "${LOGFILE_STREAM}" 1M" > /etc/cron.d/check_stream
 	echo "*/1 * * * * root /root/gaia/client/run.sh | rotatelogs -n 5 "${LOGFILE_GAIA}" 1M" > /etc/cron.d/check_gaia
 	echo "@reboot root /root/gaia/client/run.sh | rotatelogs -n 5 "${LOGFILE_GAIA}" 1M" > /etc/cron.d/check_gaia_reboot
 
@@ -23,17 +23,19 @@ list-crons:
 	ls -al /etc/cron.d/
 
 uninstall-crons:
-	rm -f /etc/cron.d/gaia 
 	rm -f /etc/cron.d/check_inet_connection
 	rm -f /etc/cron.d/check_stream
-	rm -f /etc/cron.d/check_gaia
+	rm -f /etc/cron.d/check_gaia 
+	rm -f /etc/cron.d/check_gaia_reboot
 
 install-services:
 	sudo cp services/* /lib/systemd/system/
 	sudo sudo chmod 644 /lib/systemd/system/autossh-ssh-tunnel.service
+	sudo sudo chmod 644 /lib/systemd/system/stream.service
 	systemctl start autossh-ssh-tunnel.service
-	systemctl start autossh
 	systemctl enable autossh-ssh-tunnel.service
+	systemctl start stream.service
+	systemctl enable stream.service
 
 list-services:
 	systemctl status autossh-ssh-tunnel.service
