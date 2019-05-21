@@ -3,12 +3,12 @@ import sys
 import time
 import gaia_client.constants as constants
 import gaia_client.gpio_init as gpios
-import gaia_client.dht11 as dht11
 from os import listdir
 from os.path import join
 from RPLCD.i2c import CharLCD
 import threading
 from datetime import datetime
+from gaia_client.DHT22 import DHT22Sensor
 
 try:
     import RPi.GPIO as GPIO
@@ -44,6 +44,7 @@ class GPIOControl(ClassWithReport):
     pwm = None
     last_sensor_report = dict()
     lock = None
+    dht22sensor = None
 
     def __init__(self, verbose=True):
 
@@ -57,6 +58,9 @@ class GPIOControl(ClassWithReport):
         self.last_sensor_report['t2'] = -1
         self.last_sensor_report['t3'] = -1
         self.lock = threading.Lock()
+
+        # create DHT22 sensor
+        self.dht22sensor = DHT22Sensor(gpio=gpios.GPIO_PIN_AM2301)
 
         # instantiate LCD screen
         self.lcd = CharLCD(gpios.LCD_TYPE, int(gpios.LCD_I2C_ADDRESS, 16), charmap='A00')
@@ -220,12 +224,9 @@ class GPIOControl(ClassWithReport):
         res['t3'] = -1
 
         # read DHT11 sensor
-        instance = dht11.DHT11(pin=gpios.GPIO_PIN_DHT11)
-
-        result = instance.read()
-        if result.is_valid():
-            res['t1'] = result.temperature
-            res['humidity'] = result.humidity
+        t1, humidity, staleness, = self.dht22sensor.read()
+        res['t1'] = t1
+        res['humidity'] = humidity
 
         w1sensors = [f for f in listdir(constants.ONE_WIRE_DEVICES_PATH) if
                      f.startswith(constants.ONE_WIRE_SENSOR_NAME_STARTSWITH)]
@@ -255,8 +256,8 @@ class GPIOControl(ClassWithReport):
 
     def lcd_print_status(self):
         time = str(datetime.now().time())[0:5]
-        sensors = str(round(self.last_sensor_report['t1']))+"° "+str(round(self.last_sensor_report['humidity']))+"%" + str(round(self.last_sensor_report['t2']))+"° " + str(round(self.last_sensor_report['t3']))+"°"
-        sensors = str(round(self.last_sensor_report['t2'], 1))+"° " + str(round(self.last_sensor_report['t3'], 1))+"°"
+        sensors = str(round(self.last_sensor_report['t1']))+"° "+str(round(self.last_sensor_report['humidity']))+"% " + str(round(self.last_sensor_report['t2']))+"° " + str(round(self.last_sensor_report['t3']))+"°"
+        #sensors = str(round(self.last_sensor_report['t2'], 1))+"° " + str(round(self.last_sensor_report['t3'], 1))+"°"
 
         self.lcd_write("Gaia " + time + '\r\n' + sensors)
 

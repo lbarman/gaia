@@ -8,9 +8,10 @@ import datetime
 from os import listdir
 from os.path import join
 import gaia_client.gpio_init as gpios
-import gaia_client.dht11 as dht11
 import gaia_client.constants as constants
 from RPLCD.i2c import CharLCD
+from gaia_client.DHT22 import DHT22Sensor
+import time
 
 try:
     import RPi.GPIO as GPIO
@@ -25,32 +26,20 @@ def shell(cmd):
     return result.stdout.decode('utf-8')
 
 print(separator)
-print("*** The DHT11 temperature/humidity ***\n")
+print("*** The AM2301 temperature/humidity ***\n")
 
-instance = dht11.DHT11(pin=gpios.GPIO_PIN_DHT11)
-
-result = instance.read()
-if result.is_valid():
-    print("Temperature: %d C" % result.temperature)
-    print("Humidity: %d %%" % result.humidity)
-else:
-    print("Invalid")
+sensor = DHT22Sensor(gpio=gpios.GPIO_PIN_AM2301)
+try:
+    i = 0
+    while i < 10:
+        print("Attempt", i, sensor.read())
+        time.sleep(2)
+        i += 1
+except Exception as e:
+    print("Exception", e)
+sensor.cleanup()
 
 print("Continue ? [Enter]")
-input()
-
-print(separator)
-print("*** Testing for the LCD screen ***\n")
-print("i2cdetect -y 1 should show exactly one address")
-print(shell(['i2cdetect', '-y', '1']))
-print("Pin is expected to be", gpios.LCD_I2C_ADDRESS, ". If not, edit the constants. Continue ? [Enter]")
-input()
-
-lcd = CharLCD('PCF8574', int(gpios.LCD_I2C_ADDRESS, 16))
-lcd.clear()
-lcd.write_string('LCD OK ' + str(datetime.datetime.now().time())[0:8])
-
-print("LCD should read \"OK\". Continue ? [Enter]")
 input()
 
 print(separator)
@@ -67,6 +56,20 @@ for w1sensor in w1sensors:
 
 
 print("Continue ? [Enter]")
+input()
+
+print(separator)
+print("*** Testing for the LCD screen ***\n")
+print("i2cdetect -y 1 should show exactly one address")
+print(shell(['i2cdetect', '-y', '1']))
+print("Pin is expected to be", gpios.LCD_I2C_ADDRESS, ". If not, edit the constants. Continue ? [Enter]")
+input()
+
+lcd = CharLCD('PCF8574', int(gpios.LCD_I2C_ADDRESS, 16))
+lcd.clear()
+lcd.write_string('LCD OK ' + str(datetime.datetime.now().time())[0:8])
+
+print("LCD should read \"OK\". Continue ? [Enter]")
 input()
 
 print(separator)
