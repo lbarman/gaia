@@ -56,14 +56,14 @@ def build_status_data_html(status):
             feeding += '<span class="no">No</span>'
         else:
             feeding += '<span class="yes">Yes</span>'
-        feeding += ', '+s['feeding_module_cronstring']
+        feeding += ', '+str(s['feeding_module_cronstring'])
 
         watering = '<span class="wateringColor">Watering</span>: '
         if s['watering_module_activated'] == 0:
             watering += '<span class="no">No</span>'
         else:
             watering += '<span class="yes">Yes</span>'
-        watering += ', '+s['watering_module_cronstring']
+        watering += ', '+str(s['watering_module_cronstring'])
 
         water_levels = "{0},{1},{2},{3}".format(s['watering_pump_1_duration'], s['watering_pump_2_duration'], s['watering_pump_3_duration'], s['watering_pump_4_duration'])
 
@@ -139,7 +139,7 @@ def build_reports_data_html(reports):
                          server_ts=r['server_timestamp'].strftime("%H:%M:%S %d/%m/%Y"),
                          local_ts=r['local_timestamp'].strftime("%H:%M:%S %d/%m/%Y"),
                          action_type=action_type,
-                         details=r['action_details'],
+                         details=str(r['action_details']).replace("\n", "<br/>"),
                          type=type)
         report_id += 1
 

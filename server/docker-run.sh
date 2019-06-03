@@ -31,6 +31,14 @@ while sleep 60; do
   # If they are not both 0, then something is wrong
   if [ $PROCESS_1_STATUS -ne 0 -o $PROCESS_2_STATUS -ne 0 ]; then
     echo "One of the processes has already exited."
+
+    if [ $PROCESS_1_STATUS -ne 0 ]; then
+        echo "Process 1 has already exited."
+    fi
+    if [ $PROCESS_2_STATUS -ne 0 ]; then
+        echo "Process 2 has already exited."
+    fi
+
     exit 1
   fi
 done

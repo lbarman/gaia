@@ -1,4 +1,5 @@
-var PRECISION = 24 * 3600
+var PRECISION_REPORTS = 24 * 3600
+var PRECISION_STATUS = 3600
 
 function meanArray(array) {
     var acc = 0
@@ -8,16 +9,16 @@ function meanArray(array) {
     return Math.round(acc * 10 / array.length) / 10
 }
 
-function roundTo(x) {
-    return Math.floor(x / PRECISION) * PRECISION
+function roundTo(x, precision) {
+    return Math.floor(x / precision) * precision
 }
 
-function groupByLabelAndSum(rawData, labels, operation) {
+function groupByLabelAndSum(rawData, labels, operation, round_to) {
     var hashMap = {}
     for (var property in rawData) {
         if (rawData.hasOwnProperty(property)) {
 
-            t = roundTo(Number(property))
+            t = roundTo(Number(property), round_to)
             if(operation == "sum") {
                 if (hashMap[t] == undefined) {
                     hashMap[t] = 0
@@ -93,16 +94,21 @@ function groupByLabelAndSum(rawData, labels, operation) {
     }
 }
 
-var pingsLabelsAndVals = groupByLabelAndSum(data_status, undefined, "sum");
-var tempLabelsAndVals = groupByLabelAndSum(data_temps, pingsLabelsAndVals[0], "mean");
-var feedingLabelsAndVals = groupByLabelAndSum(data_feeding, pingsLabelsAndVals[0], "sum");
-var wateringLabelsAndVals = groupByLabelAndSum(data_watering, pingsLabelsAndVals[0], "sum");
+var pingsLabelsAndVals = groupByLabelAndSum(data_status, undefined, "sum", PRECISION_REPORTS);
+var tempLabelsAndVals = groupByLabelAndSum(data_temps, undefined, "mean", PRECISION_STATUS);
+var feedingLabelsAndVals = groupByLabelAndSum(data_feeding, pingsLabelsAndVals[0], "sum", PRECISION_REPORTS);
+var wateringLabelsAndVals = groupByLabelAndSum(data_watering, pingsLabelsAndVals[0], "sum", PRECISION_REPORTS);
 
 // nice labels
 var labels = [];
 for (i = 0; i < pingsLabelsAndVals[0].length; i++) {
     d = pingsLabelsAndVals[0][i];
     labels.push(d.getDate() + "/" + (d.getMonth() + 1) + " " + d.getHours()+"h");
+}
+var labels2 = [];
+for (i = 0; i < tempLabelsAndVals[0].length; i++) {
+    d = tempLabelsAndVals[0][i];
+    labels2.push(d.getDate() + "/" + (d.getMonth() + 1) + " " + d.getHours()+"h");
 }
 
 // make the important info (watering, feeding) stand out by scaling them with respect to max pings
@@ -182,7 +188,7 @@ for (i = 0; i < tempLabelsAndVals[1].length; i++) {
     temp3Values.push(tempLabelsAndVals[1][i]['y'][3])
 }
 var lineChartData = {
-    labels: labels,
+    labels: labels2,
     datasets: [{
         label: 'Temperature',
         backgroundColor: color(red).alpha(0.1).rgbString(),
