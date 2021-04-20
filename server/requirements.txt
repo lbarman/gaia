@@ -18,7 +18,7 @@ MarkupSafe==1.1.0
 more-itertools==6.0.0
 pluggy==0.8.1
 protobuf==3.6.1
-py==1.7.0
+py==1.10.0
 pytest==4.2.1
 python-coveralls==2.9.1
 PyYAML==4.2b1
